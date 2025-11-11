@@ -1,0 +1,33 @@
+@use "colors" as *;
+@use "font" as *;
+
+
+p {
+    color: $black;
+    @extend .f-12;
+    @extend ._fw-500;
+}
+
+._heading1 {
+    color: $black;
+    @extend .f-14;
+    @extend ._fw-600;
+}
+
+._heading2 {
+    color: $black;
+    @extend .f-18;
+    @extend ._fw-600;
+}
+
+._heading3 {
+    color: $black;
+    @extend .f-24;
+    @extend ._fw-600;
+}
+
+._heading4 {
+    color: $black;
+    @extend .f-28;
+    @extend ._fw-600;
+}

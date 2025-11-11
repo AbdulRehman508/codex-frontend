@@ -1,0 +1,53 @@
+@use 'colors' as *;
+@use 'font' as *;
+
+@mixin button {
+  @extend .f-10;
+  @extend ._fw-500;
+  border-radius: 50px;
+  padding: 7px 16px;
+  height: 36px;
+}
+
+._danger-btn {
+  @include button;
+  background-color: $danger;
+  color: $white;
+  border: none;
+}
+
+._primary-btn {
+  @include button;
+  background-color: $primary;
+  border: solid 1px $primary;
+  color: $white;
+}
+
+._outline-btn {
+  @include button;
+  border: solid 1px $primary;
+  background-color: $white;
+  color: $black;
+}
+
+._cancel-btn {
+  @include button;
+  border: solid 1px $lightGray;
+  background-color: $white;
+  color: $black;
+}
+
+._addNew {
+  width: 36px;
+  height: 36px;
+  padding: 5px;
+  border-radius: 50px;
+  background-color: $primary;
+  color: $white;
+  border: 1px solid $primary;
+}
+
+
+
+
+
