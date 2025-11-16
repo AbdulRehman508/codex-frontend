@@ -1,0 +1,22 @@
+@use "../../../../../public/assets/scss/colors" as *;
+@use "../../../../../public/assets/scss/font" as *;
+
+.margin-logo {
+    margin: 40px 110px 65px;
+}
+
+.login-box {
+    margin: 0 auto;
+    width: 450px;
+    background: $white;
+    border-radius: 8px;
+    border-color: $borderColor;
+    padding: 50px;
+}
+
+.password-icon {
+    position: absolute;
+    top: 32px;
+    right: 15px;
+    cursor: pointer;
+}
