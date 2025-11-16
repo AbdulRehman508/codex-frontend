@@ -4,13 +4,13 @@ $primary: #229276;
 $secondary: #e9f4f1;
 $white: #ffffff;
 $black: #1a2f45;
-$lightGray: #e8eaec;
+$borderColor: #e8eaec;
 $gray: #f1f1f1;
 $fullGray: #48596a;
 $lightDarkGray: #a0a09c;
 $mediumGray: #dadce0;
 $darkGray: #565656;
-$lightGrayBG: #f8f8f8;
+$bodyColor: #f8f8f8;
 $danger: #cd1818;
 $warning: #fdedf0;
 $info: #f57200;
@@ -30,7 +30,7 @@ $lightBlue: #7ccafa;
 }
 
 .gray-text {
-  color: $lightGray !important;
+  color: $borderColor !important;
 }
 
 .primary-color {

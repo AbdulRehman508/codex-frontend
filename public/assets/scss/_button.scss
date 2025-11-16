@@ -2,11 +2,10 @@
 @use 'font' as *;
 
 @mixin button {
-  @extend .f-10;
   @extend ._fw-500;
-  border-radius: 50px;
+  border-radius: 8px;
   padding: 7px 16px;
-  height: 36px;
+  font-size: 11px
 }
 
 ._danger-btn {
@@ -32,7 +31,7 @@
 
 ._cancel-btn {
   @include button;
-  border: solid 1px $lightGray;
+  border: solid 1px $borderColor;
   background-color: $white;
   color: $black;
 }

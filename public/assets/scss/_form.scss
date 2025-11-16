@@ -1,0 +1,94 @@
+@use "colors" as *;
+@use "font" as *;
+
+
+@mixin input {
+  @extend .f-12;
+  @extend ._fw-400;
+  @extend .font-family;
+  width: 100%;
+  height: 36px;
+  border-radius: 8px !important;
+  border: solid 1px $borderColor;
+  color: $black !important;
+
+  x &::placeholder {
+    color: $black !important;
+  }
+
+  &::-webkit-input-placeholder {
+    color: $black !important;
+  }
+
+  &:-moz-placeholder {
+    color: $black !important;
+  }
+
+  &::-moz-placeholder {
+    color: $black !important;
+  }
+
+  &:-ms-input-placeholder {
+    color: $black !important;
+  }
+}
+
+._input,
+input {
+  @include input;
+  padding: 0 7px;
+}
+
+input::placeholder {
+  color: #888888;
+  opacity: 1;
+}
+
+input:focus-visible {
+  outline: none !important;
+}
+
+._input-icon {
+  @include input;
+  padding: 0px 32px;
+}
+
+
+
+// Checkbox
+
+.form-check-input {
+  width: 17px;
+  height: 17px;
+  background-color: $white;
+  border-radius: 50px !important;
+  border: solid 1px #e8eaec;
+  margin: 0;
+}
+
+.form-check-input[type=checkbox]:checked {
+  background-color: $primary;
+  border-color: $primary;
+}
+
+.form-check-input:focus {
+  border-color: none;
+  outline: 0;
+  box-shadow: 0 0 0 0 rgba(13, 110, 253, .25);
+}
+
+// in-valid
+
+._inputError {
+  border: 1px solid $danger !important;
+}
+
+.invalid-list {
+  width: 100%;
+  @extend .f-10;
+  @extend .font-family;
+  color: $danger !important;
+  list-style-type: none;
+  margin-top: 5px;
+  padding-left: 0;
+}
