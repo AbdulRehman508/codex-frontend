@@ -15,7 +15,7 @@ export class ForgotPassword {
   forgotForm: FormGroup = new FormGroup({});
   submitted: boolean = false;
   password_visible: boolean = true;
-
+  is_reset_password_email: boolean = true;
 
   ngOnInit(): void {
     this.initializeForgotForm();
@@ -36,7 +36,6 @@ export class ForgotPassword {
     } else {
       this.submitted = false;
       console.log('Value:', this.forgotForm.value)
-
     }
   }
 

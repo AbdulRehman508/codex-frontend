@@ -1,0 +1,45 @@
+@use "../../../../public/assets/scss/colors" as *;
+@use "../../../../public/assets/scss/font" as *;
+
+.siteTopBar {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    min-height: 70px;
+    padding-right: 0;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 7 !important;
+
+    img {
+        margin-left: 10px;
+        width: 190px;
+    }
+}
+
+.login-user {
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 164px;
+    text-align: right;
+    .edge {
+        min-width: 35px;
+        height: 35px;
+        background: $secondary;
+        color: $primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50px;
+        font-weight: 600;
+    }
+
+    i {
+        cursor: pointer;
+    }
+}
