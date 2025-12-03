@@ -1,9 +1,22 @@
-
 <div class="siteTopBar">
     <img src="assets/logo/logo.png" alt="">
     <div class="login-user">
         <p>Welcome, Abdul Rehman</p>
         <p class="edge">AR</p>
         <i class="pi pi-angle-down"></i>
+    </div>
+</div>
+
+
+<div class="side-menu">
+    <div class="right-menu">
+        <ul>
+            @for (item of side_menu; track item?.label) {
+                <li class="display-content">
+                    <img [src]="item?.icon" alt="" />
+                    <p class="hover-content">{{ item?.label }}</p>
+                </li>
+            }
+        </ul>
     </div>
 </div>
