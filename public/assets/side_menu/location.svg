@@ -1,18 +1,3 @@
-<svg width="41" height="43" viewBox="0 0 41 43" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g filter="url(#filter0_d_911_20276)">
-<circle cx="20.5" cy="19.7917" r="8.54167" fill="white"/>
-<path fill-rule="evenodd" clip-rule="evenodd" d="M5.97925 18.6255C5.97925 10.7674 12.5459 4.41602 20.4889 4.41602C28.4543 4.41602 35.0209 10.7674 35.0209 18.6255C35.0209 22.5853 33.5808 26.2615 31.2105 29.3775C28.5955 32.8145 25.3725 35.8091 21.7447 38.1597C20.9144 38.703 20.165 38.744 19.2538 38.1597C15.6053 35.8091 12.3822 32.8145 9.78969 29.3775C7.41764 26.2615 5.97925 22.5853 5.97925 18.6255ZM15.7069 19.0669C15.7069 21.6993 17.855 23.7698 20.4889 23.7698C23.1245 23.7698 25.2933 21.6993 25.2933 19.0669C25.2933 16.4549 23.1245 14.2837 20.4889 14.2837C17.855 14.2837 15.7069 16.4549 15.7069 19.0669Z" fill="#229276"/>
-</g>
-<defs>
-<filter id="filter0_d_911_20276" x="-4" y="-3" width="49" height="49" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-<feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
-<feOffset/>
-<feGaussianBlur stdDeviation="2"/>
-<feComposite in2="hardAlpha" operator="out"/>
-<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.17 0"/>
-<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_911_20276"/>
-<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_911_20276" result="shape"/>
-</filter>
-</defs>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M3.47656 10.8297C3.47656 6.26102 7.29438 2.56836 11.9124 2.56836C16.5435 2.56836 20.3612 6.26102 20.3612 10.8297C20.3612 13.1319 19.524 15.2692 18.1459 17.0808C16.6255 19.0791 14.7517 20.8201 12.6425 22.1868C12.1598 22.5026 11.7241 22.5265 11.1943 22.1868C9.0731 20.8201 7.19921 19.0791 5.69193 17.0808C4.31284 15.2692 3.47656 13.1319 3.47656 10.8297ZM9.13217 11.0863C9.13217 12.6168 10.3811 13.8206 11.9124 13.8206C13.4447 13.8206 14.7057 12.6168 14.7057 11.0863C14.7057 9.56771 13.4447 8.30538 11.9124 8.30538C10.3811 8.30538 9.13217 9.56771 9.13217 11.0863Z" stroke="#1A2F45" stroke-width="1.2"/>
 </svg>

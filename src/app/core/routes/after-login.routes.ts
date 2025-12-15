@@ -4,6 +4,23 @@ export const afterLoginRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('../../pages/header/header').then((c) => c.Header),
+      import('../../layout/layout/layout').then((c) => c.Layout),
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('../../pages/dashboard/dashboard').then((c) => c.Dashboard),
+      },
+      {
+        path: 'product',
+        loadComponent: () =>
+          import('../../pages/product-list/product-list').then((c) => c.ProductList),
+      },
+    ],
   },
 ];
