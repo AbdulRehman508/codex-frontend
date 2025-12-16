@@ -1,24 +1,29 @@
 import { Routes } from '@angular/router';
 import { routesAuthentication } from './core/routes/authentication.routes';
 import { afterLoginRoutes } from './core/routes/after-login.routes';
-import { authGuard } from './core/guards/auth.guard';
+import { LoginAuthGuard } from './core/guards/login-auth.guard';
 
 export const routes: Routes = [
-
+    
     {
         path: '',
-        canActivate: [authGuard],
-        children: [
-            ...afterLoginRoutes
-        ]
+        canActivate: [LoginAuthGuard],
+        children: [] // empty, guard redirect karega
     },
+
+    // After login routes
     {
         path: '',
-        canActivate: [authGuard],
-        children: [
-            ...routesAuthentication
-        ]
+        children: [...afterLoginRoutes]
+    },
+
+    // Auth routes
+    {
+        path: '',
+        children: [...routesAuthentication]
     }
+
+
 
     // ...routesAuthentication, ...afterLoginRoutes
 ];

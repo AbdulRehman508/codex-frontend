@@ -1,16 +1,25 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-side-bar',
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule],
   templateUrl: './side-bar.html',
   styleUrl: './side-bar.scss',
 })
 export class SideBar {
 
-
   side_menu: any[] = [];
+  activeRoute: string = '';
+
+  constructor(private router: Router) {
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.activeRoute = event.urlAfterRedirects;
+      }
+    });
+  }
 
   ngOnInit() {
 
@@ -18,7 +27,8 @@ export class SideBar {
       {
         label: 'Dashboard',
         icon: 'assets/side_menu/home.svg',
-        url: '/dashboard'
+        url: '/dashboard',
+        isExact: true
       },
       {
         label: 'Product',
@@ -28,12 +38,12 @@ export class SideBar {
       {
         label: 'Stock',
         icon: 'assets/side_menu/task.svg',
-        url: '/product'
+        url: '/stock'
       },
       {
         label: 'Report',
         icon: 'assets/side_menu/report.svg',
-        url: '/user-management'
+        url: '/report'
       },
       {
         label: 'Location',
@@ -43,7 +53,7 @@ export class SideBar {
       {
         label: 'Trace Product',
         icon: 'assets/side_menu/find.svg',
-        url: '/location'
+        url: '/trace-product'
       },
       {
         label: 'User Management',

@@ -13,28 +13,18 @@ export class TokenService {
         private router: Router,
     ) { }
 
-    /**
-     * Saves the token to local storage
-     * @param token the token to save
-     */
     setToken(token: string) {
         localStorage.setItem('token', token);
     }
 
-    /**
-     * Retrieves the token from local storage
-     * @returns the token if it exists
-     */
     getToken() {
         return localStorage.getItem('token');
     }
 
-    /**
-     * Removes the token from local storage
-     */
     removeToken() {
         localStorage.clear();
     }
+    
 
 
 }
