@@ -1,1 +1,21 @@
-<p>user-management works!</p>
+<p class="f-20 _fw-600">User Management</p>
+
+<div class="d-flex align-items-start mt-3 gap-3">
+    <div class="user-menu">
+        <ul>
+            @for (item of user_menu; track item.label) {
+            <li class="display-content" routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item?.isExact ?? false }">
+                <a [routerLink]="item.url" class="d-flex align-items-center gap-2">
+                    <img [src]="item.icon" />
+                    <p class="hover-content">{{ item.label }}</p>
+                </a>
+            </li>
+            }
+        </ul>
+    </div>
+
+    <div>
+        <router-outlet></router-outlet>
+    </div>
+</div>

@@ -28,7 +28,6 @@ export class SideBar {
         label: 'Dashboard',
         icon: 'assets/side_menu/home.svg',
         url: '/dashboard',
-        isExact: true
       },
       {
         label: 'Product',

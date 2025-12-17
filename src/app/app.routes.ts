@@ -4,16 +4,11 @@ import { afterLoginRoutes } from './core/routes/after-login.routes';
 import { LoginAuthGuard } from './core/guards/login-auth.guard';
 
 export const routes: Routes = [
-    
-    {
-        path: '',
-        canActivate: [LoginAuthGuard],
-        children: [] // empty, guard redirect karega
-    },
 
     // After login routes
     {
         path: '',
+        canActivate: [LoginAuthGuard],
         children: [...afterLoginRoutes]
     },
 

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { userRoutes } from './user.routes';
 
 export const afterLoginRoutes: Routes = [
   {
@@ -45,6 +46,7 @@ export const afterLoginRoutes: Routes = [
         path: 'user-management',
         loadComponent: () =>
           import('../../pages/user-management/user-management').then((c) => c.UserManagement),
+        children: [...userRoutes]
       },
       {
         path: 'setting',
