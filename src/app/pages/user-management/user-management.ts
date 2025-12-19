@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { commonIcons } from '../../core/icon-images/common-icon';
 
 @Component({
   selector: 'app-user-management',
@@ -12,33 +13,34 @@ export class UserManagement {
 
 
   user_menu: any[] = [];
+  ImageIcon = commonIcons
 
   ngOnInit() {
 
     this.user_menu = [
       {
         label: 'Customer',
-        icon: 'assets/icon/staff_card.svg',
+        icon: this.ImageIcon.customer_icon,
         url: '/user-management/customer'
       },
       {
         label: 'Office',
-        icon: 'assets/icon/office_icon.svg',
+        icon: this.ImageIcon.office_icon,
         url: '/user-management/office'
       },
       {
         label: 'Staff',
-        icon: 'assets/icon/staff.svg',
+        icon: this.ImageIcon.staff_icon,
         url: '/user-management/staff'
       },
       {
         label: 'Role',
-        icon: 'assets/icon/domain.svg',
+        icon: this.ImageIcon.role_icon,
         url: '/user-management/role'
       },
       {
         label: 'Access Control',
-        icon: 'assets/icon/lock.svg',
+        icon: this.ImageIcon.lock_icon,
         url: '/user-management/access'
       },
     ];

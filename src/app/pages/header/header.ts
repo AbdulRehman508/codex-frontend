@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { commonIcons } from '../../core/icon-images/common-icon';
 
 @Component({
   selector: 'app-header',
@@ -8,6 +9,8 @@ import { Component } from '@angular/core';
 })
 export class Header {
 
+    ImageIcon = commonIcons
+  
 
 
   ngOnInit() {

@@ -4,6 +4,11 @@ import { Routes } from '@angular/router';
 export const userRoutes: Routes = [
 
     {
+        path: '',
+        redirectTo: 'customer',
+        pathMatch: 'full',
+    },
+    {
         path: 'customer',
         loadComponent: () =>
             import('../../pages/user-management/customer/customer').then((c) => c.Customer),
@@ -28,4 +33,5 @@ export const userRoutes: Routes = [
         loadComponent: () =>
             import('../../pages/user-management/access/access').then((c) => c.Access),
     },
+
 ];

@@ -46,7 +46,12 @@
   border: 1px solid $primary;
 }
 
-
-
-
-
+._circle-btn {
+  width: 36px;
+  height: 36px;
+  background-color: $lightGrayBG !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { commonIcons } from '../../core/icon-images/common-icon';
 
 @Component({
   selector: 'app-side-bar',
@@ -12,6 +13,7 @@ export class SideBar {
 
   side_menu: any[] = [];
   activeRoute: string = '';
+  ImageIcon = commonIcons
 
   constructor(private router: Router) {
     this.router.events.subscribe(event => {
@@ -26,42 +28,42 @@ export class SideBar {
     this.side_menu = [
       {
         label: 'Dashboard',
-        icon: 'assets/side_menu/home.svg',
+        icon: this.ImageIcon.home_icon,
         url: '/dashboard',
       },
       {
         label: 'Product',
-        icon: 'assets/side_menu/list.svg',
+        icon: this.ImageIcon.list_icon,
         url: '/product'
       },
       {
         label: 'Stock',
-        icon: 'assets/side_menu/task.svg',
+        icon: this.ImageIcon.stock_icon,
         url: '/stock'
       },
       {
         label: 'Report',
-        icon: 'assets/side_menu/report.svg',
+        icon: this.ImageIcon.report_icon,
         url: '/report'
       },
       {
         label: 'Location',
-        icon: 'assets/side_menu/location.svg',
+        icon: this.ImageIcon.location_icon,
         url: '/location'
       },
       {
         label: 'Trace Product',
-        icon: 'assets/side_menu/find.svg',
+        icon: this.ImageIcon.find_icon,
         url: '/trace-product'
       },
       {
         label: 'User Management',
-        icon: 'assets/side_menu/user.svg',
+        icon: this.ImageIcon.user_icon,
         url: '/user-management'
       },
       {
         label: 'Setting',
-        icon: 'assets/side_menu/setting.svg',
+        icon: this.ImageIcon.setting_icon,
         url: '/setting'
       },
     ];

@@ -51,3 +51,53 @@ p {
     @extend ._fw-600;
     @extend .font-family;
 }
+
+._cross-icon {
+    position: absolute;
+    right: 0px;
+    top: 8px;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    @extend .f-14;
+}
+
+._search-icon {
+    @extend .f-14;
+    @extend ._fw-500;
+    color: $searchIcon;
+    position: absolute;
+    left: 10px;
+    top: 11px;
+}
+
+.scroll-top {
+    position: fixed;
+    right: 65px;
+    bottom: 115px;
+    z-index: 9;
+    background: $primary;
+    color: $white;
+    @extend .f-12;
+    padding: 7px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+*::-webkit-scrollbar,
+.p-datatable-scrollable-body::-webkit-scrollbar {
+    width: 5px !important;
+    height: 5px !important;
+}
+
+*::-webkit-scrollbar-track,
+.p-datatable-scrollable-body::-webkit-scrollbar-track {
+    background: $gray !important;
+}
+
+*::-webkit-scrollbar-thumb,
+.p-datatable-scrollable-body::-webkit-scrollbar-thumb {
+    background-color: lightgray !important;
+    border-radius: 20px !important;
+    border: 0px !important;
+}
