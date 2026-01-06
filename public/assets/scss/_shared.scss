@@ -22,6 +22,7 @@ p {
     border-radius: 16px;
     border: solid 1px #f4f5f6;
     background-color: #fff !important;
+    // height: calc(100vh - 90px);
 }
 
 ._heading1 {
@@ -83,6 +84,7 @@ p {
     border-radius: 6px;
     cursor: pointer;
 }
+
 
 *::-webkit-scrollbar,
 .p-datatable-scrollable-body::-webkit-scrollbar {
