@@ -23,4 +23,7 @@ export const commonIcons = {
   // common icon
   delete_icon: 'assets/icon/delete.svg',
   edit_icon: 'assets/icon/pencil.svg',
+
+  // Images
+  avatar_image: 'assets/img/user-profile.png',
 };

@@ -1,1 +1,61 @@
-<p>add-edit-customer works!</p>
+<p class="f-16 _fw-600">{{pageTitle}}</p>
+
+<div class="d-flex align-items-end justify-content-between">
+    <img [src]="commonIcon.avatar_image" class="circle-profile" />
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>
+        <button class="_primary-btn" (click)="createCustomer()">Save</button>
+    </div>
+</div>
+
+<form [formGroup]="customerForm">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" formControlName="first_name"
+                [ngClass]="{ _inputError: submitted && customerForm.controls['first_name'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" formControlName="last_name"
+                [ngClass]="{ _inputError: submitted && customerForm.controls['last_name'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" formControlName="email"
+                [ngClass]="{ _inputError: submitted && customerForm.controls['email'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="mobile_no">Mobile No</label>
+                <input type="text" id="mobile_no" formControlName="mobile_no"
+                [ngClass]="{ _inputError: submitted && customerForm.controls['mobile_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="cnic_no">CNIC No</label>
+                <input type="text" id="cnic_no" formControlName="cnic_no"
+                [ngClass]="{ _inputError: submitted && customerForm.controls['cnic_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" formControlName="address">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="biography">Biography</label>
+                <textarea formControlName="biography" cols="20" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+</form>

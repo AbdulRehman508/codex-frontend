@@ -7,6 +7,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+
 import { ForgotPassword } from '../forgot-password/forgot-password';
 
 @Component({

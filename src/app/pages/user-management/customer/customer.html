@@ -11,8 +11,12 @@
     <div class="_circle-btn">
         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
     </div>
-    <button class="_outline-btn">Add New</button>
+    <button class="_outline-btn" [routerLink]="['/user-management/customer/add']">Add New</button>
 </div>
+
+@if (isPopupOpen) {
+<app-right-popup></app-right-popup>
+}
 
 <div class="position-relative">
     <div class="scroll_landing_page">
@@ -31,6 +35,7 @@
                     <th scope="col">First</th>
                     <th scope="col">Last</th>
                     <th scope="col">Handle</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -43,6 +48,10 @@
                     <td>{{item.first}}</td>
                     <td>{{item.last}}</td>
                     <td>{{item.handle}}</td>
+                    <td>
+                        <img [src]="commonIcon.edit_icon" class="cursor-pointer" width="18px" 
+                        [routerLink]="['/user-management/customer/edit', item.id]" />
+                    </td>
                 </tr>
                 }
             </tbody>

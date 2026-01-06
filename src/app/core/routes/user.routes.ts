@@ -8,6 +8,16 @@ export const userRoutes: Routes = [
         redirectTo: 'customer',
         pathMatch: 'full',
     },
+        {
+        path: 'customer/add',
+        loadComponent: () =>
+            import('../../pages/user-management/customer/add-edit-customer/add-edit-customer').then((c) => c.AddEditCustomer),
+    },
+        {
+        path: 'customer/edit/:id',
+        loadComponent: () =>
+            import('../../pages/user-management/customer/add-edit-customer/add-edit-customer').then((c) => c.AddEditCustomer),
+    },
     {
         path: 'customer',
         loadComponent: () =>

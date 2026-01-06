@@ -39,6 +39,18 @@ input {
   padding: 0 7px;
 }
 
+textarea {
+  @include input;
+  padding: 7px;
+  min-height: 150px;
+  resize: vertical;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
 input::placeholder {
   color: #888888;
   opacity: 1;

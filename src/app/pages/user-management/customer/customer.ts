@@ -3,10 +3,12 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { commonIcons } from '../../../core/icon-images/common-icon';
 import { customer } from './customer.json';
+import { RightPopup } from '../../common/right-popup/right-popup';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-customer',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RightPopup, RouterModule],
   templateUrl: './customer.html',
   styleUrl: './customer.scss',
 })
@@ -16,6 +18,7 @@ export class Customer {
   commonIcon = commonIcons
   customerList: any[] = customer;
   isTableHeaderChecked: boolean = false;
+  isPopupOpen: boolean = false;
   ngOnInit() {
     console.log('customerList', this.customerList);
   }

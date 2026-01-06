@@ -9,7 +9,7 @@ body {
     padding: 0;
 }
 
-p {
+p, label {
     color: $black;
     @extend .f-12;
     @extend ._fw-500;
@@ -22,7 +22,7 @@ p {
     border-radius: 16px;
     border: solid 1px #f4f5f6;
     background-color: #fff !important;
-    // height: calc(100vh - 90px);
+    height: calc(100vh - 90px);
 }
 
 ._heading1 {
@@ -85,6 +85,9 @@ p {
     cursor: pointer;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
 
 *::-webkit-scrollbar,
 .p-datatable-scrollable-body::-webkit-scrollbar {
