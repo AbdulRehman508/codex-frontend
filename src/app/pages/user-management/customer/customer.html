@@ -1,6 +1,6 @@
 <div class="top-box">
     <button class="_outline-btn" (click)="clearSearch()">Reset</button>
-    <div class="position-relative mob-res">
+    <div class="position-relative">
         <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="task-search"
             class="_input-icon w-100 custom-placeholder" placeholder="Search" />
         <i class="pi pi-search _search-icon"></i>
@@ -14,16 +14,9 @@
     <button class="_outline-btn" [routerLink]="['/user-management/customer/add']">Add New</button>
 </div>
 
-@if (isPopupOpen) {
-<app-right-popup></app-right-popup>
-}
 
 <div class="position-relative">
     <div class="scroll_landing_page">
-        <!-- @if (scrollTop > 50) {
-            (scroll)="onScroll($event)" #scrollableElement
-        <i class="pi pi-arrow-up scroll-top" (click)="scrollToTop()"></i>
-        } -->
         <table class="table">
             <thead>
                 <tr>

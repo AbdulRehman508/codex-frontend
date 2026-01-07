@@ -562,3 +562,12 @@ export const customer = [
         handle: '@mdo'
     }
 ]
+
+
+export const roleList = [
+    { id: 1, role: 'Admin' },
+    { id: 2, role: 'Editor' },
+    { id: 3, role: 'Moderator' },
+    { id: 5, role: 'Contributor' },
+    { id: 6, role: 'Subscriber' },
+];

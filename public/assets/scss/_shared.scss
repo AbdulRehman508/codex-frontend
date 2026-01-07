@@ -22,7 +22,7 @@ p, label {
     border-radius: 16px;
     border: solid 1px #f4f5f6;
     background-color: #fff !important;
-    height: calc(100vh - 90px);
+    min-height: calc(100vh - 90px);
 }
 
 ._heading1 {

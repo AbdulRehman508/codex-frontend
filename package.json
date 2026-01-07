@@ -31,6 +31,7 @@
     "@angular/platform-server": "^20.3.0",
     "@angular/router": "^20.3.10",
     "@angular/ssr": "^20.3.4",
+    "@ng-select/ng-select": "^20.4.0",
     "bootstrap": "^5.3.8",
     "express": "^5.1.0",
     "primeicons": "^7.0.0",
