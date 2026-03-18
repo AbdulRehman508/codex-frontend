@@ -9,7 +9,8 @@ body {
     padding: 0;
 }
 
-p, label {
+p,
+label {
     color: $black;
     @extend .f-12;
     @extend ._fw-500;
@@ -87,6 +88,14 @@ p, label {
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+.circle-profile {
+    width: 92px;
+    height: 92px;
+    border-radius: 99px;
+    object-position: top center;
+    object-fit: cover;
 }
 
 *::-webkit-scrollbar,

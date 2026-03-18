@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { commonIcons } from '../../../core/icon-images/common-icon';
-import { customer, roleList } from '../customer/customer.json';
+import { customer, roleList } from '../contant.json';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';

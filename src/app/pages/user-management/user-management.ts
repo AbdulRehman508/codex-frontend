@@ -38,11 +38,11 @@ export class UserManagement {
         icon: this.ImageIcon.role_icon,
         url: '/user-management/role'
       },
-      {
-        label: 'Access Control',
-        icon: this.ImageIcon.lock_icon,
-        url: '/user-management/access'
-      },
+      // {
+      //   label: 'Access Control',
+      //   icon: this.ImageIcon.lock_icon,
+      //   url: '/user-management/access'
+      // },
     ];
   }
 }

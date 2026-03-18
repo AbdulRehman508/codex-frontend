@@ -17,9 +17,5 @@ export const routes: Routes = [
         path: '',
         children: [...routesAuthentication]
     }
-
-
-
-    // ...routesAuthentication, ...afterLoginRoutes
 ];
 

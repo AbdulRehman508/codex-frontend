@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { commonIcons } from '../../../core/icon-images/common-icon';
-import { customer } from './customer.json';
+import { customer } from '../contant.json';
 import { RouterModule } from '@angular/router';
 
 @Component({

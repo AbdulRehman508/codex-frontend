@@ -35,6 +35,7 @@ export class ForgotPassword {
       return
     } else {
       this.submitted = false;
+      this.is_reset_password_email = false
       console.log('Value:', this.forgotForm.value)
     }
   }

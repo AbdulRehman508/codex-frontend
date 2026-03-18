@@ -8,20 +8,20 @@ export const userRoutes: Routes = [
         redirectTo: 'customer',
         pathMatch: 'full',
     },
-        {
-        path: 'customer/add',
-        loadComponent: () =>
-            import('../../pages/user-management/customer/add-edit-customer/add-edit-customer').then((c) => c.AddEditCustomer),
-    },
-        {
-        path: 'customer/edit/:id',
-        loadComponent: () =>
-            import('../../pages/user-management/customer/add-edit-customer/add-edit-customer').then((c) => c.AddEditCustomer),
-    },
     {
         path: 'customer',
         loadComponent: () =>
             import('../../pages/user-management/customer/customer').then((c) => c.Customer),
+    },
+    {
+        path: 'customer/add',
+        loadComponent: () =>
+            import('../../pages/user-management/customer/add-edit-customer/add-edit-customer').then((c) => c.AddEditCustomer),
+    },
+    {
+        path: 'customer/edit/:id',
+        loadComponent: () =>
+            import('../../pages/user-management/customer/add-edit-customer/add-edit-customer').then((c) => c.AddEditCustomer),
     },
     {
         path: 'office',
@@ -32,6 +32,16 @@ export const userRoutes: Routes = [
         path: 'staff',
         loadComponent: () =>
             import('../../pages/user-management/staff/staff').then((c) => c.Staff),
+    },
+    {
+        path: 'staff/add',
+        loadComponent: () =>
+            import('../../pages/user-management/staff/add-edit-staff/add-edit-staff').then((c) => c.AddEditStaff),
+    },
+    {
+        path: 'staff/edit/:id',
+        loadComponent: () =>
+            import('../../pages/user-management/staff/add-edit-staff/add-edit-staff').then((c) => c.AddEditStaff),
     },
     {
         path: 'role',
