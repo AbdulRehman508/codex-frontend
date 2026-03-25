@@ -43,15 +43,4 @@ export const userRoutes: Routes = [
         loadComponent: () =>
             import('../../pages/user-management/staff/add-edit-staff/add-edit-staff').then((c) => c.AddEditStaff),
     },
-    {
-        path: 'role',
-        loadComponent: () =>
-            import('../../pages/user-management/role/role').then((c) => c.Role),
-    },
-    {
-        path: 'access',
-        loadComponent: () =>
-            import('../../pages/user-management/access/access').then((c) => c.Access),
-    },
-
 ];

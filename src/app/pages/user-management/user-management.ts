@@ -33,16 +33,6 @@ export class UserManagement {
         icon: this.ImageIcon.staff_icon,
         url: '/user-management/staff'
       },
-      {
-        label: 'Role',
-        icon: this.ImageIcon.role_icon,
-        url: '/user-management/role'
-      },
-      // {
-      //   label: 'Access Control',
-      //   icon: this.ImageIcon.lock_icon,
-      //   url: '/user-management/access'
-      // },
     ];
   }
 }
