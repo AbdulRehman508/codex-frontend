@@ -1,4 +1,3 @@
-@use 'colors' as *;
 @use 'font' as *;
 
 @mixin button {
@@ -10,30 +9,30 @@
 
 ._danger-btn {
   @include button;
-  background-color: $danger;
-  color: $white;
+  background-color: var(--danger);
+  color: var(--white) !important;
   border: none;
 }
 
 ._primary-btn {
   @include button;
-  background-color: $primary;
-  border: solid 1px $primary;
-  color: $white;
+  background-color: var(--primary);
+  border: solid 1px var(--primary);
+  color: var(--white);
 }
 
 ._outline-btn {
   @include button;
-  border: solid 1px $primary;
-  background-color: $white;
-  color: $black;
+  border: solid 1px var(--primary);
+  background-color: var(--white);
+  color: var(--black);
 }
 
 ._cancel-btn {
   @include button;
-  border: solid 1px $borderColor;
-  background-color: $white;
-  color: $black;
+  border: solid 1px var(--borderColor);
+  background-color: var(--white);
+  color: var(--black);
 }
 
 ._addNew {
@@ -41,17 +40,29 @@
   height: 36px;
   padding: 5px;
   border-radius: 50px;
-  background-color: $primary;
-  color: $white;
-  border: 1px solid $primary;
+  background-color: var(--primary);
+  color: var(--white);
+  border: 1px solid var(--primary);
 }
 
 ._circle-btn {
   width: 36px;
   height: 36px;
-  background-color: $lightGrayBG !important;
+  background-color: var(--lightGrayBG) !important;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+}
+
+.upload-btn {
+  width: 40px;
+  height: 40px;
+  background-color: var(--secondary);
+  border-radius: 50px;
+  box-shadow: 0 0 2px var(--lightDarkGray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
 }

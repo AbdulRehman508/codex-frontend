@@ -577,3 +577,15 @@ export const officeList = [
     { id: 2, office: 'Remmi' },
     { id: 3, office: 'QA Group' },
 ];
+
+
+export const membershipList = [
+    { label: 'Gold', value: 'gold' },
+    { label: 'Premium', value: 'premium' },
+    { label: 'Silver', value: 'silver' },
+];
+
+export const membershipType = [
+    { label: 'Monthly', value: 'monthly' },
+    { label: 'Yearly', value: 'yearly' },
+];

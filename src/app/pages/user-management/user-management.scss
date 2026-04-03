@@ -1,9 +1,7 @@
-@use "../../../../public/assets/scss/colors" as *;
-@use "../../../../public/assets/scss/font" as *;
 
 .user-menu {
     width: 200px;
-    border-right: 1px solid $borderColor;
+    border-right: 1px solid var(--borderColor);
     ul {
         list-style: none;
         padding: 0;
@@ -18,7 +16,7 @@
             
             a {
                 text-decoration: none;
-                color: $black;
+                color: var(--black);
 
                 img {
                     width: 16px;
@@ -27,13 +25,13 @@
 
             &:hover,
             &.active {
-                background-color: $secondary;
+                background-color: var(--secondary);
 
                 a {
                     text-decoration: none;
 
                     p {
-                        color: $primary;
+                        color: var(--primary);
                     }
 
                     img {

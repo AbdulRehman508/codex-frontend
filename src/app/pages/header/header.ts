@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { commonIcons } from '../../core/icon-images/common-icon';
 
 @Component({
@@ -7,13 +7,25 @@ import { commonIcons } from '../../core/icon-images/common-icon';
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
+
 export class Header {
 
-    ImageIcon = commonIcons
-  
+  ImageIcon = commonIcons
+  dropdownOpen: boolean = false;
+  @ViewChild('topBar') topBar!: ElementRef;
+
 
 
   ngOnInit() {
-    
+
+  }
+
+
+
+  @HostListener('document:click', ['$event'])
+  clickOutside(event: MouseEvent) {
+    if (this.dropdownOpen && !this.topBar.nativeElement.contains(event.target)) {
+      this.dropdownOpen = false;
+    }
   }
 }

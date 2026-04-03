@@ -1,6 +1,3 @@
-@use "../../../../../../public/assets/scss/colors" as *;
-@use "../../../../../../public/assets/scss/font" as *;
-
 .password-icon {
     position: absolute;
     top: 32px;
@@ -15,19 +12,19 @@
 }
 
 .strength-bar.weak {
-    background-color: $danger;
+    background-color: var(--danger);
     width: 33%;
     transition: linear 500ms;
 }
 
 .strength-bar.medium {
-    background-color: $info;
+    background-color: var(--info);
     width: 66%;
     transition: linear 500ms;
 }
 
 .strength-bar.strong {
-    background-color: $primary;
+    background-color: var(--primary);
     width: 100%;
     transition: linear 500ms;
 }

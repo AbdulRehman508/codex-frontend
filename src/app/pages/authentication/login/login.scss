@@ -1,5 +1,6 @@
-@use "../../../../../public/assets/scss/colors" as *;
-@use "../../../../../public/assets/scss/font" as *;
+
+
+
 
 .margin-logo {
     margin: 40px 110px 65px;
@@ -8,9 +9,9 @@
 .login-box {
     margin: 0 auto;
     width: 450px;
-    background: $white;
+    background: var(--white);
     border-radius: 8px;
-    border-color: $borderColor;
+    border-color: var(--borderColor);
     padding: 50px;
 }
 

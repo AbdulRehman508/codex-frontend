@@ -1,0 +1,14 @@
+.top-box {
+    position: absolute;
+    top: 96px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 10px;
+}
+
+.scroll_landing_page {
+    overflow: auto;
+    height: calc(100vh - 235px);
+}

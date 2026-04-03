@@ -24,6 +24,16 @@ export const userRoutes: Routes = [
             import('../../pages/user-management/customer/add-edit-customer/add-edit-customer').then((c) => c.AddEditCustomer),
     },
     {
+        path: 'office/add',
+        loadComponent: () =>
+            import('../../pages/user-management/office/add-edit-office/add-edit-office').then((c) => c.AddEditOffice),
+    },
+    {
+        path: 'office/edit/:id',
+        loadComponent: () =>
+            import('../../pages/user-management/office/add-edit-office/add-edit-office').then((c) => c.AddEditOffice),
+    },
+    {
         path: 'office',
         loadComponent: () =>
             import('../../pages/user-management/office/office').then((c) => c.Office),
