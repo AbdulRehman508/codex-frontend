@@ -1,1 +1,41 @@
-<p>role works!</p>
+<div class="top-box">
+    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <div class="position-relative">
+        <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="task-search"
+            class="_input-icon w-200 custom-placeholder" placeholder="Search" />
+        <i class="pi pi-search _search-icon"></i>
+        @if (searchByKeyword) {
+        <i class="pi pi-times _cross-icon pt-1" (click)="searchByKeyword = ''; getCustomerList()"></i>
+        }
+    </div>
+    <div class="_circle-btn">
+        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
+    </div>
+    <button class="_outline-btn" [routerLink]="['/setting/role/add']">Add New</button>
+</div>
+
+
+<div class="position-relative">
+    <div class="scroll_landing_page">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">
+                        <input class="form-check-input mt-1" type="checkbox" [(ngModel)]="isTableHeaderChecked"
+                            (change)="checkAll()">
+                    </th>
+                    <th scope="col">ID</th>
+                    <th scope="col">Role Name</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4">
+                        <p>Record no available</p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

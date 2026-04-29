@@ -1,0 +1,26 @@
+<p class="f-16 _fw-600">{{pageTitle}}</p>
+
+<div class="d-flex align-items-end justify-content-end">
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="closeRole()">Cancel</button>
+        <button class="_primary-btn" (click)="createRole()">Save</button>
+    </div>
+</div>
+
+<form [formGroup]="roleForm">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="first_name">Role Name</label>
+                <input type="text" id="role_name" formControlName="role_name"
+                    [ngClass]="{ _inputError: submitted && roleForm.controls['role_name'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="biography">Description</label>
+                <textarea formControlName="description" cols="20" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+</form>

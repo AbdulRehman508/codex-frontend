@@ -98,6 +98,16 @@ label {
     object-fit: cover;
 }
 
+.top-box {
+    position: absolute;
+    top: 96px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 10px;
+}
+
 *::-webkit-scrollbar,
 .p-datatable-scrollable-body::-webkit-scrollbar {
     width: 5px !important;

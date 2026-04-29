@@ -1,0 +1,38 @@
+.password-icon {
+    position: absolute;
+    top: 32px;
+    right: 15px;
+    cursor: pointer;
+}
+
+.strength-bar {
+    height: 8px;
+    border-radius: 8px;
+    margin-top: 5px;
+}
+
+.strength-bar.weak {
+    background-color: var(--danger);
+    width: 33%;
+    transition: linear 500ms;
+}
+
+.strength-bar.medium {
+    background-color: var(--info);
+    width: 66%;
+    transition: linear 500ms;
+}
+
+.strength-bar.strong {
+    background-color: var(--primary);
+    width: 100%;
+    transition: linear 500ms;
+}
+
+.password-icon {
+    position: absolute;
+    top: 36px;
+    right: 12px;
+    cursor: pointer;
+    font-size: 12px;
+}

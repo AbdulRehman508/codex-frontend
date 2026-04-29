@@ -14,6 +14,17 @@ export const settingRoutes: Routes = [
             import('../../pages/setting/access/access').then((c) => c.Access),
     },
     {
+        path: 'role/add',
+        loadComponent: () =>
+            import('../../pages/setting/role/add-edit-role/add-edit-role').then((c) => c.AddEditRole),
+    },
+    {
+        path: 'role/edit/:id',
+        loadComponent: () =>
+            import('../../pages/setting/role/add-edit-role/add-edit-role').then((c) => c.AddEditRole),
+    },
+
+    {
         path: 'role',
         loadComponent: () =>
             import('../../pages/setting/role/role').then((c) => c.Role),
