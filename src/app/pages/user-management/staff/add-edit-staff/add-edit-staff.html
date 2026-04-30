@@ -1,0 +1,97 @@
+<p class="f-16 _fw-600">{{pageTitle}}</p>
+
+<div class="d-flex align-items-end justify-content-between">
+    <img [src]="commonIcon.avatar_image" class="circle-profile" />
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>
+        <button class="_primary-btn" (click)="createCustomer()">Save</button>
+    </div>
+</div>
+
+<form [formGroup]="staffForm">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" formControlName="first_name"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['first_name'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" formControlName="last_name"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['last_name'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="mobile_no">Mobile No</label>
+                <input type="text" id="mobile_no" formControlName="mobile_no"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['mobile_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="cnic_no">CNIC No</label>
+                <input type="text" id="cnic_no" formControlName="cnic_no"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['cnic_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" formControlName="email"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['email'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group position-relative">
+                <label for="email">Password</label>
+                <input type="{{hideShowPassword ? 'text' : 'password'}}" id="password" formControlName="password"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['password'].invalid }"
+                    (input)="passwordCriteria()">
+                <i class="pi {{hideShowPassword ? 'pi-eye' : 'pi-eye-slash'}} password-icon"
+                    (click)="hideShowPassword = !hideShowPassword"></i>
+                <div class="strength-bar" [ngClass]="strengthLevel.toLowerCase()"></div>
+                @if(validation_error.length > 0){
+                <ul class="invalid-list">
+                    @for (error of validation_error; track $index) {
+                    <li>{{ error }}</li>
+                    }
+                </ul>
+                }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group position-relative">
+                <label for="email">Office</label>
+                <ng-select formControlName="officeId" [items]="officeList" bindLabel="office" bindValue="id"
+                    placeholder="Select Office"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['officeId'].invalid }">
+                </ng-select>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group position-relative">
+                <label for="email">Role</label>
+                <ng-select formControlName="roleId" [items]="roleList" bindLabel="role" bindValue="id"
+                    placeholder="Select Role"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['roleId'].invalid }">
+                </ng-select>
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" formControlName="address">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="biography">Biography</label>
+                <textarea formControlName="biography" cols="20" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+</form>

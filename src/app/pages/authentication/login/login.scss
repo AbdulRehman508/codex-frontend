@@ -1,0 +1,23 @@
+
+
+
+
+.margin-logo {
+    margin: 40px 110px 65px;
+}
+
+.login-box {
+    margin: 0 auto;
+    width: 450px;
+    background: var(--white);
+    border-radius: 8px;
+    border-color: var(--borderColor);
+    padding: 50px;
+}
+
+.password-icon {
+    position: absolute;
+    top: 32px;
+    right: 15px;
+    cursor: pointer;
+}

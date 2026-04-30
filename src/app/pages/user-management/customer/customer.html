@@ -1,0 +1,54 @@
+<div class="top-box">
+    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <div class="position-relative">
+        <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="task-search"
+            class="_input-icon w-100 custom-placeholder" placeholder="Search" />
+        <i class="pi pi-search _search-icon"></i>
+        @if (searchByKeyword) {
+        <i class="pi pi-times _cross-icon pt-1" (click)="searchByKeyword = ''; getCustomerList()"></i>
+        }
+    </div>
+    <div class="_circle-btn">
+        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
+    </div>
+    <button class="_outline-btn" [routerLink]="['/user-management/customer/add']">Add New</button>
+</div>
+
+
+<div class="position-relative">
+    <div class="scroll_landing_page">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="isTableHeaderChecked"
+                            (change)="checkAll()">
+                    </th>
+                    <th scope="col">ID</th>
+                    <th scope="col">First</th>
+                    <th scope="col">Last</th>
+                    <th scope="col">Handle</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (item of customerList; track $index) {
+                <tr>
+                    <td>
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="item.isChecked">
+                    </td>
+                    <td>{{item.id}}</td>
+                    <td>{{item.first}}</td>
+                    <td>{{item.last}}</td>
+                    <td>{{item.handle}}</td>
+                    <td>
+                        <img [src]="commonIcon.edit_icon" class="cursor-pointer" width="18px" 
+                        [routerLink]="['/user-management/customer/edit', item.id]" />
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="mt-5">Records: {{customerList.length}}</p>
+</div>

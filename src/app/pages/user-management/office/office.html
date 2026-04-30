@@ -1,0 +1,15 @@
+<div class="top-box">
+    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <div class="position-relative">
+        <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="task-search"
+            class="_input-icon w-100 custom-placeholder" placeholder="Search" />
+        <i class="pi pi-search _search-icon"></i>
+        @if (searchByKeyword) {
+        <i class="pi pi-times _cross-icon pt-1" (click)="searchByKeyword = ''; getOfficeList()"></i>
+        }
+    </div>
+    <div class="_circle-btn">
+        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
+    </div>
+    <button class="_outline-btn" [routerLink]="['/user-management/office/add']">Add New</button>
+</div>

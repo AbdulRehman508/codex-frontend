@@ -1,0 +1,132 @@
+<p class="f-16 _fw-600">{{pageTitle}}</p>
+
+<div class="d-flex align-items-end justify-content-between">
+    <div>
+        <img [src]="commonIcon.avatar_image" class="circle-profile" />
+        <i class="pi pi-cloud-upload f-14 cursor-pointer text-color"></i>
+            <!-- (click)="fileInputLR.click()" -->
+    </div>
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>
+        <button class="_primary-btn" (click)="createCustomer()">Save</button>
+    </div>
+</div>
+
+<form [formGroup]="officeForm">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="office_name">Office Name</label>
+                <input type="text" id="office_name" formControlName="office_name"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_name'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="office_email">Office Email</label>
+                <input type="text" id="office_email" formControlName="office_email"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_email'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="office_mobile_no">Office Mobile No.</label>
+                <input type="text" id="office_mobile_no" formControlName="office_mobile_no"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_mobile_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="membership_level">Membership Level</label>
+                <ng-select formControlName="membership_level" [items]="membershipList" bindLabel="label"
+                    bindValue="value" placeholder="Select Membership Level"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['membership_level'].invalid }">
+                </ng-select>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="membership_type">Membership Type</label>
+                <ng-select formControlName="membership_type" [items]="membershipType" bindLabel="label"
+                    bindValue="value" placeholder="Select Membership Type"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['membership_type'].invalid }">
+                </ng-select>
+            </div>
+        </div>
+        <div class="col-sm-3">
+            <div class="form-group">
+                <label for="licence_no">Licence Number</label>
+                <input type="text" id="licence_no" formControlName="licence_no">
+            </div>
+        </div>
+        <div class="col-sm-1 px-0">
+            <div class="form-group d-flex align-items-center gap-2 mt-4">
+                <label for="licence_no">Approved</label>
+                <input class="form-check-input" type="checkbox" formControlName="approved">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="office_address">Office Address</label>
+                <input type="text" id="office_address" formControlName="office_address"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_address'].invalid }">
+            </div>
+        </div>
+        <p class="f-16 _fw-600 my-3">Contact Person</p>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" formControlName="full_name"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['full_name'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" formControlName="email"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['email'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="mobile_no">Mobile No.</label>
+                <input type="text" id="mobile_no" formControlName="mobile_no"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['mobile_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="cnic_no">CNIC No</label>
+                <input type="text" id="cnic_no" formControlName="cnic_no"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['cnic_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="cnic_no">Country</label>
+                <input type="text" id="cnic_no" formControlName="cnic_no"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['cnic_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="cnic_no">City</label>
+                <input type="text" id="cnic_no" formControlName="cnic_no"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['cnic_no'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" formControlName="address"
+                    [ngClass]="{ _inputError: submitted && officeForm.controls['address'].invalid }">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="biography">Biography</label>
+                <textarea formControlName="biography" cols="20" rows="5"></textarea>
+            </div>
+        </div>
+    </div>
+</form>

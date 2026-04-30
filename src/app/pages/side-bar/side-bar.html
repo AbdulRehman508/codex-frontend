@@ -1,0 +1,15 @@
+<div class="side-menu">
+    <div class="right-menu">
+        <ul>
+            @for (item of side_menu; track item.label) {
+            <li class="display-content" routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: item?.isExact ?? false }">
+                <a [routerLink]="item.url" class="d-flex align-items-center">
+                    <img [src]="item.icon" />
+                    <p class="hover-content">{{ item.label }}</p>
+                </a>
+            </li>
+            }
+        </ul>
+    </div>
+</div>

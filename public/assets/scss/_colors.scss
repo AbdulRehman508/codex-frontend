@@ -1,0 +1,42 @@
+:root {
+  /* Base colors */
+  --primary: #229276;
+  --secondary: #e9f4f1;
+  --white: #ffffff;
+  --black: #1a2f45;
+  --borderColor: #e8eaec;
+  --gray: #f1f1f1;
+  --fullGray: #48596a;
+  --lightDarkGray: #a0a09c;
+  --mediumGray: #dadce0;
+  --darkGray: #565656;
+  --bodyColor: #f8f8f8;
+  --danger: #cd1818;
+  --warning: #fdedf0;
+  --info: #f57200;
+  --yellow: #ffff00;
+  --green: #4ec542;
+  --darkGreen: #344640;
+  --darkerGreen: #042521;
+  --sky: #689edb;
+  --lightBlue: #7ccafa;
+  --searchIcon: #76828f;
+  --lightGrayBG: #f8f8f8;
+}
+
+
+.black-text {
+  color: var(--black) !important;
+}
+
+.danger-text {
+  color: var(--danger) !important;
+}
+
+.gray-text {
+  color: var(--borderColor) !important;
+}
+
+.primary-color {
+  color: var(--primary) !important;
+}

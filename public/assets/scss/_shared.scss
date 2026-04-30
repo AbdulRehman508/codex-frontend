@@ -1,0 +1,127 @@
+@use "colors" as *;
+@use "font" as *;
+
+
+
+body {
+    background-color: var(--bodyColor) !important;
+    margin: 0;
+    padding: 0;
+}
+
+p,
+label {
+    color: var(--black) !important;
+    @extend .f-12;
+    @extend ._fw-500;
+    @extend .font-family;
+    margin: 0;
+}
+
+.body-details {
+    padding: 20px;
+    border-radius: 16px;
+    border: solid 1px var(--borderColor);
+    background-color: var(--white) !important;
+    min-height: calc(100vh - 90px);
+}
+
+._heading1 {
+    color: var(--black);
+    @extend .f-14;
+    @extend ._fw-600;
+    @extend .font-family;
+}
+
+._heading2 {
+    color: var(--black);
+    @extend .f-18;
+    @extend ._fw-600;
+    @extend .font-family;
+}
+
+._heading3 {
+    color: var(--black);
+    @extend .f-24;
+    @extend ._fw-600;
+    @extend .font-family;
+}
+
+._heading4 {
+    color: var(--black);
+    @extend .f-28;
+    @extend ._fw-600;
+    @extend .font-family;
+}
+
+._cross-icon {
+    position: absolute;
+    right: 0px;
+    top: 8px;
+    cursor: pointer;
+    width: 25px;
+    height: 25px;
+    @extend .f-14;
+}
+
+._search-icon {
+    @extend .f-14;
+    @extend ._fw-500;
+    color: var(--searchIcon);
+    position: absolute;
+    left: 10px;
+    top: 11px;
+}
+
+.scroll-top {
+    position: fixed;
+    right: 65px;
+    bottom: 115px;
+    z-index: 9;
+    color: var(--white);
+    background: var(--primary);
+    @extend .f-12;
+    padding: 7px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.circle-profile {
+    width: 92px;
+    height: 92px;
+    border-radius: 99px;
+    object-position: top center;
+    object-fit: cover;
+}
+
+.top-box {
+    position: absolute;
+    top: 96px;
+    right: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 10px;
+}
+
+*::-webkit-scrollbar,
+.p-datatable-scrollable-body::-webkit-scrollbar {
+    width: 5px !important;
+    height: 5px !important;
+}
+
+*::-webkit-scrollbar-track,
+.p-datatable-scrollable-body::-webkit-scrollbar-track {
+    background: var(--gray) !important;
+}
+
+*::-webkit-scrollbar-thumb,
+.p-datatable-scrollable-body::-webkit-scrollbar-thumb {
+    background-color: lightgray !important;
+    border-radius: 20px !important;
+    border: 0px !important;
+}

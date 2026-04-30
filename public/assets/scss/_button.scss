@@ -1,0 +1,68 @@
+@use 'font' as *;
+
+@mixin button {
+  @extend ._fw-500;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 11px
+}
+
+._danger-btn {
+  @include button;
+  background-color: var(--danger);
+  color: var(--white) !important;
+  border: none;
+}
+
+._primary-btn {
+  @include button;
+  background-color: var(--primary);
+  border: solid 1px var(--primary);
+  color: var(--white);
+}
+
+._outline-btn {
+  @include button;
+  border: solid 1px var(--primary);
+  background-color: var(--white);
+  color: var(--black);
+}
+
+._cancel-btn {
+  @include button;
+  border: solid 1px var(--borderColor);
+  background-color: var(--white);
+  color: var(--black);
+}
+
+._addNew {
+  width: 36px;
+  height: 36px;
+  padding: 5px;
+  border-radius: 50px;
+  background-color: var(--primary);
+  color: var(--white);
+  border: 1px solid var(--primary);
+}
+
+._circle-btn {
+  width: 36px;
+  height: 36px;
+  background-color: var(--lightGrayBG) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.upload-btn {
+  width: 40px;
+  height: 40px;
+  background-color: var(--secondary);
+  border-radius: 50px;
+  box-shadow: 0 0 2px var(--lightDarkGray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
