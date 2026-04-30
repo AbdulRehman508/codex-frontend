@@ -32,7 +32,7 @@ export class AddEditRole {
 
     this._activeRoute.params.subscribe({
       next: params => {
-        this.pageTitle = params['id'] ? 'Edit Role' : 'Add Role';
+        this.pageTitle = params['id'] ? 'Edit Roled' : 'Add Role';
       },
     });
 
