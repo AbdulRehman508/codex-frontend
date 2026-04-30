@@ -1,10 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
 import { commonIcons } from '../../../../core/icon-images/common-icon';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { membershipList, membershipType } from '../../contant.json';
-import { count } from 'console';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
@@ -20,6 +19,7 @@ export class AddEditOffice {
   private _router = inject(Router);
   private _activeRoute = inject(ActivatedRoute);
   private _formBuilder = inject(FormBuilder);
+  private _cdr = inject(ChangeDetectorRef);
 
   commonIcon = commonIcons
   submitted: boolean = false;
@@ -45,14 +45,6 @@ export class AddEditOffice {
       licence_no: [''],
       approved: [''],
       office_address: ['', Validators.required],
-      // contact person details
-      full_name: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      mobile_no: ['', Validators.required],
-      cnic_no: ['', Validators.required],
-      country: ['', Validators.required],
-      city: ['', Validators.required],
-      address: ['', Validators.required],
       biography: [''],
     });
   }
@@ -72,5 +64,21 @@ export class AddEditOffice {
   closeCustomer() {
     this.officeForm.reset();
     this._router.navigateByUrl('/user-management/office')
+  }
+
+  officeLogo: any = null;
+  onSelectFileLR(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length) {
+      const file = target.files[0];
+      // const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      const fileReader: FileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = (e: any) => {
+        this.officeLogo = e.target.result;
+        this._cdr.detectChanges();
+      };
+    }
+    target.value = '';
   }
 }
