@@ -26,4 +26,5 @@ export const commonIcons = {
 
   // Images
   avatar_image: 'assets/img/user-profile.png',
+  image_not_found: 'assets/img/images-not-found.svg',
 };

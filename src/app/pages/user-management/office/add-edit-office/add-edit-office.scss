@@ -1,0 +1,42 @@
+.office-upload-icon {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    color: var(--primary);
+}
+
+.image-box {
+    width: 200px;
+    height: 200px;
+    background-color: var(--borderColor);
+    border-radius: 8px;
+    border-style: dashed;
+    border-color: var(--borderColor);
+    position: relative;
+}
+
+.upload-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-not-found {
+    width: 80px;
+    position: absolute;
+    top: 70px;
+    left: 55px;
+}
+
+.image-exist {
+    width: 150px;
+    height: 120px;
+    border-radius: 16px;
+    position: absolute;
+    top: 56px;
+    left: 22px;
+}
