@@ -15,7 +15,8 @@ export class Office {
 
   searchByKeyword: string = '';
   commonIcon = commonIcons
-  
+  isTableHeaderChecked: boolean = false;
+
   ngOnInit() {
 
   }
@@ -29,4 +30,9 @@ export class Office {
   filterRecord() {
 
   }
+
+  checkAll() {
+    console.log('isTableHeaderChecked', this.isTableHeaderChecked);
+  }
+
 }

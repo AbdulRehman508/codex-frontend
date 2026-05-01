@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { commonIcons } from '../../../core/icon-images/common-icon';
-import { customer } from '../contant.json';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -15,10 +14,9 @@ export class Customer {
 
   searchByKeyword: string = '';
   commonIcon = commonIcons
-  customerList: any[] = customer;
+  customerList: any[] = [];
   isTableHeaderChecked: boolean = false;
   ngOnInit() {
-    console.log('customerList', this.customerList);
   }
 
   getCustomerList() {
@@ -33,7 +31,5 @@ export class Customer {
 
   checkAll() {
     console.log('isTableHeaderChecked', this.isTableHeaderChecked);
-    console.log('customerList', this.customerList);
-    this.customerList.forEach((item: any) => item.isChecked = this.isTableHeaderChecked);
   }
 }
