@@ -6,7 +6,7 @@ export const LoginAuthGuard: CanActivateFn = async () => {
 
     const tokenService = inject(TokenService);
     const router = inject(Router);
-    let token = true; //tokenService.getToken();
+    let token = tokenService.getToken();
 
     if (token) {
         console.log('user is logged in', token);

@@ -24,31 +24,21 @@
                         <input class="form-check-input" type="checkbox" [(ngModel)]="isTableHeaderChecked"
                             (change)="checkAll()">
                     </th>
-                    <th scope="col">ID</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
+                    <th scope="col">Full Name</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Mobile No</th>
+                    <th scope="col">Email</th>
                     <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
-                @for (item of customerList; track $index) {
                 <tr>
-                    <td>
-                        <input class="form-check-input" type="checkbox" [(ngModel)]="item.isChecked">
-                    </td>
-                    <td>{{item.id}}</td>
-                    <td>{{item.first}}</td>
-                    <td>{{item.last}}</td>
-                    <td>{{item.handle}}</td>
-                    <td>
-                        <img [src]="commonIcon.edit_icon" class="cursor-pointer" width="18px" 
-                        [routerLink]="['/user-management/customer/edit', item.id]" />
+                    <td colspan="6">
+                        <p>Record no available</p>
                     </td>
                 </tr>
-                }
             </tbody>
         </table>
     </div>
-    <p class="mt-5">Records: {{customerList.length}}</p>
+    <!-- <p class="mt-5">Records: {{customerList.length}}</p> -->
 </div>
