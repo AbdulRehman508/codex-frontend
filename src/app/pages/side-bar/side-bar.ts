@@ -37,6 +37,11 @@ export class SideBar {
         url: '/product'
       },
       {
+        label: 'Sales',
+        icon: this.ImageIcon.report_icon,
+        url: '/sales'
+      },
+      {
         label: 'Stock',
         icon: this.ImageIcon.stock_icon,
         url: '/stock'

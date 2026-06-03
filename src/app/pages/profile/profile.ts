@@ -1,44 +1,32 @@
-
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
-import { commonIcons } from '../../../../core/icon-images/common-icon';
+import { commonIcons } from '../../core/icon-images/common-icon';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { officeList, roleList } from '../../contant.json';
+import { officeList, roleList } from '../user-management/contant.json';
 import { NgSelectModule } from '@ng-select/ng-select';
 
 @Component({
-  selector: 'app-add-edit-staff',
+  selector: 'app-profile',
   imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule],
-  templateUrl: './add-edit-staff.html',
-  styleUrl: './add-edit-staff.scss',
+  templateUrl: './profile.html',
+  styleUrl: './profile.scss',
 })
 
-export class AddEditStaff {
+export class Profile {
 
-
-  staffForm: FormGroup = new FormGroup({});
-  private _router = inject(Router);
-  private _activeRoute = inject(ActivatedRoute);
+  profileForm: FormGroup = new FormGroup({});
   private _formBuilder = inject(FormBuilder);
 
   commonIcon = commonIcons
   submitted: boolean = false;
-  pageTitle: string = 'Add Staff';
+  pageTitle: string = 'My Profile';
   hideShowPassword: boolean = false;
   roleList: any[] = roleList;
   officeList: any[] = officeList;
   validation_error: any[] = [];
 
   ngOnInit() {
-
-    this._activeRoute.params.subscribe({
-      next: params => {
-        this.pageTitle = params['id'] ? 'Edit Staff' : 'Add Staff';
-      },
-    });
-
-    this.staffForm = this._formBuilder.group({
+    this.profileForm = this._formBuilder.group({
       first_name: ['', Validators.required],
       last_name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -52,24 +40,19 @@ export class AddEditStaff {
     });
   }
 
-
-  createCustomer() {
-    if (this.staffForm.invalid) {
+  saveProfile() {
+    if (this.profileForm.invalid) {
       this.submitted = true
       return
     } else {
-      console.log('staffForm >>:', this.staffForm.valid, 'Value:', this.staffForm.value)
+      console.log('profileForm >>:', this.profileForm.valid, 'Value:', this.profileForm.value)
       this.submitted = false;
-      this._router.navigateByUrl('/user-management/staff')
     }
   }
 
-  closeCustomer() {
-    this.staffForm.reset();
-    this._router.navigateByUrl('/user-management/staff')
+  resetProfile() {
+    this.profileForm.reset();
   }
-
-
 
   get strengthLevel(): 'Weak' | 'Medium' | 'Strong' {
     if (this.validation_error?.length === 3 || this.validation_error?.length === 4) return 'Weak';
@@ -79,7 +62,7 @@ export class AddEditStaff {
 
   passwordCriteria() {
     this.validation_error = [];
-    let password = this.staffForm.controls['password'].value;
+    let password = this.profileForm.controls['password'].value;
     if (password?.length < 12) {
       this.validation_error.push('Password must be at least 12 characters long');
     }
@@ -95,9 +78,8 @@ export class AddEditStaff {
     return this.validation_error;
   }
 
-
   officeLogo = signal<string | null>(null);
-  onSelectFileLR(event: Event) {
+  onSelectFile(event: Event) {
     const target = event.target as HTMLInputElement;
     if (target.files && target.files.length) {
       const file = target.files[0];
