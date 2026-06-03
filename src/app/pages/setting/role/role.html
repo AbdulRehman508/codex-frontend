@@ -3,9 +3,9 @@
     <div class="position-relative">
         <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="task-search"
             class="_input-icon w-200 custom-placeholder" placeholder="Search" />
-        <i class="pi pi-search _search-icon"></i>
+        <i class="pi pi-search _search-icon f-14"></i>
         @if (searchByKeyword) {
-        <i class="pi pi-times _cross-icon pt-1" (click)="searchByKeyword = ''; getCustomerList()"></i>
+        <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; getCustomerList()"></i>
         }
     </div>
     <div class="_circle-btn">

@@ -23,6 +23,7 @@
   },
   "private": true,
   "dependencies": {
+    "@angular/animations": "^20.3.0",
     "@angular/common": "^20.3.0",
     "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
@@ -32,9 +33,11 @@
     "@angular/router": "^20.3.10",
     "@angular/ssr": "^20.3.4",
     "@ng-select/ng-select": "^20.4.0",
+    "@primeuix/themes": "^2.0.3",
     "bootstrap": "^5.3.8",
     "express": "^5.1.0",
     "primeicons": "^7.0.0",
+    "primeng": "^20.4.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

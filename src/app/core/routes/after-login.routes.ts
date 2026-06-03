@@ -19,9 +19,19 @@ export const afterLoginRoutes: Routes = [
           import('../../pages/dashboard/dashboard').then((c) => c.Dashboard),
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('../../pages/profile/profile').then((c) => c.Profile),
+      },
+      {
         path: 'product',
         loadComponent: () =>
           import('../../pages/product-list/product-list').then((c) => c.ProductList),
+      },
+      {
+        path: 'sales',
+        loadComponent: () =>
+          import('../../pages/sales/sales').then((c) => c.Sales),
       },
       {
         path: 'stock',

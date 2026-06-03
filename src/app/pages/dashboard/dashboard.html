@@ -1,1 +1,136 @@
-<p>dashboard works!</p>
+<div class="dashboard">
+
+    <!-- Header -->
+    <div class="dash-head">
+        <div>
+            <h2>Welcome back 👋</h2>
+            <p>Here's what's happening in your shop today.</p>
+        </div>
+        <button class="period-btn">
+            <i class="pi pi-calendar"></i> This Week
+        </button>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="stat-grid">
+        @for (s of stats; track s.label) {
+        <div class="stat-card">
+            <div class="stat-icon" [ngClass]="s.tone">
+                <i [class]="s.icon"></i>
+            </div>
+            <div class="stat-body">
+                <p class="stat-label">{{ s.label }}</p>
+                <h3 class="stat-value">{{ s.value }}</h3>
+                <span class="stat-delta" [ngClass]="s.delta >= 0 ? 'up' : 'down'">
+                    <i class="pi" [ngClass]="s.delta >= 0 ? 'pi-arrow-up-right' : 'pi-arrow-down-right'"></i>
+                    {{ s.delta >= 0 ? '+' : '' }}{{ s.delta }}%
+                </span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Charts row -->
+    <div class="chart-row">
+
+        <!-- Sales bar chart -->
+        <div class="panel sales-panel">
+            <div class="panel-head">
+                <h4>Sales Overview</h4>
+                <span class="panel-sub">Last 7 days</span>
+            </div>
+            <div class="bar-chart">
+                @for (b of salesWeek; track b.day) {
+                <div class="bar-col">
+                    <div class="bar-track">
+                        <div class="bar-fill" [style.height.%]="b.value"></div>
+                    </div>
+                    <span class="bar-label">{{ b.day }}</span>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Category donut -->
+        <div class="panel donut-panel">
+            <div class="panel-head">
+                <h4>Sales by Category</h4>
+            </div>
+            <div class="donut-wrap">
+                <div class="donut" [style.background]="donutGradient">
+                    <div class="donut-hole">
+                        <span class="donut-total">100%</span>
+                        <span class="donut-cap">Total</span>
+                    </div>
+                </div>
+                <ul class="legend">
+                    @for (c of categories; track c.name) {
+                    <li>
+                        <span class="dot" [style.background]="c.color"></span>
+                        <span class="legend-name">{{ c.name }}</span>
+                        <span class="legend-val">{{ c.percent }}%</span>
+                    </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="bottom-row">
+
+        <!-- Recent orders -->
+        <div class="panel orders-panel">
+            <div class="panel-head">
+                <h4>Recent Orders</h4>
+                <a class="view-all">View all</a>
+            </div>
+            <div class="table-wrap">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Customer</th>
+                            <th>Items</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (o of recentOrders; track o.id) {
+                        <tr>
+                            <td class="order-id">{{ o.id }}</td>
+                            <td>{{ o.customer }}</td>
+                            <td>{{ o.items }}</td>
+                            <td class="order-total">{{ o.total }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="o.status.toLowerCase()">{{ o.status }}</span>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Top products -->
+        <div class="panel products-panel">
+            <div class="panel-head">
+                <h4>Top Products</h4>
+            </div>
+            <ul class="product-list">
+                @for (p of topProducts; track p.name; let i = $index) {
+                <li>
+                    <span class="rank">{{ i + 1 }}</span>
+                    <div class="product-info">
+                        <p class="product-name">{{ p.name }}</p>
+                        <span class="product-sold">{{ p.sold }} sold</span>
+                    </div>
+                    <span class="product-rev">{{ p.revenue }}</span>
+                </li>
+                }
+            </ul>
+        </div>
+    </div>
+
+</div>

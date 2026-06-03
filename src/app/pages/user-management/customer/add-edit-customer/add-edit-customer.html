@@ -1,25 +1,30 @@
 <p class="f-16 _fw-600">{{pageTitle}}</p>
 
 <div class="d-flex align-items-end justify-content-between my-3">
-    <div class="image-box">
-        <div class="d-flex align-items-center justify-content-between mt-1 mx-1">
-            <div class="upload-icon">
-                <i class="pi pi-cloud-upload f-20 cursor-pointer primary-color" (click)="fileInput.click()"></i>
-                <input #fileInput class="d-none" accept=".png,.jpg,.jpeg" type="file" name="profile" [hidden]="1"
-                    (change)="onSelectFileLR($event)" />
-            </div>
-            @if (officeLogo) {
-            <div class="upload-icon">
-                <i class="pi pi-times f-18 cursor-pointer primary-color" (click)="officeLogo = null"></i>
-            </div>
+    <div class="avatar-wrap">
+        <div class="avatar" (click)="fileInput.click()">
+            @if (officeLogo()) {
+            <img [src]="officeLogo()" class="avatar-img" alt="profile" />
             }
+            @else {
+            <img [src]="commonIcon.image_not_found" class="avatar-placeholder" alt="placeholder" />
+            }
+            <div class="avatar-overlay">
+                <i class="pi pi-camera"></i>
+                <span>{{ officeLogo() ? 'Change' : 'Upload' }}</span>
+            </div>
         </div>
-        @if (officeLogo) {
-        <img [src]="officeLogo" class="image-exist" />
+        <input #fileInput class="d-none" accept=".png,.jpg,.jpeg" type="file" name="profile" [hidden]="1"
+            (change)="onSelectFileLR($event)" />
+        @if (officeLogo()) {
+        <button type="button" class="avatar-remove" (click)="officeLogo.set(null)" title="Remove photo">
+            <i class="pi pi-times"></i>
+        </button>
         }
-        @else {
-        <img [src]="commonIcon.image_not_found" class="image-not-found" />
-        }
+        <div class="avatar-meta">
+            <p class="avatar-name">Profile Photo</p>
+            <p class="avatar-hint">PNG or JPG. Click image to {{ officeLogo() ? 'change' : 'upload' }}.</p>
+        </div>
     </div>
     <div class="d-flex gap-2">
         <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>

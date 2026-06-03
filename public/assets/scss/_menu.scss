@@ -1,0 +1,49 @@
+@use "colors" as *;
+@use "font" as *;
+
+.p-menu {
+  margin-top: 15px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.14) !important;
+  border: solid 1px var(--borderColor) !important;
+  background-color: var(--white) !important;
+
+  ul {
+    padding: 10px !important;
+    .p-menu-item .p-menu-item-content {
+      border-radius: 8px;
+      height: 40px;
+      display: flex;
+      color: var(--black) !important;
+      @extend .f-14;
+      @extend .font-family;
+
+      .p-menu-item-link .p-menu-item-icon {
+        @extend .f-14;
+        color: var(--black) !important;
+      }
+    }
+
+    .p-menu-item .p-menu-item-content:hover {
+      background-color: var(--secondary) !important;
+      color: var(--primary) !important;
+
+      .p-menu-item-link .p-menu-item-icon {
+        color: var(--primary) !important;
+      }
+    }
+  }
+
+
+
+  // .p-menuitem .p-menuitem-content .p-menuitem-link {
+  //   color: var(--black) !important;
+  //   -webkit-user-select: none !important;
+  //   user-select: none !important;
+  //   font-size: 12px !important;
+  //   font-family: 'Inter' !important;
+  //   gap: 7px;
+  //   padding: 0.75rem 1rem;
+  //   border-radius: 16px;
+  // }
+}
