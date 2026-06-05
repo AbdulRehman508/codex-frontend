@@ -1,0 +1,86 @@
+@if (_open()) {
+<div class="ns-backdrop"></div>
+
+<div class="ns-panel">
+
+    <!-- Top bar: close-all + floating tabs + add -->
+    <div class="ns-topbar">
+        <button class="ns-closeall" (click)="closePopup()" title="Close all">
+            <i class="pi pi-times"></i>
+        </button>
+
+        <div class="ns-tabs">
+            @for (tab of tabs(); track tab.id) {
+            <div class="ns-tab" [class.active]="tab.id === activeId()" (click)="selectTab(tab.id)">
+                <i class="pi pi-shopping-cart ns-tab-icon"></i>
+                <span class="ns-tab-label">{{ tabTitle(tab) }}</span>
+                <i class="pi pi-times ns-tab-close" (click)="closeTab(tab.id, $event)" title="Close tab"></i>
+            </div>
+            }
+            <button class="ns-add" (click)="addTab()" title="New order tab">
+                <i class="pi pi-plus"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Active order body -->
+    @if (activeTab; as tab) {
+    <div class="ns-body">
+
+        <div class="ns-form-row">
+            <div class="form-group">
+                <label>Customer</label>
+                <input type="text" [(ngModel)]="tab.customer" name="customer-{{ tab.id }}"
+                    placeholder="Customer name" />
+            </div>
+            <div class="form-group">
+                <label>Payment</label>
+                <ng-select [(ngModel)]="tab.payment" [items]="paymentOptions" bindLabel="label" bindValue="value"
+                    [clearable]="false" [searchable]="false" placeholder="Select Payment"
+                    name="payment-{{ tab.id }}">
+                </ng-select>
+            </div>
+        </div>
+
+        <div class="ns-lines">
+            <div class="ns-lines-head">
+                <span class="col-prod">Product</span>
+                <span class="col-qty">Qty</span>
+                <span class="col-price">Price</span>
+                <span class="col-total">Total</span>
+                <span class="col-act"></span>
+            </div>
+
+            @for (line of tab.lines; track $index) {
+            <div class="ns-line">
+                <input class="col-prod" type="text" [(ngModel)]="line.product" name="prod-{{ tab.id }}-{{ $index }}"
+                    placeholder="Product name" />
+                <input class="col-qty" type="number" min="1" [(ngModel)]="line.qty"
+                    name="qty-{{ tab.id }}-{{ $index }}" />
+                <input class="col-price" type="number" min="0" [(ngModel)]="line.price"
+                    name="price-{{ tab.id }}-{{ $index }}" />
+                <span class="col-total">{{ lineTotal(line) | number:'1.2-2' }}</span>
+                <i class="pi pi-trash col-act ns-line-del" (click)="removeLine($index)"></i>
+            </div>
+            }
+
+            <button class="ns-add-line" (click)="addLine()">
+                <i class="pi pi-plus"></i> Add Item
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="ns-footer">
+        <div class="ns-total">
+            <span>Total</span>
+            <strong>{{ orderTotal(tab) | currency:'USD' }}</strong>
+        </div>
+        <div class="ns-actions">
+            <button class="_outline-btn" (click)="closeTab(tab.id)">Cancel</button>
+            <button class="_primary-btn" (click)="saveOrder()">Save Order</button>
+        </div>
+    </div>
+    }
+</div>
+}

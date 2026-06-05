@@ -38,7 +38,7 @@ export class SideBar {
       },
       {
         label: 'Sales',
-        icon: this.ImageIcon.report_icon,
+        icon: this.ImageIcon.sale_icon,
         url: '/sales'
       },
       {

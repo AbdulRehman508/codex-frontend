@@ -6,6 +6,7 @@ export const commonIcons = {
   // menu icon
   home_icon: 'assets/side_menu/home.svg',
   list_icon: 'assets/side_menu/list.svg',
+  sale_icon: 'assets/side_menu/sale.svg',
   stock_icon: 'assets/side_menu/task.svg',
   report_icon: 'assets/side_menu/report.svg',
   location_icon: 'assets/side_menu/location.svg',
