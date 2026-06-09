@@ -1,0 +1,20 @@
+.scroll_landing_page {
+    overflow: auto;
+    height: calc(100vh - 235px);
+}
+
+.w-200 {
+    width: 200px;
+}
+
+.access-table {
+    th.text-center,
+    td.text-center {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .form-check-input {
+        cursor: pointer;
+    }
+}

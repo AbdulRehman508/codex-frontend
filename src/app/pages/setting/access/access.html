@@ -1,1 +1,67 @@
-<p>access works!</p>
+<div class="top-box">
+    <button class="_outline-btn" (click)="resetAccess()">Reset</button>
+    <div class="position-relative">
+        <input type="text" [ngModel]="searchByKeyword()" (ngModelChange)="searchByKeyword.set($event)"
+            name="module-search" class="_input-icon w-200 custom-placeholder" placeholder="Search module" />
+        <i class="pi pi-search _search-icon f-14"></i>
+        @if (searchByKeyword()) {
+        <i class="pi pi-times _cross-icon f-14" (click)="clearSearch()"></i>
+        }
+    </div>
+    <div class="position-relative w-200">
+        <ng-select [ngModel]="selectedRoleId()" (ngModelChange)="selectedRoleId.set($event); onRoleChange()"
+            [items]="roleList" bindLabel="role" bindValue="id" placeholder="Select Role" [clearable]="false">
+        </ng-select>
+    </div>
+    <button class="_primary-btn" (click)="saveAccess()">Save</button>
+</div>
+
+
+<div class="position-relative">
+    <div class="scroll_landing_page">
+        <table class="table access-table">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">
+                        <input class="form-check-input mt-1" type="checkbox" [checked]="isAllChecked()"
+                            (change)="toggleAll($any($event.target).checked)" title="Select all">
+                    </th>
+                    <th scope="col">Module</th>
+                    @for (col of permissionColumns; track col.key) {
+                    <th scope="col" class="text-center">
+                        <div class="d-flex flex-column align-items-center gap-1">
+                            <span>{{ col.label }}</span>
+                            <input class="form-check-input" type="checkbox" [checked]="isColumnAllChecked(col.key)"
+                                (change)="toggleColumn(col.key, $any($event.target).checked)"
+                                [title]="'Select all ' + col.label">
+                        </div>
+                    </th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of filteredList(); track p.moduleId) {
+                <tr>
+                    <td>
+                        <input class="form-check-input mt-1" type="checkbox" [checked]="isRowAllChecked(p)"
+                            (change)="toggleRow(p.moduleId, $any($event.target).checked)" title="Full access">
+                    </td>
+                    <td>{{ p.module }}</td>
+                    @for (col of permissionColumns; track col.key) {
+                    <td class="text-center">
+                        <input class="form-check-input" type="checkbox" [checked]="p[col.key]"
+                            (change)="togglePermission(p.moduleId, col.key)">
+                    </td>
+                    }
+                </tr>
+                } @empty {
+                <tr>
+                    <td [attr.colspan]="permissionColumns.length + 2">
+                        <p>Record no available</p>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
