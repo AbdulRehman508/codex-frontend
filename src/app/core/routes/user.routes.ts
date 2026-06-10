@@ -34,6 +34,11 @@ export const userRoutes: Routes = [
             import('../../pages/user-management/office/add-edit-office/add-edit-office').then((c) => c.AddEditOffice),
     },
     {
+        path: 'office/view/:id',
+        loadComponent: () =>
+            import('../../pages/user-management/office/office-detail/office-detail').then((c) => c.OfficeDetail),
+    },
+    {
         path: 'office',
         loadComponent: () =>
             import('../../pages/user-management/office/office').then((c) => c.Office),

@@ -14,21 +14,21 @@
                 <span>{{ officeLogo() ? 'Change' : 'Upload' }}</span>
             </div>
         </div>
-        <input #fileInput class="d-none" accept=".png,.jpg,.jpeg" type="file" name="profile" [hidden]="1"
+        <input #fileInput class="d-none" accept=".png,.jpg,.jpeg,.webp,.gif" type="file" name="profile" [hidden]="1"
             (change)="onSelectFileLR($event)" />
         @if (officeLogo()) {
-        <button type="button" class="avatar-remove" (click)="officeLogo.set(null)" title="Remove logo">
+        <button type="button" class="avatar-remove" (click)="removeLogo()" title="Remove logo">
             <i class="pi pi-times"></i>
         </button>
         }
         <div class="avatar-meta">
             <p class="avatar-name">Office Logo</p>
-            <p class="avatar-hint">PNG or JPG. Click image to {{ officeLogo() ? 'change' : 'upload' }}.</p>
+            <p class="avatar-hint">PNG, JPG, WEBP or GIF. Max 2 MB. Click image to {{ officeLogo() ? 'change' : 'upload' }}.</p>
         </div>
     </div>
     <div class="d-flex gap-2">
         <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>
-        <button class="_primary-btn" (click)="createCustomer()">Save</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="createCustomer()">{{ saving() ? 'Saving...' : 'Save' }}</button>
     </div>
 </div>
 
@@ -38,24 +38,27 @@
             <div class="form-group">
                 <label for="office_name">Office Name</label>
                 <input type="text" id="office_name" formControlName="office_name"
-                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_name'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && officeForm.controls['office_name'].invalid) || fieldError('office_name') }">
+                @if (fieldError('office_name')) { <small class="text-danger">{{ fieldError('office_name') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="office_email">Office Email</label>
                 <input type="text" id="office_email" formControlName="office_email"
-                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_email'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && officeForm.controls['office_email'].invalid) || fieldError('office_email') }">
+                @if (fieldError('office_email')) { <small class="text-danger">{{ fieldError('office_email') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="office_mobile_no">Office Mobile No.</label>
                 <input type="text" id="office_mobile_no" formControlName="office_mobile_no"
-                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_mobile_no'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && officeForm.controls['office_mobile_no'].invalid) || fieldError('office_mobile_no') }">
+                @if (fieldError('office_mobile_no')) { <small class="text-danger">{{ fieldError('office_mobile_no') }}</small> }
             </div>
         </div>
-        <!-- <div class="col-sm-4">
+        <div class="col-sm-4">
             <div class="form-group">
                 <label for="membership_level">Membership Level</label>
                 <ng-select formControlName="membership_level" [items]="membershipList" bindLabel="label"
@@ -72,16 +75,22 @@
                     [ngClass]="{ _inputError: submitted && officeForm.controls['membership_type'].invalid }">
                 </ng-select>
             </div>
-        </div> -->
+        </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="licence_no">Licence Number</label>
                 <input type="text" id="licence_no" formControlName="licence_no">
             </div>
         </div>
+        <div class="col-sm-3">
+            <div class="form-group">
+                <label for="office_status">Status</label>
+                <ng-select formControlName="office_status" [items]="['active','inactive']" placeholder="Select Status"></ng-select>
+            </div>
+        </div>
         <div class="col-sm-1">
             <div class="form-group d-flex align-items-center gap-2 mt-4">
-                <label for="licence_no">Approved</label>
+                <label for="approved">Approved</label>
                 <input class="form-check-input" type="checkbox" formControlName="approved">
             </div>
         </div>
@@ -89,7 +98,8 @@
             <div class="form-group">
                 <label for="office_address">Office Address</label>
                 <input type="text" id="office_address" formControlName="office_address"
-                    [ngClass]="{ _inputError: submitted && officeForm.controls['office_address'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && officeForm.controls['office_address'].invalid) || fieldError('office_address') }">
+                @if (fieldError('office_address')) { <small class="text-danger">{{ fieldError('office_address') }}</small> }
             </div>
         </div>
         <div class="col-sm-12">

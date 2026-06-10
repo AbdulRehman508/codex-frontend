@@ -1,6 +1,5 @@
 
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 
 
 @Injectable({
@@ -10,7 +9,6 @@ import { Router } from '@angular/router';
 export class TokenService {
 
     constructor(
-        private router: Router,
     ) { }
 
     setToken(token: string) {
@@ -22,7 +20,7 @@ export class TokenService {
     }
 
     removeToken() {
-        localStorage.clear();
+        localStorage.removeItem('token');
     }
     
 

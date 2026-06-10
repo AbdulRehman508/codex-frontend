@@ -1,0 +1,51 @@
+<div class="d-flex align-items-center justify-content-between my-3">
+    <p class="f-16 _fw-600 mb-0">Office Detail</p>
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="back()">Back</button>
+        @if (office()) {
+        <button class="_primary-btn" [routerLink]="['/user-management/office/edit', office()!.id]">Edit</button>
+        }
+    </div>
+</div>
+
+@if (loading()) {
+<p>Loading...</p>
+} @else if (office(); as o) {
+<div class="row">
+    <div class="col-sm-3">
+        <div class="avatar">
+            @if (o.office_logo) {
+            <img [src]="o.office_logo" class="avatar-img" alt="logo" />
+            } @else {
+            <img [src]="commonIcon.image_not_found" class="avatar-placeholder" alt="placeholder" />
+            }
+        </div>
+    </div>
+    <div class="col-sm-9">
+        <div class="row">
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Office Name</label><p class="mb-0">{{ o.office_name }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Email</label><p class="mb-0">{{ o.office_email }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Mobile No</label><p class="mb-0">{{ o.office_mobile_no }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Licence No</label><p class="mb-0">{{ o.licence_no || '-' }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Membership Level</label><p class="mb-0">{{ o.membership_level }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Membership Type</label><p class="mb-0">{{ o.membership_type }}</p></div>
+
+            <div class="col-sm-6 mb-3">
+                <label class="f-12 text-muted d-block">Status</label>
+                <span class="badge cursor-pointer" [ngClass]="o.office_status === 'active' ? 'bg-success' : 'bg-secondary'"
+                    (click)="toggleStatus()" title="Click to toggle">{{ o.office_status }}</span>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <label class="f-12 text-muted d-block">Approved</label>
+                <span class="badge cursor-pointer" [ngClass]="o.approved ? 'bg-success' : 'bg-warning'"
+                    (click)="toggleApproved()" title="Click to toggle">{{ o.approved ? 'Yes' : 'No' }}</span>
+            </div>
+
+            <div class="col-sm-12 mb-3"><label class="f-12 text-muted">Address</label><p class="mb-0">{{ o.office_address }}</p></div>
+            <div class="col-sm-12 mb-3"><label class="f-12 text-muted">Biography</label><p class="mb-0">{{ o.biography || '-' }}</p></div>
+        </div>
+    </div>
+</div>
+} @else {
+<p>Office not found.</p>
+}
