@@ -1,6 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MessageService } from 'primeng/api';
+
+import { AuthApiService } from '../auth.api';
 
 @Component({
   selector: 'app-forgot-password',
@@ -9,64 +12,43 @@ import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } 
   styleUrl: './forgot-password.scss',
 })
 export class ForgotPassword {
-
   @Input() email: any = null;
   @Output() moveToLogin = new EventEmitter<any>();
+
+  private authApi = inject(AuthApiService);
+  private toast = inject(MessageService);
+
   forgotForm: FormGroup = new FormGroup({});
-  submitted: boolean = false;
-  password_visible: boolean = true;
-  is_reset_password_email: boolean = true;
+  submitted = false;
+  loading = signal(false);
+  sent = signal(false);
 
   ngOnInit(): void {
-    this.initializeForgotForm();
-  }
-
-  initializeForgotForm() {
     this.forgotForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl(''),
+      email: new FormControl(this.email ?? '', [Validators.required, Validators.email]),
     });
   }
 
-
+  /** Request a reset link. Backend always 200s (does not reveal account existence). */
   resetPassword() {
-    if (this.forgotForm.invalid) {
-      this.submitted = true
-      return
-    } else {
-      this.submitted = false;
-      this.is_reset_password_email = false
-      console.log('Value:', this.forgotForm.value)
-    }
-  }
+    this.submitted = true;
+    if (this.forgotForm.invalid) return;
 
-  validation_error: any[] = [];
-  get strengthLevel(): 'Weak' | 'Medium' | 'Strong' {
-    if (this.validation_error?.length === 3 || this.validation_error?.length === 4) return 'Weak';
-    if (this.validation_error?.length === 1 || this.validation_error?.length === 2) return 'Medium';
-    return 'Strong';
-  }
-
-  passwordCriteria() {
-    this.validation_error = [];
-    let password = this.forgotForm.controls['password'].value;
-    if (password?.length < 12) {
-      this.validation_error.push('Password must be at least 12 characters long');
-    }
-    if (!/[A-Z]/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one uppercase letter');
-    }
-    if (!/\d/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one numeric character');
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one special character');
-    }
-    return this.validation_error;
+    this.loading.set(true);
+    this.authApi.forgotPassword(this.forgotForm.value.email).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.sent.set(true);
+        this.toast.add({ severity: 'success', summary: 'Check your email', detail: 'If the email exists, a reset link has been sent' });
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Request failed' });
+      },
+    });
   }
 
   moveLogin() {
-    // Emit an event with the value 'true' to indicate moving to the login screen
     this.moveToLogin.emit(true);
   }
 }

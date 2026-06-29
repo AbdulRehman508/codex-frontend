@@ -58,4 +58,9 @@ export const userRoutes: Routes = [
         loadComponent: () =>
             import('../../pages/user-management/staff/add-edit-staff/add-edit-staff').then((c) => c.AddEditStaff),
     },
+    {
+        path: 'staff/view/:id',
+        loadComponent: () =>
+            import('../../pages/user-management/staff/staff-detail/staff-detail').then((c) => c.StaffDetail),
+    },
 ];

@@ -2,13 +2,13 @@
     <img src="{{ImageIcon.logo}}" alt="">
     <div class="d-flex align-items-center gap-2">
         <div class="w-200px">
-            <ng-select [items]="officeList" bindLabel="office" bindValue="id"
-                placeholder="Select Office">
+            <ng-select [items]="officeList" bindLabel="office_name" bindValue="id"
+                [(ngModel)]="selectedOfficeId" placeholder="Select Office">
             </ng-select>
         </div>
         <div class="login-user">
-            <p>Welcome, Abdul Rehman</p>
-            <p class="edge">AR</p>
+            <p>Welcome, {{ welcomeName }}</p>
+            <p class="edge">{{ initials }}</p>
             <i class="pi pi-angle-down cursor-pointer" (click)="menu.toggle($event)"></i>
             <p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
         </div>
