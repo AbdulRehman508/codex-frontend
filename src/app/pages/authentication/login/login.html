@@ -28,7 +28,7 @@
                 Password</a>
         </div>
         <div class="my-5 text-center">
-            <button class="_primary-btn" (click)="submitForm()">login</button>
+            <button class="_primary-btn" type="button" [disabled]="loading()" (click)="submitForm()">{{ loading() ? 'Signing in...' : 'login' }}</button>
         </div>
         <p>Empowering your workflow, one login at a time</p>
     </form>

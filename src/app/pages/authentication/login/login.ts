@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -7,8 +7,12 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 
 import { ForgotPassword } from '../forgot-password/forgot-password';
+import { AuthApiService } from '../auth.api';
+import { TokenService } from '../../../core/services/token.service';
 
 @Component({
   selector: 'app-login',
@@ -18,11 +22,17 @@ import { ForgotPassword } from '../forgot-password/forgot-password';
 })
 
 export class Login implements OnInit {
+  private authApi = inject(AuthApiService);
+  private token = inject(TokenService);
+  private router = inject(Router);
+  private toast = inject(MessageService);
 
   password_visible: boolean = true;
   forgot_password_visible: boolean = false;
   loginForm: FormGroup = new FormGroup({});
   submitted: boolean = false;
+  loading = signal(false);
+
   ngOnInit(): void {
     this.initializeLoginForm();
   }
@@ -31,24 +41,36 @@ export class Login implements OnInit {
     this.loginForm = new FormGroup({
       email: new FormControl('', [Validators.required, Validators.email]),
       password: new FormControl('', [Validators.required]),
-      remember_me: new FormControl(false, [Validators.required, Validators.requiredTrue]),
+      remember_me: new FormControl(false),
     });
   }
 
-
   submitForm() {
-    console.log('status >>:', this.loginForm.valid, 'Value:', this.loginForm.value)
+    this.submitted = true;
+    if (this.loginForm.invalid) return;
 
-    if (this.loginForm.invalid) {
-      this.submitted = true
-      return
-    } else {
-      this.submitted = false;
-      console.log('Value:', this.loginForm.value)
-    }
+    this.loading.set(true);
+    this.authApi.login(this.loginForm.value).subscribe({
+      next: (data) => {
+        this.token.setToken(data.token);
+        this.token.setUser(data.user);
+        this.loading.set(false);
+        this.router.navigateByUrl('/');
+      },
+      error: (err) => {
+        this.loading.set(false);
+        const msg =
+          err?.status === 403
+            ? 'Account is inactive'
+            : err?.status === 401
+              ? 'Invalid email or password'
+              : err?.error?.message ?? 'Login failed';
+        this.toast.add({ severity: 'error', summary: 'Login failed', detail: msg });
+      },
+    });
   }
 
-  showLogin(event:boolean = false) {
+  showLogin(event: boolean = false) {
     event && (this.forgot_password_visible = false);
   }
 }

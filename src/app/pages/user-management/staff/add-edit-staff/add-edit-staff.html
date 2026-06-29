@@ -3,32 +3,32 @@
 <div class="d-flex align-items-end justify-content-between my-3">
     <div class="avatar-wrap">
         <div class="avatar" (click)="fileInput.click()">
-            @if (officeLogo()) {
-            <img [src]="officeLogo()" class="avatar-img" alt="profile" />
+            @if (profilePhoto()) {
+            <img [src]="profilePhoto()" class="avatar-img" alt="profile" />
             }
             @else {
             <img [src]="commonIcon.image_not_found" class="avatar-placeholder" alt="placeholder" />
             }
             <div class="avatar-overlay">
                 <i class="pi pi-camera"></i>
-                <span>{{ officeLogo() ? 'Change' : 'Upload' }}</span>
+                <span>{{ profilePhoto() ? 'Change' : 'Upload' }}</span>
             </div>
         </div>
-        <input #fileInput class="d-none" accept=".png,.jpg,.jpeg" type="file" name="profile" [hidden]="1"
+        <input #fileInput class="d-none" accept=".png,.jpg,.jpeg,.webp,.gif" type="file" name="profile" [hidden]="1"
             (change)="onSelectFileLR($event)" />
-        @if (officeLogo()) {
-        <button type="button" class="avatar-remove" (click)="officeLogo.set(null)" title="Remove photo">
+        @if (profilePhoto()) {
+        <button type="button" class="avatar-remove" (click)="removePhoto()" title="Remove photo">
             <i class="pi pi-times"></i>
         </button>
         }
         <div class="avatar-meta">
             <p class="avatar-name">Profile Photo</p>
-            <p class="avatar-hint">PNG or JPG. Click image to {{ officeLogo() ? 'change' : 'upload' }}.</p>
+            <p class="avatar-hint">PNG, JPG, WEBP or GIF. Max 2 MB. Click image to {{ profilePhoto() ? 'change' : 'upload' }}.</p>
         </div>
     </div>
     <div class="d-flex gap-2">
         <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>
-        <button class="_primary-btn" (click)="createCustomer()">Save</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="createCustomer()">{{ saving() ? 'Saving...' : 'Save' }}</button>
     </div>
 </div>
 
@@ -38,42 +38,50 @@
             <div class="form-group">
                 <label for="first_name">First Name</label>
                 <input type="text" id="first_name" formControlName="first_name"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['first_name'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && staffForm.controls['first_name'].invalid) || fieldError('first_name') }">
+                @if (fieldError('first_name')) { <small class="text-danger">{{ fieldError('first_name') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="last_name">Last Name</label>
                 <input type="text" id="last_name" formControlName="last_name"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['last_name'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && staffForm.controls['last_name'].invalid) || fieldError('last_name') }">
+                @if (fieldError('last_name')) { <small class="text-danger">{{ fieldError('last_name') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="mobile_no">Mobile No</label>
                 <input type="text" id="mobile_no" formControlName="mobile_no"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['mobile_no'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && staffForm.controls['mobile_no'].invalid) || fieldError('mobile_no') }">
+                @if (fieldError('mobile_no')) { <small class="text-danger">{{ fieldError('mobile_no') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="cnic_no">CNIC No</label>
-                <input type="text" id="cnic_no" formControlName="cnic_no"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['cnic_no'].invalid }">
+                <input type="text" id="cnic_no" formControlName="cnic_no" placeholder="XXXXX-XXXXXXX-X"
+                    [ngClass]="{ _inputError: (submitted && staffForm.controls['cnic_no'].invalid) || fieldError('cnic_no') }">
+                @if (submitted && staffForm.controls['cnic_no'].errors?.['pattern']) {
+                <small class="text-danger">Format must be XXXXX-XXXXXXX-X</small>
+                }
+                @if (fieldError('cnic_no')) { <small class="text-danger">{{ fieldError('cnic_no') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="text" id="email" formControlName="email"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['email'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && staffForm.controls['email'].invalid) || fieldError('email') }">
+                @if (fieldError('email')) { <small class="text-danger">{{ fieldError('email') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group position-relative">
-                <label for="email">Password</label>
+                <label for="password">Password {{ staffId ? '(leave blank to keep)' : '' }}</label>
                 <input type="{{hideShowPassword ? 'text' : 'password'}}" id="password" formControlName="password"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['password'].invalid }"
+                    [ngClass]="{ _inputError: (submitted && staffForm.controls['password'].invalid) || fieldError('password') }"
                     (input)="passwordCriteria()">
                 <i class="pi {{hideShowPassword ? 'pi-eye' : 'pi-eye-slash'}} password-icon"
                     (click)="hideShowPassword = !hideShowPassword"></i>
@@ -85,30 +93,51 @@
                     }
                 </ul>
                 }
+                @if (fieldError('password')) { <small class="text-danger">{{ fieldError('password') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group position-relative">
-                <label for="email">Office</label>
-                <ng-select formControlName="officeId" [items]="officeList" bindLabel="office" bindValue="id"
-                    placeholder="Select Office"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['officeId'].invalid }">
+                <label for="office_ids">Office</label>
+                <ng-select formControlName="office_ids" [items]="officeList()" bindLabel="office_name" bindValue="id"
+                    placeholder="Select Office(s)" [multiple]="true" [closeOnSelect]="false"
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['office_ids'].invalid }">
                 </ng-select>
+                @if (fieldError('office_ids')) { <small class="text-danger">{{ fieldError('office_ids') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group position-relative">
-                <label for="email">Role</label>
-                <ng-select formControlName="roleId" [items]="roleList" bindLabel="role" bindValue="id"
+                <label for="role_id">Role</label>
+                <ng-select formControlName="role_id" [items]="roleList()" bindLabel="role" bindValue="id"
                     placeholder="Select Role"
-                    [ngClass]="{ _inputError: submitted && staffForm.controls['roleId'].invalid }">
+                    [ngClass]="{ _inputError: submitted && staffForm.controls['role_id'].invalid }">
                 </ng-select>
+                @if (fieldError('role_id')) { <small class="text-danger">{{ fieldError('role_id') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group">
+                <label for="staff_status">Status</label>
+                <ng-select formControlName="staff_status" [items]="['active','inactive']" placeholder="Select Status"></ng-select>
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <div class="form-group">
+                <label for="salary">Salary</label>
+                <p-inputNumber formControlName="salary" inputId="salary" [useGrouping]="true" [min]="0"
+                    placeholder="e.g. 50,000" styleClass="w-100"
+                    [inputStyleClass]="((submitted && staffForm.controls['salary'].invalid) || fieldError('salary')) ? '_inputError w-100' : 'w-100'">
+                </p-inputNumber>
+                @if (fieldError('salary')) { <small class="text-danger">{{ fieldError('salary') }}</small> }
             </div>
         </div>
         <div class="col-sm-12">
             <div class="form-group">
                 <label for="address">Address</label>
-                <input type="text" id="address" formControlName="address">
+                <input type="text" id="address" formControlName="address"
+                    [ngClass]="{ _inputError: (submitted && staffForm.controls['address'].invalid) || fieldError('address') }">
+                @if (fieldError('address')) { <small class="text-danger">{{ fieldError('address') }}</small> }
             </div>
         </div>
         <div class="col-sm-12">

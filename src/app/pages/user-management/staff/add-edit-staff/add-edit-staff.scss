@@ -5,6 +5,28 @@
     cursor: pointer;
 }
 
+// match p-inputNumber to the global input look (.f-12, 35px, etc.)
+:host ::ng-deep p-inputnumber {
+    display: block;
+    width: 100%;
+
+    .p-inputnumber {
+        width: 100%;
+    }
+
+    .p-inputnumber-input {
+        width: 100%;
+        height: 35px;
+        padding: 0 7px;
+        font-size: 12px;
+        font-weight: 400;
+        font-family: "Inter";
+        border-radius: 8px !important;
+        border: solid 1px var(--borderColor);
+        color: var(--black) !important;
+    }
+}
+
 .strength-bar {
     height: 8px;
     border-radius: 8px;
@@ -142,4 +164,113 @@
     margin: 0;
     font-size: 12px;
     color: var(--secondary, #94a3b8);
+}
+
+/* ---- ng-select: match global inputs + prettier multi-select pills ---- */
+:host ::ng-deep {
+    .ng-select {
+        .ng-select-container {
+            min-height: 35px;
+            border-radius: 8px;
+            border: 1px solid var(--borderColor);
+            background: var(--white);
+            color: var(--black);
+            font-size: 12px;
+            font-family: "Inter";
+            padding: 0 4px;
+            transition: border-color 150ms ease, box-shadow 150ms ease;
+        }
+
+        &.ng-select-focused .ng-select-container {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+        }
+
+        .ng-placeholder {
+            color: var(--secondary, #94a3b8);
+            font-size: 12px;
+        }
+
+        .ng-arrow-wrapper,
+        .ng-clear-wrapper {
+            color: var(--secondary, #94a3b8);
+        }
+
+        // red border when invalid (mirrors ._inputError on text inputs)
+        &._inputError .ng-select-container {
+            border-color: var(--danger);
+        }
+    }
+
+    // compact rounded pills for the multi-select (office) field
+    .ng-select.ng-select-multiple .ng-select-container {
+        .ng-value-container {
+            gap: 4px;
+            padding-top: 3px;
+            padding-bottom: 3px;
+        }
+
+        .ng-value {
+            display: inline-flex;
+            align-items: center;
+            margin: 0;
+            padding: 2px 8px 2px 6px;
+            background: color-mix(in srgb, var(--primary) 12%, var(--white));
+            color: var(--primary);
+            border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 500;
+            line-height: 1.5;
+
+            .ng-value-label {
+                padding: 0 2px;
+            }
+
+            .ng-value-icon {
+                order: 2; // move the "x" to the right of the label
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 16px;
+                height: 16px;
+                margin-left: 4px;
+                border-radius: 50%;
+                font-size: 13px;
+                line-height: 1;
+                border: none;
+                opacity: 0.7;
+                transition: background 120ms ease, opacity 120ms ease;
+
+                &:hover {
+                    background: color-mix(in srgb, var(--primary) 25%, transparent);
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    // dropdown options
+    .ng-dropdown-panel {
+        border-radius: 8px;
+        border: 1px solid var(--borderColor);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+
+        .ng-option {
+            font-size: 12px;
+            padding: 8px 10px;
+
+            &.ng-option-marked {
+                background: color-mix(in srgb, var(--primary) 10%, var(--white));
+                color: var(--primary);
+            }
+
+            &.ng-option-selected {
+                background: color-mix(in srgb, var(--primary) 16%, var(--white));
+                color: var(--primary);
+                font-weight: 500;
+            }
+        }
+    }
 }

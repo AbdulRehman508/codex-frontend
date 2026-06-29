@@ -5,15 +5,15 @@
             class="_input-icon w-200 custom-placeholder" placeholder="Search" />
         <i class="pi pi-search _search-icon f-14"></i>
         @if (searchByKeyword) {
-        <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; getCustomerList()"></i>
+        <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
         }
     </div>
     <div class="position-relative w-200">
-        <ng-select [(ngModel)]="searchByRole" [items]="roleList" bindLabel="role" bindValue="id"
-            placeholder="Select Role">
+        <ng-select [(ngModel)]="searchByRole" [items]="roleList()" bindLabel="role" bindValue="id"
+            placeholder="Select Role" (change)="onRoleFilterChange()">
         </ng-select>
     </div>
-    <div class="_circle-btn">
+    <div class="_circle-btn" (click)="bulkDelete()" title="Delete selected">
         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
     </div>
     <button class="_outline-btn" [routerLink]="['/user-management/staff/add']">Add New</button>
@@ -25,25 +25,68 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>
-                        <input class="form-check-input" type="checkbox" [(ngModel)]="isTableHeaderChecked"
+                    <th style="width: 30px;">
+                        <input class="form-check-input mt-1" type="checkbox" [(ngModel)]="isTableHeaderChecked"
                             (change)="checkAll()">
                     </th>
-                    <th scope="col">Full Name</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Mobile No</th>
-                    <th scope="col">Email</th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('first_name')">
+                        Full Name <i class="pi" [ngClass]="sort() === 'first_name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('staff_status')">
+                        Status <i class="pi" [ngClass]="sort() === 'staff_status' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('mobile_no')">
+                        Mobile No <i class="pi" [ngClass]="sort() === 'mobile_no' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('email')">
+                        Email <i class="pi" [ngClass]="sort() === 'email' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
                     <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
+                @if (loading()) {
+                <tr><td colspan="6"><p>Loading...</p></td></tr>
+                } @else if (rows().length === 0) {
+                <tr><td colspan="6"><p>Record not available</p></td></tr>
+                } @else {
+                @for (row of rows(); track row.id) {
                 <tr>
-                    <td colspan="6">
-                        <p>Record no available</p>
+                    <td>
+                        <input class="form-check-input mt-1" type="checkbox" [checked]="isSelected(row.id)"
+                            (change)="toggleRow(row.id)">
+                    </td>
+                    <td>{{ row.full_name }}</td>
+                    <td>
+                        <span class="badge cursor-pointer" [ngClass]="row.staff_status === 'active' ? 'bg-success' : 'bg-secondary'"
+                            (click)="toggleStatus(row)" title="Click to toggle">
+                            {{ row.staff_status }}
+                        </span>
+                    </td>
+                    <td>{{ row.mobile_no }}</td>
+                    <td>{{ row.email }}</td>
+                    <td>
+                        <i class="pi pi-eye cursor-pointer me-2" [routerLink]="['/user-management/staff/view', row.id]" title="View"></i>
+                        <img [src]="commonIcon.edit_icon" class="cursor-pointer me-2" width="16px"
+                            [routerLink]="['/user-management/staff/edit', row.id]" title="Edit" />
+                        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="16px"
+                            (click)="deleteOne(row)" title="Delete" />
                     </td>
                 </tr>
+                }
+                }
             </tbody>
         </table>
     </div>
-    <!-- <p class="mt-5">Records: {{customerList.length}}</p> -->
+
+    @if (!loading() && total() > 0) {
+    <div class="d-flex align-items-center justify-content-between mt-3">
+        <span class="f-14">Total: {{ total() }}</span>
+        <div class="d-flex align-items-center gap-2">
+            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+            <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+        </div>
+    </div>
+    }
 </div>
