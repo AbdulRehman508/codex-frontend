@@ -13,6 +13,7 @@ import { MessageService } from 'primeng/api';
 import { ForgotPassword } from '../forgot-password/forgot-password';
 import { AuthApiService } from '../auth.api';
 import { TokenService } from '../../../core/services/token.service';
+import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,7 @@ import { TokenService } from '../../../core/services/token.service';
 export class Login implements OnInit {
   private authApi = inject(AuthApiService);
   private token = inject(TokenService);
+  private perm = inject(PermissionService);
   private router = inject(Router);
   private toast = inject(MessageService);
 
@@ -54,8 +56,12 @@ export class Login implements OnInit {
       next: (data) => {
         this.token.setToken(data.token);
         this.token.setUser(data.user);
-        this.loading.set(false);
-        this.router.navigateByUrl('/');
+        // load this user's permissions before entering the app so the
+        // sidebar/routes are gated correctly on first paint
+        this.perm.reload().finally(() => {
+          this.loading.set(false);
+          this.router.navigateByUrl('/');
+        });
       },
       error: (err) => {
         this.loading.set(false);

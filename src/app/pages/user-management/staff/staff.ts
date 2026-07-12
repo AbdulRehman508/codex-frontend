@@ -1,5 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { commonIcons } from '../../../core/icon-images/common-icon';
+import { OfficeContextService } from '../../../core/services/office-context.service';
+import { ConfirmService } from '../../../core/services/confirm.service';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -11,6 +13,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { StaffApiService } from './staff.api';
 import { StaffListQuery, StaffListRow, StaffStatus } from './staff.model';
 import { RolesApiService, Role } from '../roles.api';
+import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-staff',
@@ -21,8 +24,30 @@ import { RolesApiService, Role } from '../roles.api';
 export class Staff {
   private api = inject(StaffApiService);
   private rolesApi = inject(RolesApiService);
+  private ctx = inject(OfficeContextService);
+  private confirm = inject(ConfirmService);
   private toast = inject(MessageService);
+  perm = inject(PermissionService);
   private search$ = new Subject<string>();
+
+  // module this list is gated by (create/edit/delete checks in the template)
+  readonly module = 'staff';
+
+  constructor() {
+    // reload when the header office changes (skip the initial run)
+    let first = true;
+    effect(() => {
+      this.ctx.selectedOfficeId();
+      if (first) {
+        first = false;
+        return;
+      }
+      this.searchByRole = null;
+      this.page.set(1);
+      this.loadRoles();
+      this.getStaffList();
+    });
+  }
 
   commonIcon = commonIcons;
 
@@ -56,13 +81,26 @@ export class Staff {
   }
 
   private loadRoles() {
-    this.rolesApi.listRoles().subscribe({
+    const officeId = this.ctx.selectedOfficeId();
+    if (!officeId) {
+      this.roleList.set([]);
+      return;
+    }
+    this.rolesApi.listRoles([officeId]).subscribe({
       next: (roles) => this.roleList.set(roles),
       error: (err) => this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Failed to load roles' }),
     });
   }
 
   getStaffList() {
+    const officeId = this.ctx.selectedOfficeId();
+    // office-scoped: no office selected => nothing to show
+    if (!officeId) {
+      this.rows.set([]);
+      this.total.set(0);
+      this.loading.set(false);
+      return;
+    }
     this.loading.set(true);
     this.api
       .listStaff({
@@ -70,6 +108,7 @@ export class Staff {
         limit: this.limit(),
         search: this.searchByKeyword,
         role_id: this.searchByRole ?? undefined,
+        office_id: officeId,
         sort: this.sort(),
         order: this.order(),
       })
@@ -152,6 +191,7 @@ export class Staff {
 
   // ---- status toggle (PATCH) ----
   toggleStatus(row: StaffListRow) {
+    if (!this.perm.can(this.module, 'edit')) return;
     const next: StaffStatus = row.staff_status === 'active' ? 'inactive' : 'active';
     this.api.patchStaff(row.id, { staff_status: next }).subscribe({
       next: (updated) => {
@@ -163,8 +203,8 @@ export class Staff {
   }
 
   // ---- delete ----
-  deleteOne(row: StaffListRow) {
-    if (!confirm(`Delete staff "${row.full_name}"?`)) return;
+  async deleteOne(row: StaffListRow) {
+    if (!(await this.confirm.delete(`staff "${row.full_name}"`))) return;
     this.api.deleteStaff(row.id).subscribe({
       next: () => {
         this.toast.add({ severity: 'success', summary: 'Deleted', detail: 'Staff deleted' });
@@ -174,13 +214,13 @@ export class Staff {
     });
   }
 
-  bulkDelete() {
+  async bulkDelete() {
     const ids = [...this.selectedIds()];
     if (!ids.length) {
       this.toast.add({ severity: 'warn', summary: 'No selection', detail: 'Select at least one staff member' });
       return;
     }
-    if (!confirm(`Delete ${ids.length} selected staff member(s)?`)) return;
+    if (!(await this.confirm.delete(`${ids.length} selected staff member(s)`))) return;
     this.api.bulkDeleteStaff(ids).subscribe({
       next: (res) => {
         this.toast.add({ severity: 'success', summary: 'Deleted', detail: `${res.deleted_count} staff member(s) deleted` });

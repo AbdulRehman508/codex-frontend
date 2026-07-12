@@ -3,7 +3,7 @@
 <div class="d-flex align-items-end justify-content-end">
     <div class="d-flex gap-2">
         <button class="_cancel-btn" (click)="closeRole()">Cancel</button>
-        <button class="_primary-btn" (click)="createRole()">Save</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="createRole()">{{ saving() ? 'Saving...' : 'Save' }}</button>
     </div>
 </div>
 
@@ -11,14 +11,25 @@
     <div class="row">
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="first_name">Role Name</label>
+                <label for="role_name">Role Name</label>
                 <input type="text" id="role_name" formControlName="role_name"
-                    [ngClass]="{ _inputError: submitted && roleForm.controls['role_name'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && roleForm.controls['role_name'].invalid) || fieldError('role') }">
+                @if (fieldError('role')) { <small class="text-danger">{{ fieldError('role') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group position-relative">
+                <label for="office_id">Office</label>
+                <ng-select formControlName="office_id" [items]="officeList()" bindLabel="office_name" bindValue="id"
+                    placeholder="Select Office"
+                    [ngClass]="{ _inputError: (submitted && roleForm.controls['office_id'].invalid) || fieldError('office_id') }">
+                </ng-select>
+                @if (fieldError('office_id')) { <small class="text-danger">{{ fieldError('office_id') }}</small> }
             </div>
         </div>
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="biography">Description</label>
+                <label for="description">Description</label>
                 <textarea formControlName="description" cols="20" rows="5"></textarea>
             </div>
         </div>

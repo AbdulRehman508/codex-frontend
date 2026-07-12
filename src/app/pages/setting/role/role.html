@@ -5,13 +5,17 @@
             class="_input-icon w-200 custom-placeholder" placeholder="Search" />
         <i class="pi pi-search _search-icon f-14"></i>
         @if (searchByKeyword) {
-        <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; getCustomerList()"></i>
+        <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
         }
     </div>
-    <div class="_circle-btn">
+    @if (perm.can(module, 'delete')) {
+    <div class="_circle-btn" (click)="bulkDelete()" title="Delete selected">
         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
     </div>
+    }
+    @if (perm.can(module, 'create')) {
     <button class="_outline-btn" [routerLink]="['/setting/role/add']">Add New</button>
+    }
 </div>
 
 
@@ -24,18 +28,61 @@
                         <input class="form-check-input mt-1" type="checkbox" [(ngModel)]="isTableHeaderChecked"
                             (change)="checkAll()">
                     </th>
-                    <th scope="col">ID</th>
-                    <th scope="col">Role Name</th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('id')">
+                        ID <i class="pi" [ngClass]="sort() === 'id' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('role')">
+                        Role Name <i class="pi" [ngClass]="sort() === 'role' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
                     <th scope="col">Description</th>
+                    <th scope="col">Office</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
+                @if (loading()) {
+                <tr><td colspan="6"><p>Loading...</p></td></tr>
+                } @else if (rows().length === 0) {
+                <tr><td colspan="6"><p>Record not available</p></td></tr>
+                } @else {
+                @for (row of rows(); track row.id) {
                 <tr>
-                    <td colspan="4">
-                        <p>Record no available</p>
+                    <td>
+                        <input class="form-check-input mt-1" type="checkbox" [checked]="isSelected(row.id)"
+                            (change)="toggleRow(row.id)">
+                    </td>
+                    <td>{{ row.id }}</td>
+                    <td>{{ row.role }}</td>
+                    <td>{{ row.description || '-' }}</td>
+                    <td>{{ row.office_name || '-' }}</td>
+                    <td>
+                        @if (perm.can(module, 'edit')) {
+                        <img [src]="commonIcon.edit_icon" class="cursor-pointer me-2" width="16px"
+                            [routerLink]="['/setting/role/edit', row.id]" title="Edit" />
+                        }
+                        @if (perm.can(module, 'delete')) {
+                        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="16px"
+                            (click)="deleteOne(row)" title="Delete" />
+                        }
+                        @if (!perm.can(module, 'edit') && !perm.can(module, 'delete')) {
+                        <span class="text-muted">-</span>
+                        }
                     </td>
                 </tr>
+                }
+                }
             </tbody>
         </table>
     </div>
+
+    @if (!loading() && total() > 0) {
+    <div class="d-flex align-items-center justify-content-between mt-3">
+        <span class="f-14">Total: {{ total() }}</span>
+        <div class="d-flex align-items-center gap-2">
+            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+            <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+        </div>
+    </div>
+    }
 </div>

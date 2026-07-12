@@ -10,6 +10,7 @@ import { Staff } from '../staff.model';
 import { RolesApiService, Role } from '../../roles.api';
 import { OfficeApiService } from '../../office/office.api';
 import { OfficeListRow } from '../../office/office.model';
+import { PermissionService } from '../../../../core/services/permission.service';
 
 @Component({
   selector: 'app-staff-detail',
@@ -24,6 +25,10 @@ export class StaffDetail {
   private rolesApi = inject(RolesApiService);
   private officeApi = inject(OfficeApiService);
   private toast = inject(MessageService);
+  perm = inject(PermissionService);
+
+  // module this page is gated by (edit check on Edit button + status toggle)
+  readonly module = 'staff';
 
   commonIcon = commonIcons;
   staff = signal<Staff | null>(null);
@@ -66,6 +71,7 @@ export class StaffDetail {
   }
 
   toggleStatus() {
+    if (!this.perm.can(this.module, 'edit')) return;
     const s = this.staff();
     if (!s) return;
     const next = s.staff_status === 'active' ? 'inactive' : 'active';

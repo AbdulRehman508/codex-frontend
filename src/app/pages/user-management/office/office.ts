@@ -9,6 +9,8 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { OfficeApiService } from './office.api';
 import { OfficeListQuery, OfficeListRow, OfficeStatus } from './office.model';
+import { ConfirmService } from '../../../core/services/confirm.service';
+import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-office',
@@ -18,8 +20,13 @@ import { OfficeListQuery, OfficeListRow, OfficeStatus } from './office.model';
 })
 export class Office {
   private api = inject(OfficeApiService);
+  private confirm = inject(ConfirmService);
   private toast = inject(MessageService);
+  perm = inject(PermissionService);
   private search$ = new Subject<string>();
+
+  // module this list is gated by (create/edit/delete checks in the template)
+  readonly module = 'office';
 
   commonIcon = commonIcons;
 
@@ -132,6 +139,7 @@ export class Office {
 
   // ---- status toggle (PATCH) ----
   toggleStatus(row: OfficeListRow) {
+    if (!this.perm.can(this.module, 'edit')) return;
     const next: OfficeStatus = row.office_status === 'active' ? 'inactive' : 'active';
     this.api.patchOffice(row.id, { office_status: next }).subscribe({
       next: (updated) => {
@@ -143,8 +151,8 @@ export class Office {
   }
 
   // ---- delete ----
-  deleteOne(row: OfficeListRow) {
-    if (!confirm(`Delete office "${row.office_name}"?`)) return;
+  async deleteOne(row: OfficeListRow) {
+    if (!(await this.confirm.delete(`office "${row.office_name}"`))) return;
     this.api.deleteOffice(row.id).subscribe({
       next: () => {
         this.toast.add({ severity: 'success', summary: 'Deleted', detail: 'Office deleted' });
@@ -154,13 +162,13 @@ export class Office {
     });
   }
 
-  bulkDelete() {
+  async bulkDelete() {
     const ids = [...this.selectedIds()];
     if (!ids.length) {
       this.toast.add({ severity: 'warn', summary: 'No selection', detail: 'Select at least one office' });
       return;
     }
-    if (!confirm(`Delete ${ids.length} selected office(s)?`)) return;
+    if (!(await this.confirm.delete(`${ids.length} selected office(s)`))) return;
     this.api.bulkDeleteOffices(ids).subscribe({
       next: (res) => {
         this.toast.add({ severity: 'success', summary: 'Deleted', detail: `${res.deleted_count} office(s) deleted` });
