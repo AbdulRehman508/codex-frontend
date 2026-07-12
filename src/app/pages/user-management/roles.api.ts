@@ -24,7 +24,8 @@ interface ApiSuccess<T> {
 @Injectable({ providedIn: 'root' })
 export class RolesApiService {
   private api = inject(ApiService);
-  private endpoint = 'roles';
+  // dropdown source — paginated CRUD lives on the role management module
+  private endpoint = 'roles/options';
 
   listRoles(officeIds?: string[]): Observable<Role[]> {
     const params = officeIds?.length ? { office_id: officeIds.join(',') } : undefined;

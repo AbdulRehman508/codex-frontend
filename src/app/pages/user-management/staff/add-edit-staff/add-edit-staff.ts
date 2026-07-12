@@ -12,6 +12,7 @@ import { CreateStaffDto } from '../staff.model';
 import { RolesApiService, Role } from '../../roles.api';
 import { OfficeApiService } from '../../office/office.api';
 import { OfficeListRow } from '../../office/office.model';
+import { TokenService } from '../../../../core/services/token.service';
 
 @Component({
   selector: 'app-add-edit-staff',
@@ -27,6 +28,7 @@ export class AddEditStaff {
   private api = inject(StaffApiService);
   private rolesApi = inject(RolesApiService);
   private officeApi = inject(OfficeApiService);
+  private token = inject(TokenService);
   private toast = inject(MessageService);
 
   commonIcon = commonIcons;
@@ -94,9 +96,9 @@ export class AddEditStaff {
   }
 
   private loadOffices() {
-    // pull a large page so the dropdown holds every office
+    // Admin sees every office; others only their assigned offices
     this.officeApi.listOffices({ limit: 1000, sort: 'office_name', order: 'asc' }).subscribe({
-      next: (res) => this.officeList.set(res.data),
+      next: (res) => this.officeList.set(this.token.filterOfficesForUser(res.data)),
       error: (err) => this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Failed to load offices' }),
     });
   }

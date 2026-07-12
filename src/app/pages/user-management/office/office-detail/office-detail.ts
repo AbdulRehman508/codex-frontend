@@ -6,6 +6,7 @@ import { MessageService } from 'primeng/api';
 import { commonIcons } from '../../../../core/icon-images/common-icon';
 import { OfficeApiService } from '../office.api';
 import { Office } from '../office.model';
+import { PermissionService } from '../../../../core/services/permission.service';
 
 @Component({
   selector: 'app-office-detail',
@@ -18,6 +19,10 @@ export class OfficeDetail {
   private _router = inject(Router);
   private api = inject(OfficeApiService);
   private toast = inject(MessageService);
+  perm = inject(PermissionService);
+
+  // module this page is gated by (edit check on Edit button + toggles)
+  readonly module = 'office';
 
   commonIcon = commonIcons;
   office = signal<Office | null>(null);
@@ -42,6 +47,7 @@ export class OfficeDetail {
   }
 
   toggleApproved() {
+    if (!this.perm.can(this.module, 'edit')) return;
     const o = this.office();
     if (!o) return;
     this.api.patchOffice(o.id, { approved: !o.approved }).subscribe({
@@ -54,6 +60,7 @@ export class OfficeDetail {
   }
 
   toggleStatus() {
+    if (!this.perm.can(this.module, 'edit')) return;
     const o = this.office();
     if (!o) return;
     const next = o.office_status === 'active' ? 'inactive' : 'active';

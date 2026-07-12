@@ -55,6 +55,7 @@ export interface StaffListQuery {
   limit?: number;
   search?: string;
   role_id?: number;
+  office_id?: string;
   sort?: 'first_name' | 'email' | 'mobile_no' | 'staff_status' | 'created_at' | 'updated_at';
   order?: 'asc' | 'desc';
 }

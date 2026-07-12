@@ -10,6 +10,8 @@ import { AuthApiService } from '../authentication/auth.api';
 import { OfficeApiService } from '../user-management/office/office.api';
 import { OfficeListRow } from '../user-management/office/office.model';
 import { TokenService } from '../../core/services/token.service';
+import { OfficeContextService } from '../../core/services/office-context.service';
+import { PermissionService } from '../../core/services/permission.service';
 import { AuthUser } from '../authentication/auth.model';
 @Component({
   selector: 'app-header',
@@ -24,11 +26,12 @@ export class Header {
   private authApi = inject(AuthApiService);
   private officeApi = inject(OfficeApiService);
   private token = inject(TokenService);
+  private perm = inject(PermissionService);
+  ctx = inject(OfficeContextService);
 
   ImageIcon = commonIcons
   dropdownOpen: boolean = false;
   officeList: OfficeListRow[] = [];
-  selectedOfficeId: string | null = null;
   user: AuthUser | null = null;
 
   @ViewChild('topBar') topBar!: ElementRef;
@@ -48,13 +51,17 @@ export class Header {
 
   ngOnInit() {
     this.user = this.token.getUser();
-    this.selectedOfficeId = this.user?.office_ids?.[0] ?? null;
     this.loadOffices();
   }
 
+  onOfficeChange(id: string | null) {
+    this.ctx.setOffice(id);
+  }
+
   private loadOffices() {
+    // Admin sees every office; others only their assigned offices
     this.officeApi.listOffices({ limit: 1000, sort: 'office_name', order: 'asc' }).subscribe({
-      next: (res) => (this.officeList = res.data),
+      next: (res) => (this.officeList = this.token.filterOfficesForUser(res.data)),
       error: () => (this.officeList = []),
     });
   }
@@ -78,6 +85,8 @@ export class Header {
 
   private finishLogout() {
     this.token.clearSession();
+    this.perm.clear();
+    this.ctx.setOffice(null);
     this.router.navigateByUrl('/login');
   }
 

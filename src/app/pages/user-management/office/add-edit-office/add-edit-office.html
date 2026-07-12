@@ -58,7 +58,7 @@
                 @if (fieldError('office_mobile_no')) { <small class="text-danger">{{ fieldError('office_mobile_no') }}</small> }
             </div>
         </div>
-        <div class="col-sm-4">
+        <!-- <div class="col-sm-4">
             <div class="form-group">
                 <label for="membership_level">Membership Level</label>
                 <ng-select formControlName="membership_level" [items]="membershipList" bindLabel="label"
@@ -75,7 +75,7 @@
                     [ngClass]="{ _inputError: submitted && officeForm.controls['membership_type'].invalid }">
                 </ng-select>
             </div>
-        </div>
+        </div> -->
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="licence_no">Licence Number</label>

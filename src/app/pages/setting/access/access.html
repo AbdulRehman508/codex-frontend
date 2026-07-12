@@ -10,10 +10,15 @@
     </div>
     <div class="position-relative w-200">
         <ng-select [ngModel]="selectedRoleId()" (ngModelChange)="selectedRoleId.set($event); onRoleChange()"
-            [items]="roleList" bindLabel="role" bindValue="id" placeholder="Select Role" [clearable]="false">
+            [items]="roleList()" bindLabel="role" bindValue="id" placeholder="Select Role" [clearable]="false"
+            [disabled]="!hasOffice() || roleList().length === 0">
         </ng-select>
     </div>
-    <button class="_primary-btn" (click)="saveAccess()">Save</button>
+    @if (canEdit()) {
+    <button class="_primary-btn" (click)="saveAccess()" [disabled]="saving() || selectedRoleId() === null">
+        {{ saving() ? 'Saving...' : 'Save' }}
+    </button>
+    }
 </div>
 
 
@@ -24,7 +29,7 @@
                 <tr>
                     <th style="width: 40px;">
                         <input class="form-check-input mt-1" type="checkbox" [checked]="isAllChecked()"
-                            (change)="toggleAll($any($event.target).checked)" title="Select all">
+                            [disabled]="!canEdit()" (change)="toggleAll($any($event.target).checked)" title="Select all">
                     </th>
                     <th scope="col">Module</th>
                     @for (col of permissionColumns; track col.key) {
@@ -32,6 +37,7 @@
                         <div class="d-flex flex-column align-items-center gap-1">
                             <span>{{ col.label }}</span>
                             <input class="form-check-input" type="checkbox" [checked]="isColumnAllChecked(col.key)"
+                                [disabled]="!canEdit()"
                                 (change)="toggleColumn(col.key, $any($event.target).checked)"
                                 [title]="'Select all ' + col.label">
                         </div>
@@ -40,26 +46,56 @@
                 </tr>
             </thead>
             <tbody>
-                @for (p of filteredList(); track p.moduleId) {
+                @if (loading()) {
                 <tr>
-                    <td>
-                        <input class="form-check-input mt-1" type="checkbox" [checked]="isRowAllChecked(p)"
-                            (change)="toggleRow(p.moduleId, $any($event.target).checked)" title="Full access">
+                    <td [attr.colspan]="permissionColumns.length + 2">
+                        <p>Loading...</p>
                     </td>
-                    <td>{{ p.module }}</td>
-                    @for (col of permissionColumns; track col.key) {
-                    <td class="text-center">
-                        <input class="form-check-input" type="checkbox" [checked]="p[col.key]"
-                            (change)="togglePermission(p.moduleId, col.key)">
-                    </td>
-                    }
                 </tr>
+                } @else if (!hasOffice()) {
+                <tr>
+                    <td [attr.colspan]="permissionColumns.length + 2">
+                        <p>Select an office to manage access</p>
+                    </td>
+                </tr>
+                } @else {
+                @for (section of sections(); track section.group ?? '_top') {
+                    @if (section.group) {
+                    <tr class="access-group-row">
+                        <td>
+                            <input class="form-check-input mt-1" type="checkbox"
+                                [checked]="isGroupAllChecked(section.group)" [disabled]="!canEdit()"
+                                (change)="toggleGroup(section.group, $any($event.target).checked)"
+                                [title]="'Full access ' + section.group">
+                        </td>
+                        <td class="fw-semibold" [attr.colspan]="permissionColumns.length + 1">
+                            {{ section.group }}
+                        </td>
+                    </tr>
+                    }
+                    @for (p of section.rows; track p.module) {
+                    <tr>
+                        <td>
+                            <input class="form-check-input mt-1" type="checkbox" [checked]="isRowAllChecked(p)"
+                                [disabled]="!canEdit()"
+                                (change)="toggleRow(p.module, $any($event.target).checked)" title="Full access">
+                        </td>
+                        <td [class.ps-4]="section.group">{{ p.module_label }}</td>
+                        @for (col of permissionColumns; track col.key) {
+                        <td class="text-center">
+                            <input class="form-check-input" type="checkbox" [checked]="p[col.key]"
+                                [disabled]="!canEdit()" (change)="togglePermission(p.module, col.key)">
+                        </td>
+                        }
+                    </tr>
+                    }
                 } @empty {
                 <tr>
                     <td [attr.colspan]="permissionColumns.length + 2">
                         <p>Record no available</p>
                     </td>
                 </tr>
+                }
                 }
             </tbody>
         </table>

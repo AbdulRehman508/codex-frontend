@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { userRoutes } from './user.routes';
 import { settingRoutes } from './setting.routes';
+import { accessGuard } from '../guards/access.guard';
 
 export const afterLoginRoutes: Routes = [
   {
@@ -25,21 +26,29 @@ export const afterLoginRoutes: Routes = [
       },
       {
         path: 'product',
+        canActivate: [accessGuard],
+        data: { module: 'products' },
         loadComponent: () =>
           import('../../pages/product-list/product-list').then((c) => c.ProductList),
       },
       {
         path: 'sales',
+        canActivate: [accessGuard],
+        data: { module: 'sales' },
         loadComponent: () =>
           import('../../pages/sales/sales').then((c) => c.Sales),
       },
       {
         path: 'stock',
+        canActivate: [accessGuard],
+        data: { module: 'stock' },
         loadComponent: () =>
           import('../../pages/stock/stock').then((c) => c.Stock),
       },
       {
         path: 'report',
+        canActivate: [accessGuard],
+        data: { module: 'reports' },
         loadComponent: () =>
           import('../../pages/report/report').then((c) => c.Report),
       },
@@ -55,12 +64,16 @@ export const afterLoginRoutes: Routes = [
       },
       {
         path: 'user-management',
+        canActivate: [accessGuard],
+        data: { anyOf: ['customer', 'office', 'staff'] },
         loadComponent: () =>
           import('../../pages/user-management/user-management').then((c) => c.UserManagement),
         children: [...userRoutes]
       },
       {
         path: 'setting',
+        canActivate: [accessGuard],
+        data: { anyOf: ['access_control', 'role'] },
         loadComponent: () =>
           import('../../pages/setting/setting').then((c) => c.Setting),
         children: [...settingRoutes]

@@ -8,10 +8,14 @@
         <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
         }
     </div>
+    @if (perm.can(module, 'delete')) {
     <div class="_circle-btn" (click)="bulkDelete()" title="Delete selected">
         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
     </div>
+    }
+    @if (perm.can(module, 'create')) {
     <button class="_outline-btn" [routerLink]="['/user-management/office/add']">Add New</button>
+    }
 </div>
 
 
@@ -53,8 +57,9 @@
                     </td>
                     <td>{{ row.office_name }}</td>
                     <td>
-                        <span class="badge cursor-pointer" [ngClass]="row.office_status === 'active' ? 'bg-success' : 'bg-secondary'"
-                            (click)="toggleStatus(row)" title="Click to toggle">
+                        <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
+                            [ngClass]="row.office_status === 'active' ? 'bg-success' : 'bg-secondary'"
+                            (click)="toggleStatus(row)" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">
                             {{ row.office_status }}
                         </span>
                     </td>
@@ -62,10 +67,14 @@
                     <td>{{ row.office_email }}</td>
                     <td>
                         <i class="pi pi-eye cursor-pointer me-2" [routerLink]="['/user-management/office/view', row.id]" title="View"></i>
+                        @if (perm.can(module, 'edit')) {
                         <img [src]="commonIcon.edit_icon" class="cursor-pointer me-2" width="16px"
                             [routerLink]="['/user-management/office/edit', row.id]" title="Edit" />
+                        }
+                        @if (perm.can(module, 'delete')) {
                         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="16px"
                             (click)="deleteOne(row)" title="Delete" />
+                        }
                     </td>
                 </tr>
                 }

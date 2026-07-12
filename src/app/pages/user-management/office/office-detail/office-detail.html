@@ -2,7 +2,7 @@
     <p class="f-16 _fw-600 mb-0">Office Detail</p>
     <div class="d-flex gap-2">
         <button class="_cancel-btn" (click)="back()">Back</button>
-        @if (office()) {
+        @if (office() && perm.can(module, 'edit')) {
         <button class="_primary-btn" [routerLink]="['/user-management/office/edit', office()!.id]">Edit</button>
         }
     </div>
@@ -32,13 +32,15 @@
 
             <div class="col-sm-6 mb-3">
                 <label class="f-12 text-muted d-block">Status</label>
-                <span class="badge cursor-pointer" [ngClass]="o.office_status === 'active' ? 'bg-success' : 'bg-secondary'"
-                    (click)="toggleStatus()" title="Click to toggle">{{ o.office_status }}</span>
+                <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
+                    [ngClass]="o.office_status === 'active' ? 'bg-success' : 'bg-secondary'"
+                    (click)="toggleStatus()" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">{{ o.office_status }}</span>
             </div>
             <div class="col-sm-6 mb-3">
                 <label class="f-12 text-muted d-block">Approved</label>
-                <span class="badge cursor-pointer" [ngClass]="o.approved ? 'bg-success' : 'bg-warning'"
-                    (click)="toggleApproved()" title="Click to toggle">{{ o.approved ? 'Yes' : 'No' }}</span>
+                <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
+                    [ngClass]="o.approved ? 'bg-success' : 'bg-warning'"
+                    (click)="toggleApproved()" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">{{ o.approved ? 'Yes' : 'No' }}</span>
             </div>
 
             <div class="col-sm-12 mb-3"><label class="f-12 text-muted">Address</label><p class="mb-0">{{ o.office_address }}</p></div>
