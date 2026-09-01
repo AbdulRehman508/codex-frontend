@@ -1,1 +1,119 @@
-<p>location works!</p>
+<!-- in-flow toolbar: the shared .top-box is absolute and would sit under the
+     table card on pages that have no heading band above it -->
+<div class="page-toolbar">
+    <p class="_heading2 mb-0">Location</p>
+    <div class="toolbar-actions">
+    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <div class="position-relative">
+        <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="location-search"
+            class="_input-icon w-200 custom-placeholder" placeholder="Search name / code" />
+        <i class="pi pi-search _search-icon f-14"></i>
+        @if (searchByKeyword) {
+        <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
+        }
+    </div>
+    <div class="position-relative w-200">
+        <ng-select [(ngModel)]="searchByStatus" [items]="statusList" placeholder="Select Status"
+            (change)="onStatusFilterChange()">
+        </ng-select>
+    </div>
+    @if (perm.can(module, 'delete')) {
+    <div class="_circle-btn" (click)="bulkDelete()" title="Delete selected">
+        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
+    </div>
+    }
+    @if (perm.can(module, 'create')) {
+    <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/location/add']"
+        [title]="hasOffice() ? 'Add a rack' : 'Select an office in the header first'">Add New</button>
+    }
+    </div>
+</div>
+
+
+<div class="position-relative">
+    <div class="scroll_landing_page">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">
+                        <input class="form-check-input mt-1" type="checkbox" [(ngModel)]="isTableHeaderChecked"
+                            (change)="checkAll()">
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('name')">
+                        Rack Name <i class="pi" [ngClass]="sort() === 'name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('code')">
+                        Rack Code <i class="pi" [ngClass]="sort() === 'code' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('rows_count')">
+                        Rows <i class="pi" [ngClass]="sort() === 'rows_count' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('columns_count')">
+                        Columns <i class="pi" [ngClass]="sort() === 'columns_count' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('bins_count')">
+                        Bins <i class="pi" [ngClass]="sort() === 'bins_count' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col">Total Locations</th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('status')">
+                        Status <i class="pi" [ngClass]="sort() === 'status' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (loading()) {
+                <tr><td colspan="9"><p>Loading...</p></td></tr>
+                } @else if (!hasOffice()) {
+                <tr><td colspan="9"><p>Pick an office from the "Select Office" dropdown in the top bar to see and add racks.</p></td></tr>
+                } @else if (rows().length === 0) {
+                <tr><td colspan="9"><p>Record not available</p></td></tr>
+                } @else {
+                @for (row of rows(); track row.id) {
+                <tr>
+                    <td>
+                        <input class="form-check-input mt-1" type="checkbox" [checked]="isSelected(row.id)"
+                            (change)="toggleRow(row.id)">
+                    </td>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.code }}</td>
+                    <td>{{ row.rows_count }}</td>
+                    <td>{{ row.columns_count }}</td>
+                    <td>{{ row.bins_count }}</td>
+                    <td>{{ row.locations_count }}</td>
+                    <td>
+                        <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
+                            [ngClass]="row.status === 'active' ? 'bg-success' : 'bg-secondary'"
+                            (click)="toggleStatus(row)" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">
+                            {{ row.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <i class="pi pi-eye cursor-pointer me-2" [routerLink]="['/location/view', row.id]" title="View"></i>
+                        @if (perm.can(module, 'edit')) {
+                        <img [src]="commonIcon.edit_icon" class="cursor-pointer me-2" width="16px"
+                            [routerLink]="['/location/edit', row.id]" title="Edit" />
+                        }
+                        @if (perm.can(module, 'delete')) {
+                        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="16px"
+                            (click)="deleteOne(row)" title="Delete" />
+                        }
+                    </td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!loading() && total() > 0) {
+    <div class="d-flex align-items-center justify-content-between mt-3">
+        <span class="f-14">Total: {{ total() }}</span>
+        <div class="d-flex align-items-center gap-2">
+            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+            <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+        </div>
+    </div>
+    }
+</div>

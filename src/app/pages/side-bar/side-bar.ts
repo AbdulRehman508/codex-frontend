@@ -34,7 +34,7 @@ export class SideBar {
     { label: 'Sales', icon: this.ImageIcon.sale_icon, url: '/sales', module: 'sales' },
     { label: 'Stock', icon: this.ImageIcon.stock_icon, url: '/stock', module: 'stock' },
     { label: 'Report', icon: this.ImageIcon.report_icon, url: '/report', module: 'reports' },
-    { label: 'Location', icon: this.ImageIcon.location_icon, url: '/location' },
+    { label: 'Location', icon: this.ImageIcon.location_icon, url: '/location', module: 'location' },
     { label: 'Trace Product', icon: this.ImageIcon.find_icon, url: '/trace-product' },
     { label: 'User Management', icon: this.ImageIcon.user_icon, url: '/user-management', anyOf: ['customer', 'office', 'staff'] },
     { label: 'Setting', icon: this.ImageIcon.setting_icon, url: '/setting', anyOf: ['access_control', 'role'] },

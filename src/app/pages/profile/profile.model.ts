@@ -10,6 +10,7 @@ export interface Profile {
   cnic_no: string;
   office_ids: string[];
   offices: string[];
+  last_office_id: string | null;
   role_id: number;
   role: string | null;
   address: string;

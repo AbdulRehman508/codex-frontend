@@ -13,6 +13,7 @@ import { MessageService } from 'primeng/api';
 import { ForgotPassword } from '../forgot-password/forgot-password';
 import { AuthApiService } from '../auth.api';
 import { TokenService } from '../../../core/services/token.service';
+import { OfficeContextService } from '../../../core/services/office-context.service';
 import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
@@ -26,6 +27,7 @@ export class Login implements OnInit {
   private authApi = inject(AuthApiService);
   private token = inject(TokenService);
   private perm = inject(PermissionService);
+  private ctx = inject(OfficeContextService);
   private router = inject(Router);
   private toast = inject(MessageService);
 
@@ -56,6 +58,8 @@ export class Login implements OnInit {
       next: (data) => {
         this.token.setToken(data.token);
         this.token.setUser(data.user);
+        // land on the office this user last worked in
+        this.ctx.syncFromUser();
         // load this user's permissions before entering the app so the
         // sidebar/routes are gated correctly on first paint
         this.perm.reload().finally(() => {

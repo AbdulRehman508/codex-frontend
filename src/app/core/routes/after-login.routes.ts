@@ -32,6 +32,20 @@ export const afterLoginRoutes: Routes = [
           import('../../pages/product-list/product-list').then((c) => c.ProductList),
       },
       {
+        path: 'product/add',
+        canActivate: [accessGuard],
+        data: { module: 'products', action: 'create' },
+        loadComponent: () =>
+          import('../../pages/product-list/add-edit-product/add-edit-product').then((c) => c.AddEditProduct),
+      },
+      {
+        path: 'product/edit/:id',
+        canActivate: [accessGuard],
+        data: { module: 'products', action: 'edit' },
+        loadComponent: () =>
+          import('../../pages/product-list/add-edit-product/add-edit-product').then((c) => c.AddEditProduct),
+      },
+      {
         path: 'sales',
         canActivate: [accessGuard],
         data: { module: 'sales' },
@@ -54,8 +68,31 @@ export const afterLoginRoutes: Routes = [
       },
       {
         path: 'location',
+        canActivate: [accessGuard],
+        data: { module: 'location' },
         loadComponent: () =>
           import('../../pages/location/location').then((c) => c.Location),
+      },
+      {
+        path: 'location/add',
+        canActivate: [accessGuard],
+        data: { module: 'location', action: 'create' },
+        loadComponent: () =>
+          import('../../pages/location/add-edit-location/add-edit-location').then((c) => c.AddEditLocation),
+      },
+      {
+        path: 'location/edit/:id',
+        canActivate: [accessGuard],
+        data: { module: 'location', action: 'edit' },
+        loadComponent: () =>
+          import('../../pages/location/add-edit-location/add-edit-location').then((c) => c.AddEditLocation),
+      },
+      {
+        path: 'location/view/:id',
+        canActivate: [accessGuard],
+        data: { module: 'location' },
+        loadComponent: () =>
+          import('../../pages/location/location-detail/location-detail').then((c) => c.LocationDetail),
       },
       {
         path: 'trace-product',
