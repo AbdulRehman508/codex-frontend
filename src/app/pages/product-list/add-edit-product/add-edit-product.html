@@ -1,0 +1,141 @@
+<div class="d-flex align-items-center justify-content-between my-3">
+    <p class="f-16 _fw-600 mb-0">{{ pageTitle }}</p>
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="closeProduct()">Cancel</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="saveProduct()">{{ saving() ? 'Saving...' : 'Save' }}</button>
+    </div>
+</div>
+
+<form [formGroup]="productForm">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="name">Product Name <span class="text-danger">*</span></label>
+                <input type="text" id="name" formControlName="name" placeholder="Laptop Dell"
+                    [ngClass]="{ _inputError: (submitted && productForm.controls['name'].invalid) || fieldError('name') }">
+                @if (submitted && productForm.controls['name'].invalid) {
+                <small class="text-danger">Product name is required</small>
+                }
+                @if (fieldError('name')) { <small class="text-danger">{{ fieldError('name') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="sku">SKU <span class="text-danger">*</span></label>
+                <input type="text" id="sku" formControlName="sku" placeholder="SKU-1001"
+                    [ngClass]="{ _inputError: (submitted && productForm.controls['sku'].invalid) || fieldError('sku') }">
+                @if (submitted && productForm.controls['sku'].invalid) {
+                <small class="text-danger">SKU is required</small>
+                }
+                @if (fieldError('sku')) { <small class="text-danger">{{ fieldError('sku') }}</small> }
+                <small class="d-block text-muted">Stock Keeping Unit — your own product code, unique inside the office.</small>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="barcode">Barcode</label>
+                <input type="text" id="barcode" formControlName="barcode"
+                    [ngClass]="{ _inputError: fieldError('barcode') }">
+                @if (fieldError('barcode')) { <small class="text-danger">{{ fieldError('barcode') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="price">Price <span class="text-danger">*</span></label>
+                <input type="text" inputmode="decimal" id="price" formControlName="price" placeholder="1,499.99"
+                    (input)="onPriceInput($any($event.target).value)"
+                    [ngClass]="{ _inputError: (submitted && productForm.controls['price'].invalid) || fieldError('price') }">
+                @if (submitted && productForm.controls['price'].invalid) {
+                <small class="text-danger">Enter a price of 0 or more</small>
+                }
+                @if (fieldError('price')) { <small class="text-danger">{{ fieldError('price') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="quantity">Quantity <span class="text-danger">*</span></label>
+                <input type="number" min="0" step="1" id="quantity" formControlName="quantity"
+                    [ngClass]="{ _inputError: (submitted && productForm.controls['quantity'].invalid) || fieldError('quantity') }">
+                @if (submitted && productForm.controls['quantity'].invalid) {
+                <small class="text-danger">Enter a quantity of 0 or more</small>
+                }
+                @if (fieldError('quantity')) { <small class="text-danger">{{ fieldError('quantity') }}</small> }
+                <small class="d-block text-muted">Units held in the selected bin.</small>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="status">Status</label>
+                <ng-select formControlName="status" [items]="statusList" placeholder="Select Status"></ng-select>
+            </div>
+        </div>
+    </div>
+
+    <div class="location-box mt-2">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <p class="f-14 _fw-600 mb-0">Storage Location</p>
+            <div class="d-flex align-items-center gap-2">
+                @if (loadingChain()) { <small class="text-muted">Loading...</small> }
+                <button type="button" class="_cancel-btn" (click)="clearLocation()">Clear</button>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label for="rack_id">Rack</label>
+                    <ng-select formControlName="rack_id" [items]="rackList()" bindLabel="name" bindValue="id"
+                        placeholder="Select Rack" (change)="onRackChange()">
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label for="row_no">Row</label>
+                    <ng-select formControlName="row_no" [items]="rowList()" bindLabel="label" bindValue="row_no"
+                        placeholder="Select Row" [readonly]="!productForm.value.rack_id" (change)="onRowChange()">
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label for="column_no">Column</label>
+                    <ng-select formControlName="column_no" [items]="columnList()" bindLabel="label"
+                        bindValue="column_no" placeholder="Select Column"
+                        [readonly]="productForm.value.row_no === null || productForm.value.row_no === undefined"
+                        (change)="onColumnChange()">
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label for="rack_location_id">Bin</label>
+                    <ng-select formControlName="rack_location_id" [items]="binList()" bindLabel="location_code"
+                        bindValue="id" placeholder="Select Bin"
+                        [readonly]="productForm.value.column_no === null || productForm.value.column_no === undefined"
+                        [ngClass]="{ _inputError: incompleteLocation() || fieldError('rack_location_id') }">
+                    </ng-select>
+                    @if (fieldError('rack_location_id')) {
+                    <small class="text-danger">{{ fieldError('rack_location_id') }}</small>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (incompleteLocation()) {
+        <small class="text-danger d-block">Pick the row, column and bin — or clear the rack to leave the product unassigned.</small>
+        }
+        @if (selectedLocationCode()) {
+        <small class="text-muted d-block">Saved location code: <strong>{{ selectedLocationCode() }}</strong></small>
+        }
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" formControlName="description" cols="20" rows="3"></textarea>
+            </div>
+        </div>
+    </div>
+</form>

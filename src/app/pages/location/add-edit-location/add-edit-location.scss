@@ -1,0 +1,38 @@
+// validation / helper text under a field
+.text-danger,
+small.text-danger,
+small.text-muted {
+    font-size: 12px;
+}
+
+.preview-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background: #fafafa;
+}
+
+.preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 8px;
+}
+
+.preview-chip {
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 6px 10px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+.preview-code {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.preview-meta {
+    font-size: 11px;
+    color: #6b7280;
+}

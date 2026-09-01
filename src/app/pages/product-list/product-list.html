@@ -1,1 +1,112 @@
-<p>product-list works!</p>
+<!-- in-flow toolbar: the shared .top-box is absolute and would sit under the
+     table card on pages that have no heading band above it -->
+<div class="page-toolbar">
+    <p class="_heading2 mb-0">Product</p>
+    <div class="toolbar-actions">
+    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <div class="position-relative">
+        <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="product-search"
+            class="_input-icon w-200 custom-placeholder" placeholder="Search name / sku" />
+        <i class="pi pi-search _search-icon f-14"></i>
+        @if (searchByKeyword) {
+        <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
+        }
+    </div>
+    <div class="position-relative w-200">
+        <ng-select [(ngModel)]="searchByRack" [items]="rackList()" bindLabel="name" bindValue="id"
+            placeholder="Select Rack" (change)="onRackFilterChange()">
+        </ng-select>
+    </div>
+    @if (perm.can(module, 'delete')) {
+    <div class="_circle-btn" (click)="bulkDelete()" title="Delete selected">
+        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
+    </div>
+    }
+    @if (perm.can(module, 'create')) {
+    <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/product/add']"
+        [title]="hasOffice() ? 'Add a product' : 'Select an office in the header first'">Add New</button>
+    }
+    </div>
+</div>
+
+
+<div class="position-relative">
+    <div class="scroll_landing_page">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">
+                        <input class="form-check-input mt-1" type="checkbox" [(ngModel)]="isTableHeaderChecked"
+                            (change)="checkAll()">
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('name')">
+                        Product Name <i class="pi" [ngClass]="sort() === 'name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('price')">
+                        Price <i class="pi" [ngClass]="sort() === 'price' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('quantity')">
+                        Quantity <i class="pi" [ngClass]="sort() === 'quantity' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col" class="cursor-pointer" (click)="changeSort('status')">
+                        Status <i class="pi" [ngClass]="sort() === 'status' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                    </th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (loading()) {
+                <tr><td colspan="6"><p>Loading...</p></td></tr>
+                } @else if (!hasOffice()) {
+                <tr><td colspan="6"><p>Pick an office from the "Select Office" dropdown in the top bar to see and add products.</p></td></tr>
+                } @else if (rows().length === 0) {
+                <tr><td colspan="6"><p>Record not available</p></td></tr>
+                } @else {
+                @for (row of rows(); track row.id) {
+                <tr>
+                    <td>
+                        <input class="form-check-input mt-1" type="checkbox" [checked]="isSelected(row.id)"
+                            (change)="toggleRow(row.id)">
+                    </td>
+                    <td>{{ row.name }}</td>
+                    <td>{{ row.price | number: '1.0-2' }}</td>
+                    <td>
+                        <span class="badge" [ngClass]="row.quantity > 0 ? 'bg-success' : 'bg-danger'">
+                            {{ row.quantity }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
+                            [ngClass]="row.status === 'active' ? 'bg-success' : 'bg-secondary'"
+                            (click)="toggleStatus(row)" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">
+                            {{ row.status }}
+                        </span>
+                    </td>
+                    <td>
+                        @if (perm.can(module, 'edit')) {
+                        <img [src]="commonIcon.edit_icon" class="cursor-pointer me-2" width="16px"
+                            [routerLink]="['/product/edit', row.id]" title="Edit" />
+                        }
+                        @if (perm.can(module, 'delete')) {
+                        <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="16px"
+                            (click)="deleteOne(row)" title="Delete" />
+                        }
+                    </td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (!loading() && total() > 0) {
+    <div class="d-flex align-items-center justify-content-between mt-3">
+        <span class="f-14">Total: {{ total() }}</span>
+        <div class="d-flex align-items-center gap-2">
+            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+            <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+        </div>
+    </div>
+    }
+</div>

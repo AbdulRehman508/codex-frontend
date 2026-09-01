@@ -9,6 +9,8 @@ export interface AuthUser {
   role_id: number;
   role: string;
   office_ids: string[];
+  /** office the user last picked in the header; re-selected on next login */
+  last_office_id: string | null;
   profile_photo: string | null;
   staff_status: StaffStatus;
 }

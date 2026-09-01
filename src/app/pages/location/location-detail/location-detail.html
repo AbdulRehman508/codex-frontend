@@ -1,0 +1,73 @@
+@if (loading()) {
+<p>Loading...</p>
+} @else if (!rack()) {
+<p>Record not available</p>
+} @else {
+<div class="d-flex align-items-center justify-content-between my-3">
+    <p class="f-16 _fw-600 mb-0">{{ rack()!.name }} <span class="text-muted f-14">({{ rack()!.code }})</span></p>
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="back()">Back</button>
+        @if (perm.can(module, 'edit')) {
+        <button class="_primary-btn" [routerLink]="['/location/edit', rack()!.id]">Edit</button>
+        }
+    </div>
+</div>
+
+<div class="row summary-row">
+    <div class="col-sm-3">
+        <div class="summary-card">
+            <span class="summary-label">Status</span>
+            <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
+                [ngClass]="rack()!.status === 'active' ? 'bg-success' : 'bg-secondary'" (click)="toggleStatus()">
+                {{ rack()!.status }}
+            </span>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="summary-card">
+            <span class="summary-label">Grid</span>
+            <span class="summary-value">
+                {{ rack()!.rows_count }} rows × {{ rack()!.columns_count }} columns × {{ rack()!.bins_count }} bins
+            </span>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="summary-card">
+            <span class="summary-label">Total Locations</span>
+            <span class="summary-value">{{ rack()!.locations_count }}</span>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="summary-card">
+            <span class="summary-label">Occupied</span>
+            <span class="summary-value">{{ occupiedCount() }}</span>
+        </div>
+    </div>
+</div>
+
+@if (rack()!.description) {
+<p class="f-14 text-muted mt-2">{{ rack()!.description }}</p>
+}
+
+<div class="scroll_landing_page mt-3">
+    @for (row of tree(); track row.row_no) {
+    <div class="row-node">
+        <p class="row-title mb-2">Row {{ row.row_no }}</p>
+        @for (col of row.columns; track col.column_no) {
+        <div class="column-node">
+            <p class="column-title mb-1">Column {{ col.column_no }}</p>
+            <div class="bin-grid">
+                @for (bin of col.bins; track bin.id) {
+                <div class="bin-chip" [class.occupied]="bin.occupied" [class.inactive]="bin.status !== 'active'"
+                    [title]="bin.occupied ? 'A product is stored here' : 'Free'">
+                    <span class="bin-code">{{ bin.location_code }}</span>
+                    <span class="bin-meta">Bin {{ bin.bin_no }} · {{ bin.occupied ? 'Occupied' : 'Free' }}</span>
+                </div>
+                }
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>
+}

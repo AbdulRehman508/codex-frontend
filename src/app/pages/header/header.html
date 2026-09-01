@@ -3,7 +3,7 @@
     <div class="d-flex align-items-center gap-2">
         <div class="w-200px">
             <ng-select [items]="officeList" bindLabel="office_name" bindValue="id"
-                [ngModel]="ctx.selectedOfficeId()" (ngModelChange)="onOfficeChange($event)"
+                [ngModel]="selectedOffice" (ngModelChange)="onOfficeChange($event)"
                 placeholder="Select Office" [clearable]="false">
             </ng-select>
         </div>

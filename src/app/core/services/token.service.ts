@@ -54,6 +54,18 @@ export class TokenService {
         return this.getUser()?.office_ids ?? [];
     }
 
+    /** Office the user last worked in (server-remembered, sent with login). */
+    getLastOfficeId(): string | null {
+        return this.getUser()?.last_office_id ?? null;
+    }
+
+    /** Keep the stored user in sync after the header office changes. */
+    setLastOfficeId(id: string | null) {
+        const user = this.getUser();
+        if (!user) return;
+        this.setUser({ ...user, last_office_id: id });
+    }
+
     /**
      * Restrict an office list to what the current user may see:
      * Admin → all offices; anyone else → only their assigned offices.

@@ -32,6 +32,8 @@ export class Header {
   ImageIcon = commonIcons
   dropdownOpen: boolean = false;
   officeList: OfficeListRow[] = [];
+  /** value bound to the office dropdown; set once the items have loaded */
+  selectedOffice: string | null = null;
   user: AuthUser | null = null;
 
   @ViewChild('topBar') topBar!: ElementRef;
@@ -55,15 +57,40 @@ export class Header {
   }
 
   onOfficeChange(id: string | null) {
+    // ng-select emits null while it re-resolves its items; the dropdown is not
+    // clearable, so a user can never really pick "nothing" — ignore those and
+    // keep the current office instead of wiping it
+    if (!id) {
+      this.selectedOffice = this.ctx.selectedOfficeId();
+      return;
+    }
+    this.selectedOffice = id;
     this.ctx.setOffice(id);
   }
 
   private loadOffices() {
     // Admin sees every office; others only their assigned offices
     this.officeApi.listOffices({ limit: 1000, sort: 'office_name', order: 'asc' }).subscribe({
-      next: (res) => (this.officeList = this.token.filterOfficesForUser(res.data)),
+      next: (res) => {
+        this.officeList = this.token.filterOfficesForUser(res.data);
+        this.bindSelection();
+      },
       error: () => (this.officeList = []),
     });
+  }
+
+  /**
+   * Bind the remembered office only once the items exist — ng-select drops a
+   * value it cannot find among its items. Also forgets an office the user may
+   * no longer see (unassigned or deleted).
+   */
+  private bindSelection() {
+    const current = this.ctx.selectedOfficeId();
+    const visible = !!current && this.officeList.some((o) => o.id === current);
+    this.selectedOffice = visible ? current : null;
+    if (current && !visible) {
+      this.ctx.clear();
+    }
   }
 
   get welcomeName(): string {
@@ -86,7 +113,8 @@ export class Header {
   private finishLogout() {
     this.token.clearSession();
     this.perm.clear();
-    this.ctx.setOffice(null);
+    // local only — the server keeps the office for the next login
+    this.ctx.clear();
     this.router.navigateByUrl('/login');
   }
 
