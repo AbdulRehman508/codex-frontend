@@ -178,3 +178,88 @@
 @media (max-width: 900px) {
     .stat-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ---- Thermal receipt (80mm roll) ----
+   Hidden on screen; the global @media print block reveals it. Monospace and
+   tight leading so it reads like a POS slip. */
+#printArea {
+    display: none;
+}
+
+.pos-receipt {
+    width: 68mm;
+    color: #000;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 11px;
+    line-height: 1.35;
+
+    .pos-head {
+        text-align: center;
+
+        h1 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 2px;
+            text-transform: uppercase;
+        }
+
+        p {
+            margin: 0;
+            font-size: 10px;
+        }
+    }
+
+    .pos-sep {
+        border-top: 1px dashed #000;
+        margin: 6px 0;
+    }
+
+    .pos-meta div,
+    .pos-totals div {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .pos-item {
+        margin-bottom: 4px;
+
+        // a long product name wraps onto a second line, then ellipsises
+        .pos-item-name {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+        }
+
+        // qty x unit price and the line total always stay on one row
+        .pos-item-calc {
+            display: flex;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            gap: 6px;
+            padding-left: 8px;
+            white-space: nowrap;
+
+            span:last-child {
+                flex-shrink: 0;
+            }
+        }
+    }
+
+    .pos-grand {
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 4px;
+        padding-top: 4px;
+        border-top: 1px solid #000;
+    }
+
+    .pos-foot {
+        margin: 6px 0 0;
+        text-align: center;
+        font-size: 10px;
+    }
+}

@@ -10,7 +10,7 @@
 
     <!-- Stat chips -->
     <div class="stat-grid">
-        @for (s of stats; track s.label) {
+        @for (s of stats(); track s.label) {
         <div class="stat-card">
             <div class="stat-icon" [ngClass]="s.tone">
                 <i [class]="s.icon"></i>
@@ -27,16 +27,19 @@
     <div class="top-box">
         <button class="_outline-btn" (click)="clearSearch()">Reset</button>
         <div class="position-relative">
-            <input type="text" [(ngModel)]="searchTerm" name="sales-search"
-                class="_input-icon w-200 custom-placeholder" placeholder="Search" />
+            <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="sales-search"
+                class="_input-icon w-200 custom-placeholder" placeholder="Search invoice / customer" />
             <i class="pi pi-search _search-icon f-14"></i>
             @if (searchTerm) {
-            <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''"></i>
+            <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
             }
         </div>
-        <button class="_outline-btn" (click)="newSale()">New Sale</button>
+        @if (perm.can(module, 'create')) {
+        <button class="_outline-btn" [disabled]="!hasOffice()" (click)="newSale()"
+            [title]="hasOffice() ? 'Start a new sale' : 'Select an office in the header first'">New Sale</button>
+        }
     </div>
-    
+
 
     <!-- Sales table -->
     <div class="panel">
@@ -44,45 +47,126 @@
             <table class="sales-table">
                 <thead>
                     <tr>
-                        <th>Invoice</th>
-                        <th>Date</th>
-                        <th>Customer</th>
-                        <th>Items</th>
+                        <th class="cursor-pointer" (click)="changeSort('invoice_no')">Invoice</th>
+                        <th class="cursor-pointer" (click)="changeSort('created_at')">Date</th>
+                        <th class="cursor-pointer" (click)="changeSort('customer_name')">Customer</th>
+                        <th class="cursor-pointer" (click)="changeSort('items_count')">Items</th>
                         <th>Payment</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th class="cursor-pointer" (click)="changeSort('total')">Amount</th>
+                        <th class="cursor-pointer" (click)="changeSort('status')">Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @for (s of filteredSales; track s.invoice) {
+                    @if (loading()) {
+                    <tr><td colspan="8" class="empty">Loading...</td></tr>
+                    } @else if (!hasOffice()) {
+                    <tr><td colspan="8" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
+                    } @else if (rows().length === 0) {
+                    <tr><td colspan="8" class="empty">No sales found.</td></tr>
+                    } @else {
+                    @for (s of rows(); track s.id) {
                     <tr>
-                        <td class="invoice">{{ s.invoice }}</td>
-                        <td>{{ s.date }}</td>
-                        <td>{{ s.customer }}</td>
-                        <td>{{ s.items }}</td>
-                        <td>{{ s.payment }}</td>
-                        <td class="amount">{{ s.amount }}</td>
+                        <td class="invoice">{{ s.invoice_no }}</td>
+                        <td>{{ s.created_at | date: 'yyyy-MM-dd HH:mm' }}</td>
+                        <td>{{ s.customer_name }}</td>
+                        <td>{{ s.items_count }}</td>
+                        <td class="text-capitalize">{{ s.payment_method }}</td>
+                        <td class="amount">{{ s.total | number: '1.2-2' }}</td>
                         <td>
-                            <span class="badge" [ngClass]="s.status.toLowerCase()">{{ s.status }}</span>
+                            <span class="badge" [ngClass]="s.status">{{ s.status }}</span>
                         </td>
                         <td>
+                            <button class="ns-edit-btn" (click)="print(s)" title="Print receipt">
+                                <i class="pi pi-print"></i>
+                            </button>
+                            @if (perm.can(module, 'edit')) {
                             <button class="ns-edit-btn" (click)="editSale(s)" title="Edit order">
                                 <i class="pi pi-pencil"></i>
                             </button>
+                            @if (s.status !== 'refunded') {
+                            <button class="ns-edit-btn" (click)="refund(s)" title="Refund (returns stock)">
+                                <i class="pi pi-replay"></i>
+                            </button>
+                            }
+                            }
+                            @if (perm.can(module, 'delete')) {
+                            <button class="ns-edit-btn" (click)="deleteSale(s)" title="Delete">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                            }
                         </td>
                     </tr>
-                    } @empty {
-                    <tr>
-                        <td colspan="8" class="empty">No sales found.</td>
-                    </tr>
+                    }
                     }
                 </tbody>
             </table>
         </div>
+
+        @if (!loading() && total() > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <span class="f-14">Total: {{ total() }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            </div>
+        </div>
+        }
     </div>
 
 </div>
 
 <app-new-sale [open]="showNewSale()" (closed)="showNewSale.set(false)"
-    (saved)="onOrderSaved($event)"></app-new-sale>
+    (saved)="onOrderSaved()"></app-new-sale>
+
+<!-- Thermal receipt (80mm roll): hidden on screen, the only thing print shows -->
+@if (printSaleData(); as sale) {
+<div id="printArea" class="pos-receipt">
+
+    <div class="pos-head">
+        <h1>{{ sale.office_name || 'Sales Receipt' }}</h1>
+        @if (sale.office_address) { <p>{{ sale.office_address }}</p> }
+        @if (sale.office_mobile_no) { <p>{{ sale.office_mobile_no }}</p> }
+    </div>
+
+    <div class="pos-sep"></div>
+
+    <div class="pos-meta">
+        <div><span>Invoice</span><span>{{ sale.invoice_no }}</span></div>
+        <div><span>Date</span><span>{{ sale.created_at | date: 'dd-MM-yyyy HH:mm' }}</span></div>
+        <div><span>Customer</span><span>{{ sale.customer_name }}</span></div>
+        <div><span>Payment</span><span class="text-capitalize">{{ sale.payment_method }}</span></div>
+        @if (sale.status !== 'completed') {
+        <div><span>Status</span><span class="text-capitalize">{{ sale.status }}</span></div>
+        }
+    </div>
+
+    <div class="pos-sep"></div>
+
+    @for (l of sale.lines; track l.product_id) {
+    <div class="pos-item">
+        <div class="pos-item-name">{{ l.name }}</div>
+        <div class="pos-item-calc">
+            <span>{{ l.quantity }} x {{ l.price | number: '1.2-2' }}</span>
+            <span>{{ l.total | number: '1.2-2' }}</span>
+        </div>
+    </div>
+    }
+
+    <div class="pos-sep"></div>
+
+    <div class="pos-totals">
+        <div><span>Items</span><span>{{ sale.items_count }}</span></div>
+        <div><span>Subtotal</span><span>{{ sale.subtotal | number: '1.2-2' }}</span></div>
+        @if (sale.discount > 0) {
+        <div><span>Discount</span><span>-{{ sale.discount | number: '1.2-2' }}</span></div>
+        }
+        <div class="pos-grand"><span>TOTAL</span><span>{{ sale.total | number: '1.2-2' }}</span></div>
+    </div>
+
+    <div class="pos-sep"></div>
+
+    <p class="pos-foot">Thank you for your purchase!</p>
+</div>
+}
