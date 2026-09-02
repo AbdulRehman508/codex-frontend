@@ -31,7 +31,7 @@
             <div class="form-group">
                 <label>Customer</label>
                 <input type="text" [(ngModel)]="tab.customer" name="customer-{{ tab.id }}"
-                    placeholder="Customer name" />
+                    placeholder="Walk-in" />
             </div>
             <div class="form-group">
                 <label>Payment</label>
@@ -51,17 +51,51 @@
                 <span class="col-act"></span>
             </div>
 
-            @for (line of tab.lines; track $index) {
+            @for (line of tab.lines; track $index; let i = $index) {
             <div class="ns-line">
-                <input class="col-prod" type="text" [(ngModel)]="line.product" name="prod-{{ tab.id }}-{{ $index }}"
-                    placeholder="Product name" />
+                <!-- product typeahead: pick from the suggestions to bind a real product -->
+                <div class="col-prod ns-typeahead">
+                    <input type="text" [(ngModel)]="line.product" name="prod-{{ tab.id }}-{{ i }}"
+                        placeholder="Type a product name" autocomplete="off"
+                        [class.ns-unbound]="line.product.trim() && !line.product_id"
+                        (input)="onProductInput(i, line.product)"
+                        (focus)="onProductInput(i, line.product)" (blur)="onProductBlur()" />
+                    @if (line.product_id) {
+                    <span class="ns-picked" title="Product linked">
+                        <i class="pi pi-check-circle"></i> {{ line.available }} in stock
+                    </span>
+                    }
+
+                    @if (openSuggestFor() === i) {
+                    <div class="ns-suggest">
+                        @if (searching()) {
+                        <div class="ns-suggest-empty">Searching...</div>
+                        } @else if (suggestions().length === 0) {
+                        <div class="ns-suggest-empty">No matching product</div>
+                        } @else {
+                        @for (p of suggestions(); track p.id) {
+                        <div class="ns-suggest-item" (mousedown)="pickProduct(i, p)">
+                            <span class="ns-suggest-name">{{ p.name }}</span>
+                            <span class="ns-suggest-meta">
+                                {{ p.price | number: '1.2-2' }} · {{ p.quantity }} in stock
+                            </span>
+                        </div>
+                        }
+                        }
+                    </div>
+                    }
+                </div>
+
                 <input class="col-qty" type="number" min="1" [(ngModel)]="line.qty"
-                    name="qty-{{ tab.id }}-{{ $index }}" />
-                <input class="col-price" type="number" min="0" [(ngModel)]="line.price"
-                    name="price-{{ tab.id }}-{{ $index }}" />
+                    name="qty-{{ tab.id }}-{{ i }}" [class.ns-over]="overStock(line)" />
+                <input class="col-price" type="number" min="0" step="0.01" [(ngModel)]="line.price"
+                    name="price-{{ tab.id }}-{{ i }}" />
                 <span class="col-total">{{ lineTotal(line) | number:'1.2-2' }}</span>
-                <i class="pi pi-trash col-act ns-line-del" (click)="removeLine($index)"></i>
+                <i class="pi pi-trash col-act ns-line-del" (click)="removeLine(i)"></i>
             </div>
+            @if (overStock(line)) {
+            <p class="ns-line-warn">Only {{ line.available }} of "{{ line.product }}" left in stock.</p>
+            }
             }
 
             <button class="ns-add-line" (click)="addLine()">
@@ -74,11 +108,13 @@
     <div class="ns-footer">
         <div class="ns-total">
             <span>Total</span>
-            <strong>{{ orderTotal(tab) | currency:'USD' }}</strong>
+            <strong>{{ orderTotal(tab) | number:'1.2-2' }}</strong>
         </div>
         <div class="ns-actions">
             <button class="_outline-btn" (click)="closeTab(tab.id)">Cancel</button>
-            <button class="_primary-btn" (click)="saveOrder()">Save Order</button>
+            <button class="_primary-btn" [disabled]="saving()" (click)="saveOrder()">
+                {{ saving() ? 'Saving...' : 'Save Order' }}
+            </button>
         </div>
     </div>
     }

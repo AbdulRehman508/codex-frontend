@@ -3,3 +3,39 @@
 
 @use "../public/assets/scss/index";
 @use "primeicons/primeicons.css";
+
+/* ---- Thermal receipt printing ----
+   Only #printArea reaches the paper, on an 80mm roll whose height grows with
+   the number of lines sold (no fixed page, no blank tail). */
+@media print {
+    @page {
+        size: 80mm auto;
+        // wider side margins so nothing sits on the paper edge
+        margin: 4mm 6mm;
+    }
+
+    html,
+    body {
+        width: 68mm;
+        margin: 0;
+        padding: 0;
+        background: #fff;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    #printArea,
+    #printArea * {
+        visibility: visible !important;
+    }
+
+    #printArea {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 68mm;
+    }
+}

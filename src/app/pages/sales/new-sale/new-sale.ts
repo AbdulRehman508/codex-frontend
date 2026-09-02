@@ -1,23 +1,25 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output, Input, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { MessageService } from 'primeng/api';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
+import { OfficeContextService } from '../../../core/services/office-context.service';
+import { ProductApiService } from '../../product-list/product.api';
+import { ProductListRow } from '../../product-list/product.model';
+import { SalesApiService } from '../sales.api';
+import { CreateSaleDto, PaymentMethod, Sale } from '../sales.model';
+
+/** A line being edited in a tab. `product_id` is what actually gets saved. */
 export interface OrderLine {
+  product_id: string | null;
   product: string;
   qty: number;
   price: number;
-}
-
-export type PaymentMethod = 'Cash' | 'Online';
-
-export interface OrderPayload {
-  ref?: string;            // invoice ref when editing an existing sale
-  customer: string;
-  payment: PaymentMethod;
-  lines: OrderLine[];
-  items: number;
-  total: number;
+  /** units in stock for the picked product — drives the over-sell warning */
+  available: number | null;
 }
 
 interface OrderTab {
@@ -26,7 +28,12 @@ interface OrderTab {
   customer: string;
   payment: PaymentMethod;
   lines: OrderLine[];
-  editRef?: string;        // invoice ref if this tab edits an existing sale
+  editId?: string;         // sale id when editing an existing sale
+  editRef?: string;        // invoice no shown on the tab while editing
+}
+
+function emptyLine(): OrderLine {
+  return { product_id: null, product: '', qty: 1, price: 0, available: null };
 }
 
 @Component({
@@ -36,6 +43,10 @@ interface OrderTab {
   styleUrl: './new-sale.scss',
 })
 export class NewSale {
+  private api = inject(SalesApiService);
+  private productApi = inject(ProductApiService);
+  private ctx = inject(OfficeContextService);
+  private toast = inject(MessageService);
 
   @Input() set open(value: boolean) {
     this._open.set(value);
@@ -48,20 +59,58 @@ export class NewSale {
   }
 
   @Output() closed = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<OrderPayload>();
+  /** emitted after the sale is stored, so the parent can refresh + print */
+  @Output() saved = new EventEmitter<Sale>();
 
   _open = signal(false);
   tabs = signal<OrderTab[]>([]);
   activeId = signal<number | null>(null);
+  saving = signal(false);
   private _idSeq = 0;
 
+  // ---- product typeahead ----
+  suggestions = signal<ProductListRow[]>([]);
+  /** index of the line whose suggestion list is open (-1 = none) */
+  openSuggestFor = signal(-1);
+  searching = signal(false);
+  private search$ = new Subject<string>();
+
   paymentOptions: { label: string; value: PaymentMethod }[] = [
-    { label: 'Cash', value: 'Cash' },
-    { label: 'Online', value: 'Online' },
+    { label: 'Cash', value: 'cash' },
+    { label: 'Online', value: 'online' },
   ];
 
+  constructor() {
+    this.search$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((term) => {
+          this.searching.set(true);
+          return this.productApi.listProducts({
+            office_id: this.ctx.selectedOfficeId() ?? undefined,
+            search: term,
+            status: 'active',
+            limit: 8,
+            sort: 'name',
+            order: 'asc',
+          });
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.suggestions.set(res.data);
+          this.searching.set(false);
+        },
+        error: () => {
+          this.suggestions.set([]);
+          this.searching.set(false);
+        },
+      });
+  }
+
   get activeTab(): OrderTab | undefined {
-    return this.tabs().find(t => t.id === this.activeId());
+    return this.tabs().find((t) => t.id === this.activeId());
   }
 
   tabTitle(tab: OrderTab): string {
@@ -70,7 +119,7 @@ export class NewSale {
 
   /** smallest positive number not currently used by an open tab */
   private nextNum(): number {
-    const used = new Set(this.tabs().filter(t => !t.editRef).map(t => t.num));
+    const used = new Set(this.tabs().filter((t) => !t.editRef).map((t) => t.num));
     let n = 1;
     while (used.has(n)) n++;
     return n;
@@ -81,18 +130,17 @@ export class NewSale {
       id: ++this._idSeq,
       num: this.nextNum(),
       customer: '',
-      payment: 'Cash',
-      lines: [{ product: '', qty: 1, price: 0 }],
+      payment: 'cash',
+      lines: [emptyLine()],
     };
-    this.tabs.update(list => [...list, tab]);
+    this.tabs.update((list) => [...list, tab]);
     this.activeId.set(tab.id);
   }
 
-  /** open popup and load an existing sale into a tab for editing */
-  loadOrder(payload: OrderPayload) {
+  /** open the popup with an existing sale loaded into a tab for editing */
+  loadOrder(sale: Sale) {
     this._open.set(true);
-    // already open in a tab? just focus it
-    const existing = this.tabs().find(t => t.editRef && t.editRef === payload.ref);
+    const existing = this.tabs().find((t) => t.editId === sale.id);
     if (existing) {
       this.activeId.set(existing.id);
       return;
@@ -100,22 +148,33 @@ export class NewSale {
     const tab: OrderTab = {
       id: ++this._idSeq,
       num: 0,
-      customer: payload.customer,
-      payment: payload.payment,
-      lines: payload.lines.length ? payload.lines.map(l => ({ ...l })) : [{ product: '', qty: 1, price: 0 }],
-      editRef: payload.ref,
+      customer: sale.customer_name,
+      payment: sale.payment_method,
+      lines: sale.lines.length
+        ? sale.lines.map((l) => ({
+            product_id: l.product_id,
+            product: l.name,
+            qty: l.quantity,
+            price: l.price,
+            available: null,
+          }))
+        : [emptyLine()],
+      editId: sale.id,
+      editRef: sale.invoice_no,
     };
-    this.tabs.update(list => [...list, tab]);
+    this.tabs.update((list) => [...list, tab]);
     this.activeId.set(tab.id);
   }
 
   selectTab(id: number) {
     this.activeId.set(id);
+    this.closeSuggestions();
   }
 
   closeTab(id: number, event?: Event) {
     event?.stopPropagation();
-    const remaining = this.tabs().filter(t => t.id !== id);
+    this.closeSuggestions();
+    const remaining = this.tabs().filter((t) => t.id !== id);
     if (remaining.length === 0) {
       this.closePopup();
       return;
@@ -131,14 +190,17 @@ export class NewSale {
     this.tabs.set([]);
     this.activeId.set(null);
     this._idSeq = 0;
+    this.closeSuggestions();
     this.closed.emit();
   }
+
+  // ---- lines ----
 
   addLine() {
     const tab = this.activeTab;
     if (!tab) return;
-    tab.lines.push({ product: '', qty: 1, price: 0 });
-    this.tabs.update(list => [...list]);
+    tab.lines.push(emptyLine());
+    this.tabs.update((list) => [...list]);
   }
 
   removeLine(index: number) {
@@ -146,9 +208,10 @@ export class NewSale {
     if (!tab) return;
     tab.lines.splice(index, 1);
     if (tab.lines.length === 0) {
-      tab.lines.push({ product: '', qty: 1, price: 0 });
+      tab.lines.push(emptyLine());
     }
-    this.tabs.update(list => [...list]);
+    this.closeSuggestions();
+    this.tabs.update((list) => [...list]);
   }
 
   lineTotal(line: OrderLine): number {
@@ -160,18 +223,107 @@ export class NewSale {
     return tab.lines.reduce((sum, l) => sum + this.lineTotal(l), 0);
   }
 
+  /** picked more units than the product has left */
+  overStock(line: OrderLine): boolean {
+    return line.available !== null && line.qty > line.available;
+  }
+
+  // ---- product typeahead ----
+
+  onProductInput(index: number, term: string) {
+    const tab = this.activeTab;
+    const line = tab?.lines[index];
+    if (!line) return;
+    // typing again detaches the line from the previously picked product
+    line.product_id = null;
+    line.available = null;
+    this.openSuggestFor.set(index);
+    if (!term.trim()) {
+      this.suggestions.set([]);
+      return;
+    }
+    this.search$.next(term.trim());
+  }
+
+  pickProduct(index: number, product: ProductListRow) {
+    const tab = this.activeTab;
+    const line = tab?.lines[index];
+    if (!line) return;
+    line.product_id = product.id;
+    line.product = product.name;
+    line.price = product.price;
+    line.available = product.quantity;
+    if (line.qty < 1) line.qty = 1;
+    this.closeSuggestions();
+    this.tabs.update((list) => [...list]);
+  }
+
+  /** delayed so a click on a suggestion still registers before it hides */
+  onProductBlur() {
+    setTimeout(() => this.closeSuggestions(), 150);
+  }
+
+  private closeSuggestions() {
+    this.openSuggestFor.set(-1);
+    this.suggestions.set([]);
+  }
+
+  // ---- save ----
+
   saveOrder() {
     const tab = this.activeTab;
-    if (!tab) return;
-    const items = tab.lines.reduce((n, l) => n + (l.qty || 0), 0);
-    this.saved.emit({
-      ref: tab.editRef,
-      customer: tab.customer,
-      payment: tab.payment,
-      lines: tab.lines.map(l => ({ ...l })),
-      items,
-      total: this.orderTotal(tab),
+    if (!tab || this.saving()) return;
+
+    const officeId = this.ctx.selectedOfficeId();
+    if (!officeId) {
+      this.toast.add({ severity: 'warn', summary: 'No office', detail: 'Select an office in the header first' });
+      return;
+    }
+
+    const lines = tab.lines.filter((l) => l.product_id && l.qty > 0);
+    if (!lines.length) {
+      this.toast.add({ severity: 'warn', summary: 'No items', detail: 'Pick at least one product from the suggestions' });
+      return;
+    }
+    if (tab.lines.some((l) => l.product.trim() && !l.product_id)) {
+      this.toast.add({ severity: 'warn', summary: 'Unknown product', detail: 'Choose each product from the suggestion list' });
+      return;
+    }
+    const short = lines.find((l) => this.overStock(l));
+    if (short) {
+      this.toast.add({ severity: 'warn', summary: 'Not enough stock', detail: `"${short.product}" has only ${short.available} left` });
+      return;
+    }
+
+    const body: CreateSaleDto = {
+      office_id: officeId,
+      customer_name: tab.customer.trim() || 'Walk-in',
+      payment_method: tab.payment,
+      lines: lines.map((l) => ({
+        product_id: l.product_id!,
+        quantity: Number(l.qty),
+        price: Number(l.price),
+      })),
+    };
+
+    this.saving.set(true);
+    const req$ = tab.editId
+      ? this.api.updateSale(tab.editId, body)
+      : this.api.createSale(body);
+
+    req$.subscribe({
+      next: (sale) => {
+        this.saving.set(false);
+        this.toast.add({ severity: 'success', summary: 'Saved', detail: `${sale.invoice_no} saved` });
+        this.saved.emit(sale);
+        this.closeTab(tab.id);
+      },
+      error: (err) => {
+        this.saving.set(false);
+        const e = err?.error;
+        const detail = e?.errors?.lines?.[0] ?? e?.message ?? 'Save failed';
+        this.toast.add({ severity: 'error', summary: 'Error', detail });
+      },
     });
-    this.closeTab(tab.id);
   }
 }
