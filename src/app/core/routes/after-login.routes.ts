@@ -102,7 +102,7 @@ export const afterLoginRoutes: Routes = [
       {
         path: 'user-management',
         canActivate: [accessGuard],
-        data: { anyOf: ['customer', 'office', 'staff'] },
+        data: { anyOf: ['customer', 'staff'] },
         loadComponent: () =>
           import('../../pages/user-management/user-management').then((c) => c.UserManagement),
         children: [...userRoutes]

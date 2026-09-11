@@ -12,6 +12,8 @@ export interface Office {
   membership_type: MembershipType;
   licence_no?: string;
   approved: boolean;
+  /** head office — only admins may assign staff to it */
+  is_main: boolean;
   office_status: OfficeStatus;
   office_address: string;
   biography?: string;
@@ -27,6 +29,7 @@ export interface OfficeListRow {
   office_status: OfficeStatus;
   office_mobile_no: string;
   office_email: string;
+  is_main: boolean;
 }
 
 /** Body for POST / PUT. */
@@ -38,6 +41,7 @@ export interface CreateOfficeDto {
   membership_type: MembershipType;
   licence_no?: string;
   approved?: boolean;
+  is_main?: boolean;
   office_status?: OfficeStatus;
   office_address: string;
   biography?: string;

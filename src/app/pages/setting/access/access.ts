@@ -32,6 +32,22 @@ export class Access {
   // may the current user change this matrix? (view-only users see it read-only)
   canEdit = computed(() => this.perm.can('access_control', 'edit'));
 
+  /**
+   * Modules only an admin may hand out. Their rows stay in `accessList` (so a
+   * non-admin's save never wipes what an admin granted) but are hidden from
+   * the grid and skipped by the bulk toggles.
+   */
+  private readonly adminOnlyModules = ['office'];
+
+  private isVisibleModule(module: string): boolean {
+    return this.perm.isAdmin() || !this.adminOnlyModules.includes(module);
+  }
+
+  /** rows this user is allowed to see and change */
+  visibleList = computed(() =>
+    this.accessList().filter((p) => this.isVisibleModule(p.module)),
+  );
+
   // CRUD permission columns rendered in the matrix
   permissionColumns: { key: PermissionKey; label: string }[] = [
     { key: 'view', label: 'View' },
@@ -50,10 +66,10 @@ export class Access {
 
   hasOffice = computed(() => !!this.ctx.selectedOfficeId());
 
-  // Apply keyword filter over loaded permissions
+  // Apply keyword filter over the visible permissions
   filteredList = computed(() => {
     const keyword = this.searchByKeyword().trim().toLowerCase();
-    const list = this.accessList();
+    const list = this.visibleList();
     if (!keyword) return list;
     return list.filter((p) => p.module_label.toLowerCase().includes(keyword));
   });
@@ -153,6 +169,7 @@ export class Access {
 
   // CREATE/UPDATE — toggle a single permission cell
   togglePermission(module: string, key: PermissionKey) {
+    if (!this.isVisibleModule(module)) return;
     this.accessList.update((list) =>
       list.map((p) => (p.module === module ? { ...p, [key]: !p[key] } : p)),
     );
@@ -164,6 +181,7 @@ export class Access {
   }
 
   toggleRow(module: string, checked: boolean) {
+    if (!this.isVisibleModule(module)) return;
     this.accessList.update((list) =>
       list.map((p) =>
         p.module === module
@@ -175,14 +193,14 @@ export class Access {
 
   // Toggle full access for every module in a section
   isGroupAllChecked(group: string | null): boolean {
-    const rows = this.accessList().filter((p) => (p.module_group ?? null) === group);
+    const rows = this.visibleList().filter((p) => (p.module_group ?? null) === group);
     return rows.length > 0 && rows.every((p) => this.isRowAllChecked(p));
   }
 
   toggleGroup(group: string | null, checked: boolean) {
     this.accessList.update((list) =>
       list.map((p) =>
-        (p.module_group ?? null) === group
+        (p.module_group ?? null) === group && this.isVisibleModule(p.module)
           ? { ...p, view: checked, create: checked, edit: checked, delete: checked }
           : p,
       ),
@@ -191,23 +209,31 @@ export class Access {
 
   // Toggle one permission across all modules
   isColumnAllChecked(key: PermissionKey): boolean {
-    const list = this.accessList();
+    const list = this.visibleList();
     return list.length > 0 && list.every((p) => p[key]);
   }
 
   toggleColumn(key: PermissionKey, checked: boolean) {
-    this.accessList.update((list) => list.map((p) => ({ ...p, [key]: checked })));
+    this.accessList.update((list) =>
+      list.map((p) =>
+        this.isVisibleModule(p.module) ? { ...p, [key]: checked } : p,
+      ),
+    );
   }
 
   // Master toggle — grant/revoke everything for the role
   isAllChecked(): boolean {
-    const list = this.accessList();
+    const list = this.visibleList();
     return list.length > 0 && list.every((p) => this.isRowAllChecked(p));
   }
 
   toggleAll(checked: boolean) {
     this.accessList.update((list) =>
-      list.map((p) => ({ ...p, view: checked, create: checked, edit: checked, delete: checked })),
+      list.map((p) =>
+        this.isVisibleModule(p.module)
+          ? { ...p, view: checked, create: checked, edit: checked, delete: checked }
+          : p,
+      ),
     );
   }
 
