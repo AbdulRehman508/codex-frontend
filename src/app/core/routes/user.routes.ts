@@ -29,28 +29,28 @@ export const userRoutes: Routes = [
     {
         path: 'office/add',
         canActivate: [accessGuard],
-        data: { module: 'office', action: 'create' },
+        data: { module: 'office', action: 'create', adminOnly: true },
         loadComponent: () =>
             import('../../pages/user-management/office/add-edit-office/add-edit-office').then((c) => c.AddEditOffice),
     },
     {
         path: 'office/edit/:id',
         canActivate: [accessGuard],
-        data: { module: 'office', action: 'edit' },
+        data: { module: 'office', action: 'edit', adminOnly: true },
         loadComponent: () =>
             import('../../pages/user-management/office/add-edit-office/add-edit-office').then((c) => c.AddEditOffice),
     },
     {
         path: 'office/view/:id',
         canActivate: [accessGuard],
-        data: { module: 'office' },
+        data: { module: 'office', adminOnly: true },
         loadComponent: () =>
             import('../../pages/user-management/office/office-detail/office-detail').then((c) => c.OfficeDetail),
     },
     {
         path: 'office',
         canActivate: [accessGuard],
-        data: { module: 'office' },
+        data: { module: 'office', adminOnly: true },
         loadComponent: () =>
             import('../../pages/user-management/office/office').then((c) => c.Office),
     },

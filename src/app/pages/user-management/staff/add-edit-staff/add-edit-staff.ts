@@ -96,9 +96,15 @@ export class AddEditStaff {
   }
 
   private loadOffices() {
-    // Admin sees every office; others only their assigned offices
+    // Admin sees every office; others only their assigned offices, and never
+    // the head office — staff there are an admin-only assignment
     this.officeApi.listOffices({ limit: 1000, sort: 'office_name', order: 'asc' }).subscribe({
-      next: (res) => this.officeList.set(this.token.filterOfficesForUser(res.data)),
+      next: (res) => {
+        const visible = this.token.filterOfficesForUser(res.data);
+        this.officeList.set(
+          this.token.isAdmin() ? visible : visible.filter((o) => !o.is_main),
+        );
+      },
       error: (err) => this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Failed to load offices' }),
     });
   }

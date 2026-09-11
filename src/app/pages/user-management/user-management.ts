@@ -10,6 +10,8 @@ interface TabItem {
   url: string;
   module: string;
   isExact?: boolean;
+  /** admins only, whatever the role's access matrix says */
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -26,12 +28,17 @@ export class UserManagement {
 
   private allTabs: TabItem[] = [
     { label: 'Customer', icon: this.ImageIcon.customer_icon, url: '/user-management/customer', module: 'customer' },
-    { label: 'Office', icon: this.ImageIcon.office_icon, url: '/user-management/office', module: 'office' },
+    { label: 'Office', icon: this.ImageIcon.office_icon, url: '/user-management/office', module: 'office', adminOnly: true },
     { label: 'Staff', icon: this.ImageIcon.staff_icon, url: '/user-management/staff', module: 'staff' },
   ];
 
   // only the tabs the current user may view (admins see all)
-  user_menu = computed(() => this.allTabs.filter((t) => this.perm.can(t.module)));
+  user_menu = computed(() =>
+    this.allTabs.filter((t) => {
+      if (t.adminOnly && !this.perm.isAdmin()) return false;
+      return this.perm.can(t.module);
+    }),
+  );
 
   ngOnInit() {
     // landed on the bare section — jump to the first tab the user can see
