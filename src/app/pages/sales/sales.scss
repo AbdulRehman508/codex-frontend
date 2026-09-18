@@ -29,7 +29,7 @@
 /* ---- Stat cards ---- */
 .stat-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
     gap: 16px;
 }
 
@@ -42,12 +42,6 @@
     align-items: center;
     gap: 14px;
     box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
-    transition: transform 200ms ease, box-shadow 200ms ease;
-
-    &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(26, 47, 69, 0.1);
-    }
 }
 
 .stat-icon {
@@ -79,7 +73,8 @@
 
 .stat-value {
     margin: 0;
-    font-size: 22px;
+    // the cash/online card carries two figures — let it shrink rather than clip
+    font-size: clamp(16px, 1.5vw, 22px);
     font-weight: 700;
     color: var(--black);
 }
@@ -262,4 +257,58 @@
         text-align: center;
         font-size: 10px;
     }
+}
+
+/* ---- Filter bar ---- */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 170px;
+
+    label {
+        font-size: 11px;
+        color: var(--lightDarkGray);
+    }
+
+}
+
+.filter-field.date-range {
+    min-width: 240px;
+}
+
+.badge.borrow {
+    background: rgba(245, 114, 0, 0.14);
+    color: var(--info);
+}
+
+/* the range picker renders its own input — match the other filter controls */
+:host ::ng-deep .filter-field p-datepicker .p-datepicker-input {
+    border: 1px solid var(--borderColor);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+}
+
+/* search sits with the other filters; reset closes the row on the right */
+.filter-field .position-relative input {
+    width: 100%;
+}
+
+.filter-reset {
+    // sits right after the last field, not pushed to the far edge
+    flex: 0 0 auto;
 }

@@ -102,3 +102,201 @@
     font-size: 12px;
     color: var(--secondary, #94a3b8);
 }
+
+/* ---- Outstanding borrow card ---- */
+.borrow-card {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--borderColor);
+    border-radius: 14px;
+    padding: 18px 20px 14px 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+    overflow: hidden;
+
+    // thin accent on the left instead of a loud coloured border
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--info);
+    }
+}
+
+.borrow-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.borrow-card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 114, 0, 0.12);
+    color: var(--info);
+    font-size: 17px;
+    flex-shrink: 0;
+}
+
+.borrow-card-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--black);
+}
+
+.borrow-card-sub {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--lightDarkGray);
+}
+
+/* borrow − pay = remaining, laid out like the sum it is */
+.borrow-calc {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 14px 18px;
+}
+
+.borrow-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 130px;
+}
+
+.borrow-stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--lightDarkGray);
+    margin: 0;
+}
+
+.borrow-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 38px;
+    color: var(--black);
+    transition: color 150ms ease;
+
+    &.owed { color: var(--info); }
+    &.cleared { color: var(--primary); }
+}
+
+.borrow-op {
+    font-size: 20px;
+    line-height: 38px;
+    color: var(--lightDarkGray);
+    user-select: none;
+}
+
+.borrow-pay {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1 1 220px;
+    max-width: 300px;
+}
+
+.borrow-pay-input {
+    display: flex;
+    align-items: center;
+    height: 38px;
+    border: 1px solid var(--borderColor);
+    border-radius: 10px;
+    padding: 3px 3px 3px 12px;
+    background: #fff;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+
+    &:focus-within {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(34, 146, 118, 0.12);
+    }
+
+    &.invalid {
+        border-color: var(--danger, #dc3545);
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+    }
+
+    input {
+        flex: 1;
+        min-width: 0;
+        border: none;
+        outline: none;
+        padding: 0;
+        font-size: 15px;
+        font-weight: 600;
+        background: transparent;
+        // hide the number spinners — they crowd the field
+        -moz-appearance: textfield;
+
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    }
+}
+
+.borrow-full {
+    border: none;
+    border-radius: 7px;
+    background: rgba(34, 146, 118, 0.1);
+    color: var(--primary);
+    font-size: 12px;
+    font-weight: 600;
+    height: 100%;
+    padding: 0 12px;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover { background: rgba(34, 146, 118, 0.18); }
+}
+
+.borrow-progress {
+    height: 6px;
+    border-radius: 99px;
+    background: var(--lightGrayBG);
+    margin-top: 16px;
+    overflow: hidden;
+}
+
+.borrow-progress-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: var(--primary);
+    transition: width 200ms ease;
+}
+
+.borrow-foot {
+    margin-top: 6px;
+    min-height: 18px;
+    font-size: 12px;
+}
+
+.borrow-hint { color: var(--lightDarkGray); }
+.borrow-error { color: var(--danger, #dc3545); }
+
+.borrow-done {
+    color: var(--primary);
+    font-weight: 600;
+
+    i { font-size: 12px; margin-right: 2px; }
+}
+
+// narrow screens: stack the sum, drop the operators
+@media (max-width: 576px) {
+    .borrow-op { display: none; }
+    .borrow-pay { max-width: none; }
+}

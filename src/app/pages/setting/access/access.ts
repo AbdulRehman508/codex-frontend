@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -95,11 +95,15 @@ export class Access {
     let first = true;
     effect(() => {
       this.ctx.selectedOfficeId();
-      if (first) {
-        first = false;
-        return;
-      }
-      this.loadRoles();
+      // untracked: loading the matrix reads and then writes the same signals,
+      // which would otherwise re-trigger this effect forever
+      untracked(() => {
+        if (first) {
+          first = false;
+          return;
+        }
+        this.loadRoles();
+      });
     });
   }
 

@@ -16,13 +16,21 @@ export interface Sale {
   id: string;
   office_id: string;
   invoice_no: string;
+  /** saved customer this sale is billed to; null for a typed walk-in */
+  customer_id: string | null;
   customer_name: string;
+  customer_mobile: string | null;
+  is_borrow: boolean;
   payment_method: PaymentMethod;
   lines: SaleLine[];
   items_count: number;
   subtotal: number;
   discount: number;
   total: number;
+  /** handed over at the counter */
+  paid_amount: number;
+  /** total - paid; also added to the customer's running balance */
+  borrow_amount: number;
   status: SaleStatus;
   sold_by: string | null;
   created_at: string;
@@ -41,6 +49,9 @@ export interface SaleListRow {
   items_count: number;
   payment_method: PaymentMethod;
   total: number;
+  paid_amount: number;
+  borrow_amount: number;
+  is_borrow: boolean;
   status: SaleStatus;
   created_at: string | null;
 }
@@ -48,7 +59,14 @@ export interface SaleListRow {
 /** Body for POST / PUT. `price` per line is optional (product price wins). */
 export interface CreateSaleDto {
   office_id: string;
+  /** picked from the customer list; omit for a plain walk-in */
+  customer_id?: string | null;
   customer_name?: string;
+  /** required when borrowing without a picked customer */
+  customer_mobile?: string | null;
+  is_borrow?: boolean;
+  /** paid now; the rest becomes the customer's borrow */
+  paid_amount?: number;
   payment_method?: PaymentMethod;
   lines: { product_id: string; quantity: number; price?: number }[];
   discount?: number;
@@ -58,9 +76,17 @@ export interface CreateSaleDto {
 export type UpdateSaleDto = Partial<CreateSaleDto>;
 
 export interface SaleStats {
+  /** takings for the filtered range (today when no date filter is given) */
   today_total: number;
   transactions: number;
   average_order: number;
+  /** still owed across the filtered sales */
+  borrow_total: number;
+  paid_total: number;
+  cash_total: number;
+  online_total: number;
+  /** true when the numbers cover today only */
+  is_today: boolean;
 }
 
 export interface SaleListQuery {
