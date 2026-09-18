@@ -3,134 +3,291 @@
     <!-- Header -->
     <div class="dash-head">
         <div>
-            <h2>Welcome back 👋</h2>
-            <p>Here's what's happening in your shop today.</p>
+            <h2>Welcome back{{ firstName ? ', ' + firstName : '' }} 👋</h2>
+            <p>Here's what's happening in your shop.</p>
         </div>
-        <button class="period-btn">
-            <i class="pi pi-calendar"></i> This Week
-        </button>
     </div>
 
-    <!-- Stat cards -->
-    <div class="stat-grid">
-        @for (s of stats; track s.label) {
-        <div class="stat-card">
-            <div class="stat-icon" [ngClass]="s.tone">
-                <i [class]="s.icon"></i>
-            </div>
-            <div class="stat-body">
-                <p class="stat-label">{{ s.label }}</p>
-                <h3 class="stat-value">{{ s.value }}</h3>
-                <span class="stat-delta" [ngClass]="s.delta >= 0 ? 'up' : 'down'">
-                    <i class="pi" [ngClass]="s.delta >= 0 ? 'pi-arrow-up-right' : 'pi-arrow-down-right'"></i>
-                    {{ s.delta >= 0 ? '+' : '' }}{{ s.delta }}%
-                </span>
-            </div>
-        </div>
+    <!-- One filter row, above everything it scopes -->
+    <div class="period-row" role="tablist" aria-label="Period">
+        @for (p of periods; track p.key) {
+        <button type="button" class="period-chip" role="tab" [class.active]="period() === p.key"
+            [attr.aria-selected]="period() === p.key" (click)="setPeriod(p.key)">
+            {{ p.label }}
+        </button>
         }
     </div>
 
-    <!-- Charts row -->
-    <div class="chart-row">
+    @if (!hasOffice()) {
+    <div class="panel empty-panel">
+        <i class="pi pi-building"></i>
+        <p>Pick an office from the "Select Office" dropdown in the top bar to see its numbers.</p>
+    </div>
+    } @else if (!data()) {
+    <div class="panel empty-panel">
+        <p>{{ loading() ? 'Loading dashboard...' : 'No data yet.' }}</p>
+    </div>
+    } @else {
+    <!-- refetch keeps the previous frame, dimmed, instead of flashing a skeleton -->
+    <div class="dash-body" [class.refetching]="loading()">
 
-        <!-- Sales bar chart -->
-        <div class="panel sales-panel">
-            <div class="panel-head">
-                <h4>Sales Overview</h4>
-                <span class="panel-sub">Last 7 days</span>
-            </div>
-            <div class="bar-chart">
-                @for (b of salesWeek; track b.day) {
-                <div class="bar-col">
-                    <div class="bar-track">
-                        <div class="bar-fill" [style.height.%]="b.value"></div>
-                    </div>
-                    <span class="bar-label">{{ b.day }}</span>
+        <!-- KPI tiles -->
+        <div class="stat-grid">
+            @for (s of stats(); track s.label) {
+            <div class="stat-card">
+                <div class="stat-icon" [ngClass]="s.tone">
+                    <i [class]="s.icon"></i>
                 </div>
+                <div class="stat-body">
+                    <p class="stat-label">{{ s.label }}</p>
+                    <h3 class="stat-value" [title]="s.title">{{ s.value }}</h3>
+                    @if (s.note) {
+                    <span class="stat-note">{{ s.note }}</span>
+                    } @else if (s.delta === null) {
+                    <!-- previous window was 0: a % change would be infinite -->
+                    <span class="stat-delta flat">no earlier data to compare</span>
+                    } @else {
+                    <span class="stat-delta" [ngClass]="deltaTone(s)">
+                        @if (s.delta !== 0) {
+                        <i class="pi" [ngClass]="s.delta > 0 ? 'pi-arrow-up-right' : 'pi-arrow-down-right'"></i>
+                        }
+                        {{ s.delta > 0 ? '+' : '' }}{{ s.delta }}%
+                        <span class="stat-vs">{{ comparisonLabel() }}</span>
+                    </span>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- Charts row -->
+        <div class="chart-row">
+
+            <!-- Sales trend: one series, so the title names it and no legend box -->
+            <div class="panel sales-panel">
+                <div class="panel-head">
+                    <div>
+                        <h4>Sales Overview</h4>
+                        <span class="panel-sub">{{ money(periodTotal()) }} in total</span>
+                    </div>
+                    <button type="button" class="link-btn" (click)="showTable.set(!showTable())">
+                        <i class="pi" [ngClass]="showTable() ? 'pi-chart-bar' : 'pi-table'"></i>
+                        {{ showTable() ? 'Chart' : 'Table' }}
+                    </button>
+                </div>
+
+                @if (!showTable()) {
+                <div class="trend">
+                    <div class="y-axis">
+                        @for (t of yTicks(); track $index) {
+                        <span [style.bottom.%]="(t / yMax()) * 100">{{ compact(t) }}</span>
+                        }
+                    </div>
+
+                    <div class="plot">
+                        @for (t of yTicks(); track $index) {
+                        <div class="grid-line" [style.bottom.%]="(t / yMax()) * 100"></div>
+                        }
+
+                        <div class="columns">
+                            @for (p of series(); track p.key; let i = $index) {
+                            <!-- the whole band is the hit target, not just the painted bar -->
+                            <div class="col-band" tabindex="0" [class.active]="hoverIndex() === i"
+                                [attr.aria-label]="p.title + ': ' + money(p.revenue)"
+                                (mouseenter)="hoverIndex.set(i)" (mouseleave)="hoverIndex.set(null)"
+                                (focus)="hoverIndex.set(i)" (blur)="hoverIndex.set(null)">
+                                @if (p.revenue > 0) {
+                                <div class="col-bar" [style.height.%]="barHeight(p)"></div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        @if (hovered(); as h) {
+                        <div class="chart-tip" [style.left.%]="tooltipLeft()">
+                            <strong>{{ money(h.revenue) }}</strong>
+                            <span>{{ h.orders }} {{ h.orders === 1 ? 'order' : 'orders' }}</span>
+                            <span class="tip-title">{{ h.title }}</span>
+                        </div>
+                        }
+
+                        @if (!hasSales()) {
+                        <div class="chart-empty">No sales in this period</div>
+                        }
+                    </div>
+
+                    <div class="x-axis">
+                        @for (p of series(); track p.key; let i = $index) {
+                        <span class="x-tick">{{ showLabel(i) ? p.label : '' }}</span>
+                        }
+                    </div>
+                </div>
+                } @else {
+                <!-- table twin of the chart: every value readable without hovering -->
+                <div class="table-wrap trend-table">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th class="num">Orders</th>
+                                <th class="num">Sales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (p of series(); track p.key) {
+                            <tr>
+                                <td>{{ p.title }}</td>
+                                <td class="num">{{ p.orders }}</td>
+                                <td class="num">{{ money(p.revenue) }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                }
+            </div>
+
+            <!-- Payment mix: part-to-whole of two, as a split bar -->
+            <div class="panel mix-panel">
+                <div class="panel-head">
+                    <div>
+                        <h4>Payment Mix</h4>
+                        <span class="panel-sub">Share of sales by payment</span>
+                    </div>
+                </div>
+
+                @if (mix().total > 0) {
+                <div class="mix-bar">
+                    @if (mix().cash > 0) {
+                    <div class="mix-seg" [style.width.%]="mix().cashPct" [style.background]="cashColor"
+                        [title]="'Cash: ' + money(mix().cash)"></div>
+                    }
+                    @if (mix().online > 0) {
+                    <div class="mix-seg" [style.width.%]="mix().onlinePct" [style.background]="onlineColor"
+                        [title]="'Online: ' + money(mix().online)"></div>
+                    }
+                </div>
+
+                <ul class="legend">
+                    <li>
+                        <span class="swatch" [style.background]="cashColor"></span>
+                        <span class="legend-name">Cash</span>
+                        <span class="legend-val">{{ money(mix().cash) }}</span>
+                        <span class="legend-pct">{{ mix().cashPct | number: '1.0-0' }}%</span>
+                    </li>
+                    <li>
+                        <span class="swatch" [style.background]="onlineColor"></span>
+                        <span class="legend-name">Online</span>
+                        <span class="legend-val">{{ money(mix().online) }}</span>
+                        <span class="legend-pct">{{ mix().onlinePct | number: '1.0-0' }}%</span>
+                    </li>
+                </ul>
+                } @else {
+                <p class="panel-empty">No sales in this period</p>
                 }
             </div>
         </div>
 
-        <!-- Category donut -->
-        <div class="panel donut-panel">
-            <div class="panel-head">
-                <h4>Sales by Category</h4>
+        <!-- Bottom row -->
+        <div class="bottom-row">
+
+            <!-- Recent orders -->
+            <div class="panel orders-panel">
+                <div class="panel-head">
+                    <h4>Recent Orders</h4>
+                    <a class="view-all" routerLink="/sales">View all</a>
+                </div>
+                @if (data()!.recent_orders.length) {
+                <div class="table-wrap">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Customer</th>
+                                <th class="num">Items</th>
+                                <th class="num">Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (o of data()!.recent_orders; track o.id) {
+                            <tr>
+                                <td class="order-id">{{ o.invoice_no }}</td>
+                                <td>{{ o.customer_name }}</td>
+                                <td class="num">{{ o.items_count }}</td>
+                                <td class="num order-total">{{ money(o.total) }}</td>
+                                <td><span class="badge" [ngClass]="o.status">{{ o.status }}</span></td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                } @else {
+                <p class="panel-empty">No orders in this period</p>
+                }
             </div>
-            <div class="donut-wrap">
-                <div class="donut" [style.background]="donutGradient">
-                    <div class="donut-hole">
-                        <span class="donut-total">100%</span>
-                        <span class="donut-cap">Total</span>
+
+            <!-- Top products: magnitude, one hue -->
+            <div class="panel products-panel">
+                <div class="panel-head">
+                    <div>
+                        <h4>Top Products</h4>
+                        <span class="panel-sub">By sales in this period</span>
                     </div>
                 </div>
-                <ul class="legend">
-                    @for (c of categories; track c.name) {
+                @if (topProducts().length) {
+                <ul class="product-list">
+                    @for (p of topProducts(); track p.product_id; let i = $index) {
                     <li>
-                        <span class="dot" [style.background]="c.color"></span>
-                        <span class="legend-name">{{ c.name }}</span>
-                        <span class="legend-val">{{ c.percent }}%</span>
+                        <span class="rank">{{ i + 1 }}</span>
+                        <div class="product-info">
+                            <div class="product-line">
+                                <p class="product-name" [title]="p.name">{{ p.name }}</p>
+                                <span class="product-rev">{{ money(p.revenue) }}</span>
+                            </div>
+                            <div class="product-track">
+                                <div class="product-fill" [style.width.%]="p.pct"></div>
+                            </div>
+                            <span class="product-sold">{{ p.quantity }} sold</span>
+                        </div>
                     </li>
                     }
                 </ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom row -->
-    <div class="bottom-row">
-
-        <!-- Recent orders -->
-        <div class="panel orders-panel">
-            <div class="panel-head">
-                <h4>Recent Orders</h4>
-                <a class="view-all">View all</a>
-            </div>
-            <div class="table-wrap">
-                <table class="orders-table">
-                    <thead>
-                        <tr>
-                            <th>Order</th>
-                            <th>Customer</th>
-                            <th>Items</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (o of recentOrders; track o.id) {
-                        <tr>
-                            <td class="order-id">{{ o.id }}</td>
-                            <td>{{ o.customer }}</td>
-                            <td>{{ o.items }}</td>
-                            <td class="order-total">{{ o.total }}</td>
-                            <td>
-                                <span class="badge" [ngClass]="o.status.toLowerCase()">{{ o.status }}</span>
-                            </td>
-                        </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Top products -->
-        <div class="panel products-panel">
-            <div class="panel-head">
-                <h4>Top Products</h4>
-            </div>
-            <ul class="product-list">
-                @for (p of topProducts; track p.name; let i = $index) {
-                <li>
-                    <span class="rank">{{ i + 1 }}</span>
-                    <div class="product-info">
-                        <p class="product-name">{{ p.name }}</p>
-                        <span class="product-sold">{{ p.sold }} sold</span>
-                    </div>
-                    <span class="product-rev">{{ p.revenue }}</span>
-                </li>
+                } @else {
+                <p class="panel-empty">No products sold in this period</p>
                 }
-            </ul>
+            </div>
+        </div>
+
+        <!-- Low stock: current state, independent of the period -->
+        <div class="panel stock-panel">
+            <div class="panel-head">
+                <div>
+                    <h4>Low Stock</h4>
+                    <span class="panel-sub">Active products with 5 or fewer left, right now</span>
+                </div>
+                <a class="view-all" routerLink="/product">Products</a>
+            </div>
+            @if (data()!.low_stock.length) {
+            <div class="stock-grid">
+                @for (s of data()!.low_stock; track s.id) {
+                <div class="stock-item">
+                    <div class="stock-info">
+                        <p class="product-name" [title]="s.name">{{ s.name }}</p>
+                        <span class="product-sold">{{ s.sku }}</span>
+                    </div>
+                    <!-- status carries a text label, never colour alone -->
+                    <span class="stock-badge" [class.out]="s.quantity === 0">
+                        <i class="pi" [ngClass]="s.quantity === 0 ? 'pi-times-circle' : 'pi-exclamation-triangle'"></i>
+                        {{ s.quantity === 0 ? 'Out of stock' : s.quantity + ' left' }}
+                    </span>
+                </div>
+                }
+            </div>
+            } @else {
+            <p class="panel-empty ok"><i class="pi pi-check-circle"></i> Every product is well stocked</p>
+            }
         </div>
     </div>
-
+    }
 </div>

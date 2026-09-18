@@ -28,12 +28,10 @@ export class SalesApiService {
       .pipe(map((res) => res.data));
   }
 
-  /** Today's takings / transaction count / average order. */
-  getStats(officeId?: string): Observable<SaleStats> {
+  /** Totals for the same filters the grid is showing. */
+  getStats(params: SaleListQuery = {}): Observable<SaleStats> {
     return this.api
-      .getAll<ApiSuccess<SaleStats>>(`${this.endpoint}/stats`, {
-        office_id: officeId,
-      })
+      .getAll<ApiSuccess<SaleStats>>(`${this.endpoint}/stats`, params)
       .pipe(map((res) => res.data));
   }
 

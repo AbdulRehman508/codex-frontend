@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { commonIcons } from '../../../core/icon-images/common-icon';
 import { OfficeContextService } from '../../../core/services/office-context.service';
 import { ConfirmService } from '../../../core/services/confirm.service';
@@ -38,14 +38,18 @@ export class Staff {
     let first = true;
     effect(() => {
       this.ctx.selectedOfficeId();
-      if (first) {
-        first = false;
-        return;
-      }
-      this.searchByRole = null;
-      this.page.set(1);
-      this.loadRoles();
-      this.getStaffList();
+      // untracked: the reload reads page/limit/sort and the response writes
+      // them back, which would otherwise re-trigger this effect forever
+      untracked(() => {
+        if (first) {
+          first = false;
+          return;
+        }
+        this.searchByRole = null;
+        this.page.set(1);
+        this.loadRoles();
+        this.getStaffList();
+      });
     });
   }
 

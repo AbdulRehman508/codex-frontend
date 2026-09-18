@@ -1,7 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  ViewChild,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageService } from 'primeng/api';
+import { DatePickerModule } from 'primeng/datepicker';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -10,7 +20,13 @@ import { OfficeContextService } from '../../core/services/office-context.service
 import { PermissionService } from '../../core/services/permission.service';
 import { NewSale } from './new-sale/new-sale';
 import { SalesApiService } from './sales.api';
-import { Sale, SaleListQuery, SaleListRow, SaleStatus } from './sales.model';
+import {
+  PaymentMethod,
+  Sale,
+  SaleListQuery,
+  SaleListRow,
+  SaleStatus,
+} from './sales.model';
 
 interface SaleStat {
   label: string;
@@ -21,7 +37,7 @@ interface SaleStat {
 
 @Component({
   selector: 'app-sales',
-  imports: [CommonModule, FormsModule, NewSale],
+  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule, NewSale],
   templateUrl: './sales.html',
   styleUrl: './sales.scss',
 })
@@ -39,16 +55,20 @@ export class Sales {
   @ViewChild(NewSale) newSalePopup!: NewSale;
 
   constructor() {
-    // reload when the header office changes (skip the initial run)
+    // reload when the header office changes (skip the initial run).
+    // The reload runs untracked: it reads page/limit/sort and the responses
+    // write them back, which would otherwise re-trigger this effect forever.
     let first = true;
     effect(() => {
       this.ctx.selectedOfficeId();
-      if (first) {
-        first = false;
-        return;
-      }
-      this.page.set(1);
-      this.loadAll();
+      untracked(() => {
+        if (first) {
+          first = false;
+          return;
+        }
+        this.page.set(1);
+        this.loadAll();
+      });
     });
   }
 
@@ -61,9 +81,24 @@ export class Sales {
   todayTotal = signal(0);
   transactions = signal(0);
   averageOrder = signal(0);
+  borrowTotal = signal(0);
+  cashTotal = signal(0);
+  onlineTotal = signal(0);
+  isToday = signal(true);
 
   searchTerm = '';
   statusFilter: SaleStatus | null = null;
+  paymentFilter: PaymentMethod | null = null;
+  /** PrimeNG range picker value: [from] or [from, to] */
+  dateRange: Date[] | null = null;
+  readonly today = new Date();
+  private dateFrom = '';
+  private dateTo = '';
+  statusList: SaleStatus[] = ['completed', 'pending', 'refunded'];
+  paymentList: { label: string; value: PaymentMethod }[] = [
+    { label: 'Cash', value: 'cash' },
+    { label: 'Online', value: 'online' },
+  ];
   sort = signal<SaleListQuery['sort']>('created_at');
   order = signal<'asc' | 'desc'>('desc');
   showNewSale = signal(false);
@@ -75,10 +110,34 @@ export class Sales {
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
 
   stats = computed<SaleStat[]>(() => [
-    { label: "Today's Sales", value: this.money(this.todayTotal()), icon: 'pi pi-dollar', tone: 'primary' },
+    {
+      label: this.isToday() ? "Today's Sales" : 'Filtered Sales',
+      value: this.money(this.todayTotal()),
+      icon: 'pi pi-dollar',
+      tone: 'primary',
+    },
     { label: 'Transactions', value: String(this.transactions()), icon: 'pi pi-receipt', tone: 'info' },
     { label: 'Avg. Order', value: this.money(this.averageOrder()), icon: 'pi pi-chart-line', tone: 'green' },
+    { label: 'Borrow Amount', value: this.money(this.borrowTotal()), icon: 'pi pi-wallet', tone: 'info' },
+    {
+      label: 'Cash / Online',
+      value: `${this.money(this.cashTotal())} / ${this.money(this.onlineTotal())}`,
+      icon: 'pi pi-credit-card',
+      tone: 'green',
+    },
   ]);
+
+  /** filters shared by the grid and the stat widgets */
+  private filters(officeId: string): SaleListQuery {
+    return {
+      search: this.searchTerm,
+      status: this.statusFilter ?? undefined,
+      payment_method: this.paymentFilter ?? undefined,
+      date_from: this.dateFrom || undefined,
+      date_to: this.dateTo || undefined,
+      office_id: officeId,
+    };
+  }
 
   ngOnInit() {
     this.search$
@@ -86,7 +145,7 @@ export class Sales {
       .subscribe((term) => {
         this.searchTerm = term;
         this.page.set(1);
-        this.getSales();
+        this.loadAll();
       });
     this.loadAll();
   }
@@ -108,11 +167,9 @@ export class Sales {
     this.loading.set(true);
     this.api
       .listSales({
+        ...this.filters(officeId),
         page: this.page(),
         limit: this.limit(),
-        search: this.searchTerm,
-        status: this.statusFilter ?? undefined,
-        office_id: officeId,
         sort: this.sort(),
         order: this.order(),
       })
@@ -137,13 +194,21 @@ export class Sales {
       this.todayTotal.set(0);
       this.transactions.set(0);
       this.averageOrder.set(0);
+      this.borrowTotal.set(0);
+      this.cashTotal.set(0);
+      this.onlineTotal.set(0);
       return;
     }
-    this.api.getStats(officeId).subscribe({
+    // same filters as the grid, so the widgets always match what is listed
+    this.api.getStats(this.filters(officeId)).subscribe({
       next: (s) => {
         this.todayTotal.set(s.today_total);
         this.transactions.set(s.transactions);
         this.averageOrder.set(s.average_order);
+        this.borrowTotal.set(s.borrow_total);
+        this.cashTotal.set(s.cash_total);
+        this.onlineTotal.set(s.online_total);
+        this.isToday.set(s.is_today);
       },
       error: () => {
         // chips are informational — a failure must not block the grid
@@ -155,18 +220,42 @@ export class Sales {
     this.search$.next(this.searchTerm);
   }
 
-  onStatusFilterChange() {
+  /** any dropdown / date change reloads both the grid and the widgets */
+  onFilterChange() {
     this.page.set(1);
-    this.getSales();
+    this.loadAll();
+  }
+
+  /**
+   * Range picker -> the API's date_from / date_to. Reload only once the range
+   * is complete (the picker emits after the first click too) or fully cleared.
+   */
+  onDateRangeChange() {
+    const [from, to] = this.dateRange ?? [];
+    if (from && !to) return; // half-picked range: wait for the second click
+    this.dateFrom = from ? this.asDate(from) : '';
+    this.dateTo = to ? this.asDate(to) : '';
+    this.onFilterChange();
+  }
+
+  /** local yyyy-MM-dd — toISOString() would shift the day by the UTC offset */
+  private asDate(d: Date): string {
+    const month = `${d.getMonth() + 1}`.padStart(2, '0');
+    const day = `${d.getDate()}`.padStart(2, '0');
+    return `${d.getFullYear()}-${month}-${day}`;
   }
 
   clearSearch() {
     this.searchTerm = '';
     this.statusFilter = null;
+    this.paymentFilter = null;
+    this.dateRange = null;
+    this.dateFrom = '';
+    this.dateTo = '';
     this.sort.set('created_at');
     this.order.set('desc');
     this.page.set(1);
-    this.getSales();
+    this.loadAll();
   }
 
   changeSort(field: NonNullable<SaleListQuery['sort']>) {

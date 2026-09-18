@@ -8,6 +8,42 @@
         </div>
     </div>
 
+    <!-- Filters: the widgets below follow whatever is set here -->
+    <div class="filter-bar">
+        <div class="filter-field">
+            <label>Search</label>
+            <div class="position-relative">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="sales-search"
+                    class="_input-icon custom-placeholder" placeholder="Search invoice / customer" />
+                <i class="pi pi-search _search-icon f-14"></i>
+                @if (searchTerm) {
+                <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
+                }
+            </div>
+        </div>
+        <div class="filter-field date-range">
+            <label>Date Range</label>
+            <p-datepicker [(ngModel)]="dateRange" name="date-range" selectionMode="range"
+                dateFormat="dd-mm-yy" placeholder="Select date range" [readonlyInput]="true"
+                [showButtonBar]="true" [maxDate]="today" appendTo="body"
+                (onSelect)="onDateRangeChange()" (onClear)="onDateRangeChange()">
+            </p-datepicker>
+        </div>
+        <div class="filter-field">
+            <label>Payment</label>
+            <ng-select [(ngModel)]="paymentFilter" [items]="paymentList" bindLabel="label" bindValue="value"
+                placeholder="All payments" (change)="onFilterChange()">
+            </ng-select>
+        </div>
+        <div class="filter-field">
+            <label>Status</label>
+            <ng-select [(ngModel)]="statusFilter" [items]="statusList" placeholder="All statuses"
+                (change)="onFilterChange()">
+            </ng-select>
+        </div>
+        <button class="_outline-btn filter-reset" (click)="clearSearch()">Reset</button>
+    </div>
+
     <!-- Stat chips -->
     <div class="stat-grid">
         @for (s of stats(); track s.label) {
@@ -23,22 +59,14 @@
         }
     </div>
 
-    <!-- Search bar -->
+    <!-- search and reset live in the filter bar; only the action stays up here -->
     <div class="top-box">
-        <button class="_outline-btn" (click)="clearSearch()">Reset</button>
-        <div class="position-relative">
-            <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="sales-search"
-                class="_input-icon w-200 custom-placeholder" placeholder="Search invoice / customer" />
-            <i class="pi pi-search _search-icon f-14"></i>
-            @if (searchTerm) {
-            <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
-            }
-        </div>
         @if (perm.can(module, 'create')) {
         <button class="_outline-btn" [disabled]="!hasOffice()" (click)="newSale()"
             [title]="hasOffice() ? 'Start a new sale' : 'Select an office in the header first'">New Sale</button>
         }
     </div>
+
 
 
     <!-- Sales table -->
@@ -53,17 +81,19 @@
                         <th class="cursor-pointer" (click)="changeSort('items_count')">Items</th>
                         <th>Payment</th>
                         <th class="cursor-pointer" (click)="changeSort('total')">Amount</th>
+                        <th>Payable</th>
+                        <th>Borrow</th>
                         <th class="cursor-pointer" (click)="changeSort('status')">Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (loading()) {
-                    <tr><td colspan="8" class="empty">Loading...</td></tr>
+                    <tr><td colspan="10" class="empty">Loading...</td></tr>
                     } @else if (!hasOffice()) {
-                    <tr><td colspan="8" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
+                    <tr><td colspan="10" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
                     } @else if (rows().length === 0) {
-                    <tr><td colspan="8" class="empty">No sales found.</td></tr>
+                    <tr><td colspan="10" class="empty">No sales found.</td></tr>
                     } @else {
                     @for (s of rows(); track s.id) {
                     <tr>
@@ -73,6 +103,12 @@
                         <td>{{ s.items_count }}</td>
                         <td class="text-capitalize">{{ s.payment_method }}</td>
                         <td class="amount">{{ s.total | number: '1.2-2' }}</td>
+                        <td class="amount">{{ s.paid_amount | number: '1.2-2' }}</td>
+                        <td class="amount">
+                            @if (s.borrow_amount > 0) {
+                            <span class="badge borrow">{{ s.borrow_amount | number: '1.2-2' }}</span>
+                            } @else { — }
+                        </td>
                         <td>
                             <span class="badge" [ngClass]="s.status">{{ s.status }}</span>
                         </td>
@@ -136,6 +172,9 @@
         <div><span>Invoice</span><span>{{ sale.invoice_no }}</span></div>
         <div><span>Date</span><span>{{ sale.created_at | date: 'dd-MM-yyyy HH:mm' }}</span></div>
         <div><span>Customer</span><span>{{ sale.customer_name }}</span></div>
+        @if (sale.customer_mobile) {
+        <div><span>Mobile</span><span>{{ sale.customer_mobile }}</span></div>
+        }
         <div><span>Payment</span><span class="text-capitalize">{{ sale.payment_method }}</span></div>
         @if (sale.status !== 'completed') {
         <div><span>Status</span><span class="text-capitalize">{{ sale.status }}</span></div>
@@ -163,6 +202,10 @@
         <div><span>Discount</span><span>-{{ sale.discount | number: '1.2-2' }}</span></div>
         }
         <div class="pos-grand"><span>TOTAL</span><span>{{ sale.total | number: '1.2-2' }}</span></div>
+        @if (sale.borrow_amount > 0) {
+        <div><span>Paid</span><span>{{ sale.paid_amount | number: '1.2-2' }}</span></div>
+        <div class="pos-grand"><span>BORROW</span><span>{{ sale.borrow_amount | number: '1.2-2' }}</span></div>
+        }
     </div>
 
     <div class="pos-sep"></div>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -36,12 +36,16 @@ export class Location {
     let first = true;
     effect(() => {
       this.ctx.selectedOfficeId();
-      if (first) {
-        first = false;
-        return;
-      }
-      this.page.set(1);
-      this.getLocationList();
+      // untracked: the reload reads page/limit/sort and the response writes
+      // them back, which would otherwise re-trigger this effect forever
+      untracked(() => {
+        if (first) {
+          first = false;
+          return;
+        }
+        this.page.set(1);
+        this.getLocationList();
+      });
     });
   }
 

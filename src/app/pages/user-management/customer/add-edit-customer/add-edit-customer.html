@@ -3,32 +3,32 @@
 <div class="d-flex align-items-end justify-content-between my-3">
     <div class="avatar-wrap">
         <div class="avatar" (click)="fileInput.click()">
-            @if (officeLogo()) {
-            <img [src]="officeLogo()" class="avatar-img" alt="profile" />
+            @if (profilePhoto()) {
+            <img [src]="profilePhoto()" class="avatar-img" alt="profile" />
             }
             @else {
             <img [src]="commonIcon.image_not_found" class="avatar-placeholder" alt="placeholder" />
             }
             <div class="avatar-overlay">
                 <i class="pi pi-camera"></i>
-                <span>{{ officeLogo() ? 'Change' : 'Upload' }}</span>
+                <span>{{ profilePhoto() ? 'Change' : 'Upload' }}</span>
             </div>
         </div>
-        <input #fileInput class="d-none" accept=".png,.jpg,.jpeg" type="file" name="profile" [hidden]="1"
+        <input #fileInput class="d-none" accept=".png,.jpg,.jpeg,.webp,.gif" type="file" name="profile" [hidden]="1"
             (change)="onSelectFileLR($event)" />
-        @if (officeLogo()) {
-        <button type="button" class="avatar-remove" (click)="officeLogo.set(null)" title="Remove photo">
+        @if (profilePhoto()) {
+        <button type="button" class="avatar-remove" (click)="removePhoto()" title="Remove photo">
             <i class="pi pi-times"></i>
         </button>
         }
         <div class="avatar-meta">
             <p class="avatar-name">Profile Photo</p>
-            <p class="avatar-hint">PNG or JPG. Click image to {{ officeLogo() ? 'change' : 'upload' }}.</p>
+            <p class="avatar-hint">PNG, JPG, WEBP or GIF. Max 2 MB. Click image to {{ profilePhoto() ? 'change' : 'upload' }}.</p>
         </div>
     </div>
     <div class="d-flex gap-2">
         <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>
-        <button class="_primary-btn" (click)="createCustomer()">Save</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="createCustomer()">{{ saving() ? 'Saving...' : 'Save' }}</button>
     </div>
 </div>
 
@@ -36,39 +36,121 @@
     <div class="row">
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="first_name">First Name</label>
+                <label for="first_name">First Name <span class="text-danger">*</span></label>
                 <input type="text" id="first_name" formControlName="first_name"
-                    [ngClass]="{ _inputError: submitted && customerForm.controls['first_name'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && customerForm.controls['first_name'].invalid) || fieldError('first_name') }">
+                @if (submitted && customerForm.controls['first_name'].invalid) {
+                <small class="text-danger">First name is required</small>
+                }
+                @if (fieldError('first_name')) { <small class="text-danger">{{ fieldError('first_name') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="last_name">Last Name</label>
+                <label for="last_name">Last Name <span class="text-danger">*</span></label>
                 <input type="text" id="last_name" formControlName="last_name"
-                    [ngClass]="{ _inputError: submitted && customerForm.controls['last_name'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && customerForm.controls['last_name'].invalid) || fieldError('last_name') }">
+                @if (submitted && customerForm.controls['last_name'].invalid) {
+                <small class="text-danger">Last name is required</small>
+                }
+                @if (fieldError('last_name')) { <small class="text-danger">{{ fieldError('last_name') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="mobile_no">Mobile No <span class="text-danger">*</span></label>
+                <input type="text" id="mobile_no" formControlName="mobile_no"
+                    [ngClass]="{ _inputError: (submitted && customerForm.controls['mobile_no'].invalid) || fieldError('mobile_no') }">
+                @if (submitted && customerForm.controls['mobile_no'].invalid) {
+                <small class="text-danger">Mobile no is required</small>
+                }
+                @if (fieldError('mobile_no')) { <small class="text-danger">{{ fieldError('mobile_no') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="text" id="email" formControlName="email"
-                    [ngClass]="{ _inputError: submitted && customerForm.controls['email'].invalid }">
-            </div>
-        </div>
-        <div class="col-sm-4">
-            <div class="form-group">
-                <label for="mobile_no">Mobile No</label>
-                <input type="text" id="mobile_no" formControlName="mobile_no"
-                    [ngClass]="{ _inputError: submitted && customerForm.controls['mobile_no'].invalid }">
+                    [ngClass]="{ _inputError: (submitted && customerForm.controls['email'].invalid) || fieldError('email') }">
+                @if (submitted && customerForm.controls['email'].hasError('email')) {
+                <small class="text-danger">Enter a valid email or leave it blank</small>
+                }
+                @if (fieldError('email')) { <small class="text-danger">{{ fieldError('email') }}</small> }
+                <small class="d-block text-muted">Optional</small>
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="cnic_no">CNIC No</label>
                 <input type="text" id="cnic_no" formControlName="cnic_no"
-                    [ngClass]="{ _inputError: submitted && customerForm.controls['cnic_no'].invalid }">
+                    [ngClass]="{ _inputError: fieldError('cnic_no') }">
+                @if (fieldError('cnic_no')) { <small class="text-danger">{{ fieldError('cnic_no') }}</small> }
+                <small class="d-block text-muted">Optional</small>
             </div>
         </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="customer_status">Status</label>
+                <ng-select formControlName="customer_status" [items]="statusList" placeholder="Select Status"></ng-select>
+            </div>
+        </div>
+        <!-- repayment: only when editing a customer who owes something -->
+        @if (customerId && borrowAmount() > 0) {
+        <div class="col-sm-12">
+            <div class="borrow-card">
+                <div class="borrow-card-head">
+                    <span class="borrow-card-icon"><i class="pi pi-wallet"></i></span>
+                    <div>
+                        <p class="borrow-card-title">Outstanding Borrow</p>
+                        <p class="borrow-card-sub">Record a payment received from this customer</p>
+                    </div>
+                </div>
+
+                <div class="borrow-calc">
+                    <div class="borrow-stat">
+                        <span class="borrow-stat-label">Borrow</span>
+                        <span class="borrow-stat-value owed">{{ borrowAmount() | number: '1.2-2' }}</span>
+                    </div>
+
+                    <span class="borrow-op">−</span>
+
+                    <div class="borrow-pay">
+                        <label for="pay_amount" class="borrow-stat-label">Pay now</label>
+                        <div class="borrow-pay-input" [class.invalid]="overPaying() || fieldError('amount')">
+                            <input type="number" id="pay_amount" min="0" step="0.01" placeholder="0.00"
+                                [ngModel]="payAmount()" (ngModelChange)="payAmount.set($event)"
+                                [ngModelOptions]="{ standalone: true }" />
+                            <button type="button" class="borrow-full" (click)="payFull()">Pay full</button>
+                        </div>
+                    </div>
+
+                    <span class="borrow-op">=</span>
+
+                    <div class="borrow-stat">
+                        <span class="borrow-stat-label">Remaining</span>
+                        <span class="borrow-stat-value" [class.cleared]="remainingBorrow() === 0">
+                            {{ remainingBorrow() | number: '1.2-2' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="borrow-progress">
+                    <div class="borrow-progress-bar" [style.width.%]="clearedPct()"></div>
+                </div>
+                <div class="borrow-foot">
+                    @if (overPaying()) {
+                    <span class="borrow-error">Can't pay more than {{ borrowAmount() | number: '1.2-2' }}</span>
+                    } @else if (fieldError('amount')) {
+                    <span class="borrow-error">{{ fieldError('amount') }}</span>
+                    } @else if (remainingBorrow() === 0) {
+                    <span class="borrow-done"><i class="pi pi-check-circle"></i> Balance fully cleared</span>
+                    } @else {
+                    <span class="borrow-hint">{{ clearedPct() | number: '1.0-0' }}% cleared with this payment</span>
+                    }
+                </div>
+            </div>
+        </div>
+        }
         <div class="col-sm-12">
             <div class="form-group">
                 <label for="address">Address</label>

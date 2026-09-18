@@ -324,3 +324,111 @@
     font-size: 12px;
     color: var(--danger, #dc3545);
 }
+
+/* ---- Borrow row ---- */
+.ns-borrow-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 14px;
+}
+
+.ns-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding-top: 6px;
+
+    input { cursor: pointer; }
+}
+
+.ns-mobile {
+    min-width: 240px;
+
+    input {
+        border: 1px solid var(--borderColor);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        outline: none;
+        width: 100%;
+
+        &:focus { border-color: var(--primary); }
+        &[readonly] { background: var(--lightGrayBG); }
+    }
+}
+
+.ns-hint {
+    display: block;
+    font-size: 11px;
+    color: var(--lightDarkGray);
+    margin-top: 2px;
+}
+
+/* ---- Payable / borrow split in the footer ---- */
+.ns-split {
+    display: flex;
+    gap: 12px;
+    margin-left: auto;
+    margin-right: 16px;
+}
+
+.ns-split-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    label {
+        font-size: 11px;
+        color: var(--lightDarkGray);
+    }
+
+    input {
+        width: 130px;
+        border: 1px solid var(--borderColor);
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 13px;
+        outline: none;
+        text-align: right;
+
+        &:focus { border-color: var(--primary); }
+        &.ns-over { border-color: var(--danger, #dc3545); }
+        &.ns-readonly {
+            background: var(--lightGrayBG);
+            font-weight: 600;
+        }
+    }
+}
+
+/* stock badge rides inside the product input, so the line keeps one row height */
+.ns-line {
+    .ns-picked {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+
+    input.ns-bound {
+        // keep the typed name clear of the badge
+        padding-right: 100px;
+    }
+}
+
+/* existing balance of the picked customer */
+.ns-mobile input.ns-owed {
+    background: rgba(245, 114, 0, 0.08);
+    border-color: rgba(245, 114, 0, 0.4);
+    color: var(--info);
+    font-weight: 600;
+}

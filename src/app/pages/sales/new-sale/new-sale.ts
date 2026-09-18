@@ -9,6 +9,8 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { OfficeContextService } from '../../../core/services/office-context.service';
 import { ProductApiService } from '../../product-list/product.api';
 import { ProductListRow } from '../../product-list/product.model';
+import { CustomerApiService } from '../../user-management/customer/customer.api';
+import { CustomerListRow } from '../../user-management/customer/customer.model';
 import { SalesApiService } from '../sales.api';
 import { CreateSaleDto, PaymentMethod, Sale } from '../sales.model';
 
@@ -25,7 +27,17 @@ export interface OrderLine {
 interface OrderTab {
   id: number;              // unique, internal
   num: number;             // display number (gap-filling)
+  /** typed name; prints on the bill when no saved customer is picked */
   customer: string;
+  /** set only when picked from the customer list */
+  customerId: string | null;
+  customerMobile: string;
+  /** what the picked customer already owes, before this sale */
+  previousBorrow: number;
+  /** sell on credit — reveals the mobile field and the payable split */
+  borrow: boolean;
+  /** what the customer hands over now; the rest becomes their borrow */
+  paid: number;
   payment: PaymentMethod;
   lines: OrderLine[];
   editId?: string;         // sale id when editing an existing sale
@@ -34,6 +46,10 @@ interface OrderTab {
 
 function emptyLine(): OrderLine {
   return { product_id: null, product: '', qty: 1, price: 0, available: null };
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
 }
 
 @Component({
@@ -45,6 +61,7 @@ function emptyLine(): OrderLine {
 export class NewSale {
   private api = inject(SalesApiService);
   private productApi = inject(ProductApiService);
+  private customerApi = inject(CustomerApiService);
   private ctx = inject(OfficeContextService);
   private toast = inject(MessageService);
 
@@ -74,6 +91,12 @@ export class NewSale {
   openSuggestFor = signal(-1);
   searching = signal(false);
   private search$ = new Subject<string>();
+
+  // ---- customer typeahead ----
+  customerSuggestions = signal<CustomerListRow[]>([]);
+  customerSuggestOpen = signal(false);
+  customerSearching = signal(false);
+  private customerSearch$ = new Subject<string>();
 
   paymentOptions: { label: string; value: PaymentMethod }[] = [
     { label: 'Cash', value: 'cash' },
@@ -107,6 +130,32 @@ export class NewSale {
           this.searching.set(false);
         },
       });
+
+    this.customerSearch$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((term) => {
+          this.customerSearching.set(true);
+          return this.customerApi.listCustomers({
+            office_id: this.ctx.selectedOfficeId() ?? undefined,
+            search: term,
+            limit: 8,
+            sort: 'first_name',
+            order: 'asc',
+          });
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          this.customerSuggestions.set(res.data);
+          this.customerSearching.set(false);
+        },
+        error: () => {
+          this.customerSuggestions.set([]);
+          this.customerSearching.set(false);
+        },
+      });
   }
 
   get activeTab(): OrderTab | undefined {
@@ -130,6 +179,11 @@ export class NewSale {
       id: ++this._idSeq,
       num: this.nextNum(),
       customer: '',
+      customerId: null,
+      customerMobile: '',
+      previousBorrow: 0,
+      borrow: false,
+      paid: 0,
       payment: 'cash',
       lines: [emptyLine()],
     };
@@ -149,6 +203,11 @@ export class NewSale {
       id: ++this._idSeq,
       num: 0,
       customer: sale.customer_name,
+      customerId: sale.customer_id,
+      customerMobile: sale.customer_mobile ?? '',
+      previousBorrow: 0,
+      borrow: sale.is_borrow,
+      paid: sale.paid_amount,
       payment: sale.payment_method,
       lines: sale.lines.length
         ? sale.lines.map((l) => ({
@@ -164,11 +223,29 @@ export class NewSale {
     };
     this.tabs.update((list) => [...list, tab]);
     this.activeId.set(tab.id);
+
+    // the customer's balance already includes this sale's own borrow, so
+    // "previous" is the balance minus what this sale still holds
+    if (sale.customer_id) {
+      const heldBySale = sale.status === 'refunded' ? 0 : sale.borrow_amount;
+      this.customerApi
+        .getCustomer(sale.customer_id, this.ctx.selectedOfficeId() ?? undefined)
+        .subscribe({
+          next: (c) => {
+            tab.previousBorrow = Math.max(0, round2((c.borrow_amount ?? 0) - heldBySale));
+            this.tabs.update((list) => [...list]);
+          },
+          error: () => {
+            // informational only — the sale still edits fine without it
+          },
+        });
+    }
   }
 
   selectTab(id: number) {
     this.activeId.set(id);
     this.closeSuggestions();
+    this.closeCustomerSuggestions();
   }
 
   closeTab(id: number, event?: Event) {
@@ -226,6 +303,73 @@ export class NewSale {
   /** picked more units than the product has left */
   overStock(line: OrderLine): boolean {
     return line.available !== null && line.qty > line.available;
+  }
+
+  // ---- customer typeahead ----
+
+  onCustomerInput(term: string) {
+    const tab = this.activeTab;
+    if (!tab) return;
+    // typing again detaches the tab from the previously picked customer;
+    // whatever is left in the box is what prints on the bill
+    tab.customerId = null;
+    tab.previousBorrow = 0;
+    this.customerSuggestOpen.set(true);
+    if (!term.trim()) {
+      this.customerSuggestions.set([]);
+      return;
+    }
+    this.customerSearch$.next(term.trim());
+  }
+
+  pickCustomer(customer: CustomerListRow) {
+    const tab = this.activeTab;
+    if (!tab) return;
+    tab.customerId = customer.id;
+    tab.customer = customer.full_name;
+    tab.customerMobile = customer.mobile_no;
+    tab.previousBorrow = customer.borrow_amount ?? 0;
+    this.closeCustomerSuggestions();
+    this.tabs.update((list) => [...list]);
+  }
+
+  /** delayed so a click on a suggestion still registers before it hides */
+  onCustomerBlur() {
+    setTimeout(() => this.closeCustomerSuggestions(), 150);
+  }
+
+  private closeCustomerSuggestions() {
+    this.customerSuggestOpen.set(false);
+    this.customerSuggestions.set([]);
+  }
+
+  // ---- borrow ----
+
+  /** turning borrow off clears the split — the sale is paid in full */
+  onBorrowToggle() {
+    const tab = this.activeTab;
+    if (!tab) return;
+    tab.paid = tab.borrow ? this.orderTotal(tab) : 0;
+    this.tabs.update((list) => [...list]);
+  }
+
+  /** total - paid, never negative */
+  borrowAmount(tab: OrderTab | undefined): number {
+    if (!tab || !tab.borrow) return 0;
+    const owed = this.orderTotal(tab) - (Number(tab.paid) || 0);
+    return owed > 0 ? Math.round(owed * 100) / 100 : 0;
+  }
+
+  /** what the customer will owe once this sale is saved */
+  balanceAfter(tab: OrderTab | undefined): number {
+    if (!tab) return 0;
+    return round2(tab.previousBorrow + this.borrowAmount(tab));
+  }
+
+  /** paid more than the bill — the payable box is wrong */
+  overPaid(tab: OrderTab | undefined): boolean {
+    if (!tab || !tab.borrow) return false;
+    return (Number(tab.paid) || 0) > this.orderTotal(tab);
   }
 
   // ---- product typeahead ----
@@ -294,10 +438,24 @@ export class NewSale {
       this.toast.add({ severity: 'warn', summary: 'Not enough stock', detail: `"${short.product}" has only ${short.available} left` });
       return;
     }
+    // a credit sale needs someone to bill: a picked customer, or a mobile no
+    // we can create one with
+    if (tab.borrow && !tab.customerId && !tab.customerMobile.trim()) {
+      this.toast.add({ severity: 'warn', summary: 'Mobile required', detail: 'Enter a mobile no to sell on borrow' });
+      return;
+    }
+    if (this.overPaid(tab)) {
+      this.toast.add({ severity: 'warn', summary: 'Check payable', detail: 'Payable amount is more than the bill total' });
+      return;
+    }
 
     const body: CreateSaleDto = {
       office_id: officeId,
+      customer_id: tab.customerId,
       customer_name: tab.customer.trim() || 'Walk-in',
+      customer_mobile: tab.customerMobile.trim() || null,
+      is_borrow: tab.borrow,
+      paid_amount: tab.borrow ? Number(tab.paid) || 0 : undefined,
       payment_method: tab.payment,
       lines: lines.map((l) => ({
         product_id: l.product_id!,
