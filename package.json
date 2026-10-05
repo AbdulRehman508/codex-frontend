@@ -38,6 +38,7 @@
     "express": "^5.1.0",
     "primeicons": "^7.0.0",
     "primeng": "^20.4.0",
+    "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -48,6 +49,7 @@
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^20.17.19",
+    "@types/qrcode": "^1.5.5",
     "baseline-browser-mapping": "^2.9.11",
     "eslint": "^9.39.2",
     "eslint-plugin-import": "^2.32.0",

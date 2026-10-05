@@ -35,9 +35,10 @@ interface TrendPoint {
   orders: number;
 }
 
-// validated pair (CVD ΔE 17.8, both ≥ 3:1 on white) — see the dataviz check
-const CASH_COLOR = '#229276';
-const ONLINE_COLOR = '#2a78d6';
+// chart tokens from _colors.scss — a validated pair (CVD ΔE 19.3, both ≥ 3:1
+// on white), so the brand can change in one place
+const CASH_COLOR = 'var(--chart-1)';
+const ONLINE_COLOR = 'var(--chart-2)';
 
 @Component({
   selector: 'app-dashboard',

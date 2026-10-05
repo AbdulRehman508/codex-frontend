@@ -16,6 +16,8 @@ import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { ConfirmService } from '../../core/services/confirm.service';
+import { QrService } from '../../core/services/qr.service';
+import { OfficePaymentMethod } from '../user-management/office/office.model';
 import { OfficeContextService } from '../../core/services/office-context.service';
 import { PermissionService } from '../../core/services/permission.service';
 import { NewSale } from './new-sale/new-sale';
@@ -27,6 +29,25 @@ import {
   SaleListRow,
   SaleStatus,
 } from './sales.model';
+
+/** a payment method ready to print: account details + the QR image to show */
+interface PayQr extends OfficePaymentMethod {
+  src: string;
+  /** provider's merchant QR (opens the wallet) vs a generated one */
+  official: boolean;
+}
+
+/** resolve once the image is decoded (or failed), capped so print never hangs */
+function preloadImage(src: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const done = () => resolve();
+    img.onload = done;
+    img.onerror = done;
+    setTimeout(done, 3000);
+    img.src = src;
+  });
+}
 
 interface SaleStat {
   label: string;
@@ -46,6 +67,7 @@ export class Sales {
   private ctx = inject(OfficeContextService);
   private confirm = inject(ConfirmService);
   private toast = inject(MessageService);
+  private qr = inject(QrService);
   perm = inject(PermissionService);
   private search$ = new Subject<string>();
 
@@ -105,6 +127,8 @@ export class Sales {
 
   /** sale currently rendered into the hidden print area */
   printSaleData = signal<Sale | null>(null);
+  /** scan-to-pay codes printed under an online bill */
+  printQrs = signal<PayQr[]>([]);
 
   hasOffice = computed(() => !!this.ctx.selectedOfficeId());
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
@@ -337,16 +361,51 @@ export class Sales {
   /** Load the full sale, render the receipt, then hand it to the browser. */
   print(row: SaleListRow) {
     this.api.getSale(row.id, this.ctx.selectedOfficeId() ?? undefined).subscribe({
-      next: (sale) => {
+      next: async (sale) => {
+        // online bills end with a scan-to-pay QR per office payment method;
+        // the logo is loaded up front so the header never prints blank
+        const [qrs] = await Promise.all([
+          sale.payment_method === 'online' ? this.buildPayQrs(sale) : Promise.resolve([]),
+          sale.office_logo ? preloadImage(sale.office_logo) : Promise.resolve(),
+        ]);
+        this.printQrs.set(qrs);
         this.printSaleData.set(sale);
         // let the receipt render before the print dialog freezes the page
         setTimeout(() => {
           window.print();
           this.printSaleData.set(null);
-        }, 100);
+          this.printQrs.set([]);
+        }, 150);
       },
       error: (err) => this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Failed to load receipt' }),
     });
+  }
+
+  /**
+   * One QR per payment method: the uploaded official QR when there is one,
+   * otherwise a generated code carrying the account, amount and invoice.
+   * Images are loaded first so none print blank.
+   */
+  private async buildPayQrs(sale: Sale): Promise<PayQr[]> {
+    const methods = sale.office_payment_methods ?? [];
+    const qrs = await Promise.all(
+      methods.map(async (m) => {
+        let src = m.qr_image;
+        if (!src) {
+          try {
+            src = await this.qr.toDataUrl(
+              this.qr.payload(m, { amount: sale.total, invoice: sale.invoice_no }),
+            );
+          } catch {
+            return null;
+          }
+        }
+        return { ...m, src, official: !!m.qr_image };
+      }),
+    );
+    const ready = qrs.filter((q): q is PayQr => !!q);
+    await Promise.all(ready.map((q) => preloadImage(q.src)));
+    return ready;
   }
 
   private money(value: number): string {

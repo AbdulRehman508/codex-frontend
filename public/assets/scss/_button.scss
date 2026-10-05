@@ -19,6 +19,22 @@
   background-color: var(--primary);
   border: solid 1px var(--primary);
   color: var(--white);
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
+
+  &:active:not(:disabled) {
+    background-color: var(--primary-active);
+    border-color: var(--primary-active);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
 ._outline-btn {
@@ -26,6 +42,17 @@
   border: solid 1px var(--primary);
   background-color: var(--white);
   color: var(--black);
+  transition: background-color 150ms ease, color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--secondary);
+    color: var(--primary);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 }
 
 ._cancel-btn {
@@ -43,6 +70,12 @@
   background-color: var(--primary);
   color: var(--white);
   border: 1px solid var(--primary);
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+  }
 }
 
 ._circle-btn {

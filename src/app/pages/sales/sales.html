@@ -161,7 +161,12 @@
 <div id="printArea" class="pos-receipt">
 
     <div class="pos-head">
-        <h1>{{ sale.office_name || 'Sales Receipt' }}</h1>
+        <div class="pos-brand">
+            @if (sale.office_logo) {
+            <img class="pos-logo" [src]="sale.office_logo" alt="" />
+            }
+            <h1>{{ sale.office_name || 'Sales Receipt' }}</h1>
+        </div>
         @if (sale.office_address) { <p>{{ sale.office_address }}</p> }
         @if (sale.office_mobile_no) { <p>{{ sale.office_mobile_no }}</p> }
     </div>
@@ -209,6 +214,28 @@
     </div>
 
     <div class="pos-sep"></div>
+
+    <!-- online bill: every office payment method as a scan-to-pay QR -->
+    @if (sale.payment_method === 'online' && printQrs().length) {
+    <div class="pos-pay">
+        <p class="pos-pay-title">SCAN TO PAY</p>
+        @for (q of printQrs(); track $index) {
+        <!-- account details on the left, the code on the right -->
+        <div class="pos-pay-item">
+            <div class="pos-pay-info">
+                <p class="pos-pay-provider">{{ q.provider }}</p>
+                <p>{{ q.account_title }}</p>
+                <p class="pos-pay-account">{{ q.account_number }}</p>
+                <p class="pos-pay-hint">
+                    {{ q.official ? 'Scan with your ' + q.provider + ' app' : 'Scan with phone camera' }}
+                </p>
+            </div>
+            <img [src]="q.src" [alt]="q.provider + ' QR'" />
+        </div>
+        }
+    </div>
+    <div class="pos-sep"></div>
+    }
 
     <p class="pos-foot">Thank you for your purchase!</p>
 </div>

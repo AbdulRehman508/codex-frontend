@@ -104,7 +104,7 @@
     font-size: 20px;
     flex-shrink: 0;
 
-    &.primary { background: rgba(34, 146, 118, 0.12); color: var(--primary); }
+    &.primary { background: rgba(var(--primary-rgb), 0.12); color: var(--primary); }
     &.info    { background: rgba(245, 114, 0, 0.12);  color: var(--info); }
     &.green   { background: rgba(78, 197, 66, 0.14);  color: var(--green); }
     &.danger  { background: rgba(205, 24, 24, 0.10);  color: var(--danger); }
@@ -307,7 +307,8 @@
     width: 100%;
     max-width: 24px;
     min-height: 2px;
-    background: var(--primary);
+    // data marks use the chart teal; the UI teal is too muted for bars
+    background: var(--chart-1);
     // 4px rounded data-end, square at the baseline
     border-radius: 4px 4px 0 0;
     transition: height 400ms cubic-bezier(0.4, 0, 0.2, 1), filter 120ms ease;
@@ -569,7 +570,7 @@
 .product-fill {
     height: 100%;
     border-radius: 99px;
-    background: var(--primary);
+    background: var(--chart-1);
     transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 

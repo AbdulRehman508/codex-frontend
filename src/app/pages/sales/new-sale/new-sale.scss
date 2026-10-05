@@ -117,7 +117,7 @@
     justify-content: center;
     flex-shrink: 0;
     margin-bottom: 4px;
-    box-shadow: 0 2px 8px rgba(34, 146, 118, 0.3);
+    box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
     transition: transform 150ms ease, filter 150ms ease;
 
     &:hover { transform: scale(1.08); filter: brightness(1.05); }
@@ -431,4 +431,97 @@
     border-color: rgba(245, 114, 0, 0.4);
     color: var(--info);
     font-weight: 600;
+}
+
+/* ---- Quick add row ---- */
+.ns-quick {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 14px;
+    border: 1px solid var(--borderColor);
+    border-radius: 10px;
+    background: var(--lightGrayBG);
+
+    label {
+        display: block;
+        font-size: 11px;
+        color: var(--lightDarkGray);
+        margin-bottom: 3px;
+    }
+
+    input {
+        border: 1px solid var(--borderColor);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        outline: none;
+        width: 100%;
+        background: #fff;
+
+        &:focus { border-color: var(--primary); }
+    }
+}
+
+.ns-quick-prod {
+    flex: 1;
+    min-width: 0;
+}
+
+.ns-quick-qty {
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.ns-quick-add {
+    height: 35px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+// the row the keyboard has landed on
+.ns-suggest-item.active {
+    background: var(--secondary);
+}
+
+.ns-line-name {
+    font-size: 13px;
+    color: var(--black);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ns-line-empty {
+    margin: 14px 0 0;
+    font-size: 13px;
+    color: var(--lightDarkGray);
+    text-align: center;
+}
+
+/* stock badge rides inside the quick-add input, so the row keeps one height */
+.ns-quick-prod {
+    position: relative;
+
+    .ns-picked {
+        position: absolute;
+        right: 10px;
+        // the input is the bottom element of the field; sit centred on it
+        bottom: 9px;
+        margin-top: 0;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        pointer-events: none;
+        white-space: nowrap;
+    }
+
+    // keep the typed name clear of the badge
+    input.ns-has-badge {
+        padding-right: 100px;
+    }
 }

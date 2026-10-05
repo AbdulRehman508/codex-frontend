@@ -1,7 +1,18 @@
 :root {
+  /* Brand — Tailwind teal scale, matched to the Code-X logo.
+     Change the brand here only: every tint below derives from it. */
+  --primary: #0f766e;          /* teal-700 · 5.5:1 with white text (WCAG AA) */
+  --primary-rgb: 15, 118, 110; /* same colour for rgba() tints */
+  --primary-hover: #115e59;    /* teal-800 · button hover */
+  --primary-active: #134e4a;   /* teal-900 · pressed */
+  --secondary: #f0fdfa;        /* teal-50 · active/selected backgrounds */
+
+  /* Chart marks (the UI teal is too muted for data bars).
+     Validated pair: CVD ΔE 19.3, both ≥ 3:1 on white. */
+  --chart-1: #0d9488;          /* teal-600 */
+  --chart-2: #6366f1;          /* indigo-500 */
+
   /* Base colors */
-  --primary: #229276;
-  --secondary: #e9f4f1;
   --white: #ffffff;
   --black: #1a2f45;
   --borderColor: #e8eaec;

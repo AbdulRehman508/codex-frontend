@@ -1,14 +1,20 @@
 import { Component, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormArray, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
 import { commonIcons } from '../../../../core/icon-images/common-icon';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { membershipList, membershipType } from '../../contant.json';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageService } from 'primeng/api';
+import { debounceTime } from 'rxjs/operators';
 
+import { QrService } from '../../../../core/services/qr.service';
 import { OfficeApiService } from '../office.api';
-import { CreateOfficeDto } from '../office.model';
+import { CreateOfficeDto, OfficePaymentMethod } from '../office.model';
+
+/** common Pakistani online payment rails; the dropdown also takes custom text */
+const PAYMENT_PROVIDERS = ['JazzCash', 'Easypaisa', 'Raast', 'Bank Transfer', 'SadaPay', 'NayaPay'];
+const MAX_PAYMENT_METHODS = 10;
 
 @Component({
   selector: 'app-add-edit-office',
@@ -23,6 +29,12 @@ export class AddEditOffice {
   private _formBuilder = inject(FormBuilder);
   private api = inject(OfficeApiService);
   private toast = inject(MessageService);
+  private qr = inject(QrService);
+
+  readonly providers = PAYMENT_PROVIDERS;
+  readonly maxPaymentMethods = MAX_PAYMENT_METHODS;
+  /** QR shown next to each payment row: its uploaded image or a generated one */
+  qrPreviews = signal<(string | null)[]>([]);
 
   commonIcon = commonIcons;
   submitted = false;
@@ -54,7 +66,13 @@ export class AddEditOffice {
       office_status: ['active'],
       office_address: ['', Validators.required],
       biography: [''],
+      payment_methods: this._formBuilder.array([]),
     });
+
+    // keep the QR previews in step with what is typed
+    this.paymentMethods.valueChanges
+      .pipe(debounceTime(250))
+      .subscribe(() => this.refreshQrPreviews());
 
     this._activeRoute.params.subscribe((params) => {
       this.officeId = params['id'] ?? null;
@@ -83,6 +101,10 @@ export class AddEditOffice {
         });
         this.officeLogo.set(office.office_logo); // existing URL, not changed
         this.logoChanged = false;
+
+        this.paymentMethods.clear();
+        (office.payment_methods ?? []).forEach((m) => this.addPaymentMethod(m));
+        this.refreshQrPreviews();
       },
       error: (err) => this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Failed to load office' }),
     });
@@ -94,9 +116,82 @@ export class AddEditOffice {
     return errs?.length ? errs[0] : null;
   }
 
+  // ---- online payment methods ----
+
+  get paymentMethods(): FormArray {
+    return this.officeForm.get('payment_methods') as FormArray;
+  }
+
+  addPaymentMethod(m?: OfficePaymentMethod) {
+    if (this.paymentMethods.length >= MAX_PAYMENT_METHODS) return;
+    this.paymentMethods.push(
+      this._formBuilder.group({
+        provider: [m?.provider ?? null, Validators.required],
+        account_title: [m?.account_title ?? '', Validators.required],
+        account_number: [m?.account_number ?? '', Validators.required],
+        // stored URL, a freshly picked base64 image, or null
+        qr_image: [m?.qr_image ?? null],
+      }),
+    );
+  }
+
+  removePaymentMethod(i: number) {
+    this.paymentMethods.removeAt(i);
+  }
+
+  /** attach the provider's official merchant QR to a row */
+  onPickQr(i: number, event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    target.value = '';
+    if (!file) return;
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      this.toast.add({ severity: 'warn', summary: 'Invalid file', detail: 'Allowed: png, jpg, jpeg, webp' });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      this.toast.add({ severity: 'warn', summary: 'Too large', detail: 'Max size 2 MB' });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e: any) => this.paymentMethods.at(i).patchValue({ qr_image: e.target.result as string });
+    reader.readAsDataURL(file);
+  }
+
+  /** drop the uploaded QR — the row falls back to a generated one */
+  removeQr(i: number) {
+    this.paymentMethods.at(i).patchValue({ qr_image: null });
+  }
+
+  hasUploadedQr(i: number): boolean {
+    return !!this.paymentMethods.at(i)?.value?.qr_image;
+  }
+
+  /** uploaded image when present, else a QR generated from the details */
+  private async refreshQrPreviews() {
+    const rows = this.paymentMethods.value as OfficePaymentMethod[];
+    const previews = await Promise.all(
+      rows.map(async (m) => {
+        if (m.qr_image) return m.qr_image;
+        if (!m.provider || !m.account_title?.trim() || !m.account_number?.trim()) return null;
+        try {
+          return await this.qr.toDataUrl(this.qr.payload(m));
+        } catch {
+          return null;
+        }
+      }),
+    );
+    this.qrPreviews.set(previews);
+  }
+
   createCustomer() {
     this.submitted = true;
     this.serverErrors.set({});
+    if (this.paymentMethods.invalid) {
+      this.toast.add({ severity: 'warn', summary: 'Payment method', detail: 'Fill provider, account title and number for every payment method' });
+      return;
+    }
     if (this.officeForm.invalid) return;
 
     const body: CreateOfficeDto = { ...this.officeForm.value };
