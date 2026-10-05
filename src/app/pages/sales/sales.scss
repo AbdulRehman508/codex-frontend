@@ -54,7 +54,7 @@
     font-size: 22px;
     flex-shrink: 0;
 
-    &.primary { background: rgba(34, 146, 118, 0.12); color: var(--primary); }
+    &.primary { background: rgba(var(--primary-rgb), 0.12); color: var(--primary); }
     &.info    { background: rgba(245, 114, 0, 0.12);  color: var(--info); }
     &.green   { background: rgba(78, 197, 66, 0.14);  color: var(--green); }
 }
@@ -311,4 +311,89 @@
 .filter-reset {
     // sits right after the last field, not pushed to the far edge
     flex: 0 0 auto;
+}
+
+/* ---- receipt header brand + scan-to-pay rows (80mm roll) ---- */
+.pos-receipt {
+    // logo sits beside the shop name, the pair centred on the slip
+    .pos-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-bottom: 2px;
+
+        h1 { margin: 0; }
+    }
+
+    // fixed height, free width: square marks and wide wordmarks both read
+    .pos-logo {
+        height: 11mm;
+        width: auto;
+        max-width: 24mm;
+        object-fit: contain;
+        flex-shrink: 0;
+        // thermal heads print one ink: keep the logo predictable
+        filter: grayscale(1) contrast(1.2);
+    }
+
+    .pos-pay-title {
+        margin: 0 0 6px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+    }
+
+    .pos-pay-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 3mm;
+        padding: 4px 0;
+        // a QR and its details never split across a paper cut
+        break-inside: avoid;
+
+        & + .pos-pay-item {
+            border-top: 1px dashed #000;
+        }
+
+        img {
+            width: 30mm;
+            height: 30mm;
+            flex-shrink: 0;
+            object-fit: contain;
+            // crisp module edges — a smoothed QR is the usual scan failure
+            image-rendering: pixelated;
+        }
+    }
+
+    .pos-pay-info {
+        flex: 1;
+        min-width: 0;
+        text-align: left;
+
+        p {
+            margin: 0;
+            font-size: 10px;
+            line-height: 1.35;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    .pos-pay-provider {
+        font-size: 12px !important;
+        font-weight: 700;
+        margin-bottom: 2px !important;
+    }
+
+    .pos-pay-account {
+        font-weight: 700;
+    }
+
+    .pos-pay-hint {
+        margin-top: 3px !important;
+        font-size: 9px !important;
+        font-style: italic;
+    }
 }

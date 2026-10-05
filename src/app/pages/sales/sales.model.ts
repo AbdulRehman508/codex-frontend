@@ -1,3 +1,5 @@
+import { OfficePaymentMethod } from '../user-management/office/office.model';
+
 export type PaymentMethod = 'cash' | 'online';
 export type SaleStatus = 'completed' | 'pending' | 'refunded';
 
@@ -37,8 +39,12 @@ export interface Sale {
   updated_at: string;
   /** shop details, returned by the detail call for the printed receipt */
   office_name?: string | null;
+  /** printed beside the shop name when the office has one */
+  office_logo?: string | null;
   office_address?: string | null;
   office_mobile_no?: string | null;
+  /** scan-to-pay accounts, printed at the foot of online bills */
+  office_payment_methods?: OfficePaymentMethod[];
 }
 
 /** Slim row returned by the list endpoint. */

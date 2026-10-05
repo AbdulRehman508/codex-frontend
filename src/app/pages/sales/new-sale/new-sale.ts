@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, Input, inject, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, Input, ViewChild, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageService } from 'primeng/api';
@@ -44,7 +44,16 @@ interface OrderTab {
   editRef?: string;        // invoice no shown on the tab while editing
 }
 
-function emptyLine(): OrderLine {
+/** what sits in the quick-add row above the item list */
+interface QuickAdd {
+  product_id: string | null;
+  product: string;
+  qty: number;
+  price: number;
+  available: number | null;
+}
+
+function emptyQuickAdd(): QuickAdd {
   return { product_id: null, product: '', qty: 1, price: 0, available: null };
 }
 
@@ -85,12 +94,17 @@ export class NewSale {
   saving = signal(false);
   private _idSeq = 0;
 
-  // ---- product typeahead ----
+  // ---- quick add row (the only way items get on the bill) ----
+  quick: QuickAdd = emptyQuickAdd();
   suggestions = signal<ProductListRow[]>([]);
-  /** index of the line whose suggestion list is open (-1 = none) */
-  openSuggestFor = signal(-1);
+  suggestOpen = signal(false);
+  /** which suggestion ↑/↓ has landed on; Enter takes it */
+  activeSuggestion = signal(0);
   searching = signal(false);
   private search$ = new Subject<string>();
+
+  @ViewChild('productInput') productInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('qtyInput') qtyInput?: ElementRef<HTMLInputElement>;
 
   // ---- customer typeahead ----
   customerSuggestions = signal<CustomerListRow[]>([]);
@@ -185,7 +199,7 @@ export class NewSale {
       borrow: false,
       paid: 0,
       payment: 'cash',
-      lines: [emptyLine()],
+      lines: [],
     };
     this.tabs.update((list) => [...list, tab]);
     this.activeId.set(tab.id);
@@ -209,15 +223,13 @@ export class NewSale {
       borrow: sale.is_borrow,
       paid: sale.paid_amount,
       payment: sale.payment_method,
-      lines: sale.lines.length
-        ? sale.lines.map((l) => ({
-            product_id: l.product_id,
-            product: l.name,
-            qty: l.quantity,
-            price: l.price,
-            available: null,
-          }))
-        : [emptyLine()],
+      lines: sale.lines.map((l) => ({
+        product_id: l.product_id,
+        product: l.name,
+        qty: l.quantity,
+        price: l.price,
+        available: null,
+      })),
       editId: sale.id,
       editRef: sale.invoice_no,
     };
@@ -244,6 +256,8 @@ export class NewSale {
 
   selectTab(id: number) {
     this.activeId.set(id);
+    // the quick-add row belongs to whatever tab is in front
+    this.quick = emptyQuickAdd();
     this.closeSuggestions();
     this.closeCustomerSuggestions();
   }
@@ -271,23 +285,12 @@ export class NewSale {
     this.closed.emit();
   }
 
-  // ---- lines ----
-
-  addLine() {
-    const tab = this.activeTab;
-    if (!tab) return;
-    tab.lines.push(emptyLine());
-    this.tabs.update((list) => [...list]);
-  }
+  // ---- lines (added through the quick-add row above the list) ----
 
   removeLine(index: number) {
     const tab = this.activeTab;
     if (!tab) return;
     tab.lines.splice(index, 1);
-    if (tab.lines.length === 0) {
-      tab.lines.push(emptyLine());
-    }
-    this.closeSuggestions();
     this.tabs.update((list) => [...list]);
   }
 
@@ -372,16 +375,15 @@ export class NewSale {
     return (Number(tab.paid) || 0) > this.orderTotal(tab);
   }
 
-  // ---- product typeahead ----
+  // ---- quick add: type a product, set qty, Enter (or Add) ----
 
-  onProductInput(index: number, term: string) {
-    const tab = this.activeTab;
-    const line = tab?.lines[index];
-    if (!line) return;
-    // typing again detaches the line from the previously picked product
-    line.product_id = null;
-    line.available = null;
-    this.openSuggestFor.set(index);
+  onProductInput(term: string) {
+    // typing again detaches from the previously picked product
+    this.quick.product_id = null;
+    this.quick.available = null;
+    this.quick.price = 0;
+    this.suggestOpen.set(true);
+    this.activeSuggestion.set(0);
     if (!term.trim()) {
       this.suggestions.set([]);
       return;
@@ -389,17 +391,91 @@ export class NewSale {
     this.search$.next(term.trim());
   }
 
-  pickProduct(index: number, product: ProductListRow) {
-    const tab = this.activeTab;
-    const line = tab?.lines[index];
-    if (!line) return;
-    line.product_id = product.id;
-    line.product = product.name;
-    line.price = product.price;
-    line.available = product.quantity;
-    if (line.qty < 1) line.qty = 1;
+  pickProduct(product: ProductListRow) {
+    this.quick.product_id = product.id;
+    this.quick.product = product.name;
+    this.quick.price = product.price;
+    this.quick.available = product.quantity;
+    if (this.quick.qty < 1) this.quick.qty = 1;
     this.closeSuggestions();
+    // straight to qty so the next keystroke is the quantity
+    this.focus(this.qtyInput, true);
+  }
+
+  /** ↑/↓ walk the list, Enter picks or adds, Esc closes */
+  onProductKeydown(event: KeyboardEvent) {
+    const list = this.suggestions();
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      if (!this.suggestOpen() || !list.length) return;
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      const next = (this.activeSuggestion() + step + list.length) % list.length;
+      this.activeSuggestion.set(next);
+      return;
+    }
+    if (event.key === 'Escape') {
+      this.closeSuggestions();
+      return;
+    }
+    if (event.key !== 'Enter') return;
+
+    event.preventDefault();
+    const highlighted = this.suggestOpen() ? list[this.activeSuggestion()] : undefined;
+    if (highlighted) {
+      this.pickProduct(highlighted);
+    } else if (this.quick.product_id) {
+      this.addQuickLine();
+    }
+  }
+
+  /** Enter in the qty box adds the item too */
+  onQtyKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    this.addQuickLine();
+  }
+
+  /**
+   * Put the quick-add product on the bill. Adding the same product again
+   * tops up the existing line instead of repeating it.
+   */
+  addQuickLine() {
+    const tab = this.activeTab;
+    if (!tab) return;
+    const q = this.quick;
+
+    if (!q.product_id) {
+      this.toast.add({ severity: 'warn', summary: 'Pick a product', detail: 'Choose a product from the suggestions first' });
+      this.focus(this.productInput);
+      return;
+    }
+    const qty = Number(q.qty) || 0;
+    if (qty < 1) {
+      this.toast.add({ severity: 'warn', summary: 'Quantity', detail: 'Enter a quantity of 1 or more' });
+      this.focus(this.qtyInput, true);
+      return;
+    }
+
+    const existing = tab.lines.find((l) => l.product_id === q.product_id);
+    const wanted = (existing?.qty ?? 0) + qty;
+    if (q.available !== null && wanted > q.available) {
+      this.toast.add({ severity: 'warn', summary: 'Not enough stock', detail: `"${q.product}" has only ${q.available} left` });
+      return;
+    }
+
+    if (existing) {
+      existing.qty = wanted;
+    } else {
+      tab.lines.push({
+        product_id: q.product_id,
+        product: q.product,
+        qty,
+        price: q.price,
+        available: q.available,
+      });
+    }
     this.tabs.update((list) => [...list]);
+    this.resetQuick();
   }
 
   /** delayed so a click on a suggestion still registers before it hides */
@@ -408,8 +484,23 @@ export class NewSale {
   }
 
   private closeSuggestions() {
-    this.openSuggestFor.set(-1);
+    this.suggestOpen.set(false);
     this.suggestions.set([]);
+    this.activeSuggestion.set(0);
+  }
+
+  /** clear the quick row and park the cursor for the next item */
+  private resetQuick() {
+    this.quick = emptyQuickAdd();
+    this.closeSuggestions();
+    this.focus(this.productInput);
+  }
+
+  private focus(ref: ElementRef<HTMLInputElement> | undefined, select = false) {
+    setTimeout(() => {
+      ref?.nativeElement.focus();
+      if (select) ref?.nativeElement.select();
+    });
   }
 
   // ---- save ----
@@ -426,11 +517,7 @@ export class NewSale {
 
     const lines = tab.lines.filter((l) => l.product_id && l.qty > 0);
     if (!lines.length) {
-      this.toast.add({ severity: 'warn', summary: 'No items', detail: 'Pick at least one product from the suggestions' });
-      return;
-    }
-    if (tab.lines.some((l) => l.product.trim() && !l.product_id)) {
-      this.toast.add({ severity: 'warn', summary: 'Unknown product', detail: 'Choose each product from the suggestion list' });
+      this.toast.add({ severity: 'warn', summary: 'No items', detail: 'Add at least one product to the bill' });
       return;
     }
     const short = lines.find((l) => this.overStock(l));

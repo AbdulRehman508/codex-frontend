@@ -102,3 +102,181 @@
     font-size: 12px;
     color: var(--secondary, #94a3b8);
 }
+
+/* ---- Online payment methods ---- */
+.pay-section {
+    margin-top: 8px;
+    border-top: 1px solid var(--borderColor);
+    padding-top: 18px;
+}
+
+.pay-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+
+    ._outline-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+}
+
+.pay-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--black);
+}
+
+.pay-sub,
+.pay-empty {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--lightDarkGray);
+}
+
+.pay-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.pay-card {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+    padding: 16px 48px 16px 16px;
+    border: 1px solid var(--borderColor);
+    border-radius: 12px;
+    background: var(--white);
+}
+
+.pay-fields {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    align-content: start;
+
+    .form-group { margin-bottom: 0; }
+}
+
+.pay-qr {
+    width: 128px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.pay-qr-box {
+    width: 104px;
+    height: 104px;
+    border: 1px solid var(--borderColor);
+    border-radius: 10px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        image-rendering: pixelated;
+    }
+}
+
+.pay-qr-empty {
+    font-size: 11px;
+    text-align: center;
+    color: var(--lightDarkGray);
+
+    .pi { font-size: 22px; }
+}
+
+.pay-qr-kind {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--darkGray);
+}
+
+.pay-qr-actions {
+    display: flex;
+    gap: 8px;
+
+    .link {
+        border: none;
+        background: none;
+        padding: 0;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--primary);
+        cursor: pointer;
+
+        &:hover { text-decoration: underline; }
+        &.muted { color: var(--lightDarkGray); }
+    }
+}
+
+.pay-remove {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--lightDarkGray);
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(205, 24, 24, 0.08);
+        color: var(--danger);
+    }
+}
+
+.pay-note {
+    margin: 12px 0 0;
+    font-size: 12px;
+    color: var(--lightDarkGray);
+
+    .pi { margin-right: 4px; }
+}
+
+@media (max-width: 900px) {
+    .pay-card { flex-direction: column; }
+    .pay-fields { grid-template-columns: 1fr; }
+    .pay-qr { width: auto; }
+}
+
+/* official vs generated QR, called out so nobody expects wallet scanning */
+.pay-qr-kind {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    &.ok { color: var(--primary); }
+    &.warn { color: var(--info); }
+
+    .pi { font-size: 11px; }
+}
+
+.pay-note.warn {
+    background: rgba(245, 114, 0, 0.08);
+    border: 1px solid rgba(245, 114, 0, 0.3);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--darkGray);
+    line-height: 1.5;
+
+    .pi { color: var(--info); }
+}

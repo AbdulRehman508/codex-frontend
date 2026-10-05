@@ -115,4 +115,91 @@
             </div>
         </div>
     </div>
+
+    <!-- Online payment: each method prints as a scan-to-pay QR on online bills -->
+    <div class="pay-section">
+        <div class="pay-head">
+            <div>
+                <p class="pay-title">Online Payment Methods</p>
+                <p class="pay-sub">Printed as QR codes at the bottom of every online-payment bill.</p>
+            </div>
+            <button type="button" class="_outline-btn" (click)="addPaymentMethod()"
+                [disabled]="paymentMethods.length >= maxPaymentMethods">
+                <i class="pi pi-plus"></i> Add Method
+            </button>
+        </div>
+
+        @if (!paymentMethods.length) {
+        <p class="pay-empty">No online payment method yet. Add JazzCash, Easypaisa, a bank account…</p>
+        }
+
+        <div formArrayName="payment_methods" class="pay-list">
+            @for (row of paymentMethods.controls; track row; let i = $index) {
+            <div class="pay-card" [formGroupName]="i">
+                <div class="pay-fields">
+                    <div class="form-group">
+                        <label>Provider</label>
+                        <ng-select formControlName="provider" [items]="providers" [addTag]="true"
+                            addTagText="Use" placeholder="Select or type"
+                            [ngClass]="{ _inputError: submitted && row.get('provider')?.invalid }">
+                        </ng-select>
+                    </div>
+                    <div class="form-group">
+                        <label>Account Title</label>
+                        <input type="text" formControlName="account_title" placeholder="Pak Loam Store"
+                            [ngClass]="{ _inputError: submitted && row.get('account_title')?.invalid }">
+                    </div>
+                    <div class="form-group">
+                        <label>Account / Wallet No / IBAN</label>
+                        <input type="text" formControlName="account_number" placeholder="03001234567"
+                            [ngClass]="{ _inputError: submitted && row.get('account_number')?.invalid }">
+                    </div>
+                </div>
+
+                <div class="pay-qr">
+                    <div class="pay-qr-box">
+                        @if (qrPreviews()[i]; as src) {
+                        <img [src]="src" alt="Payment QR" />
+                        } @else {
+                        <span class="pay-qr-empty"><i class="pi pi-qrcode"></i><br>Fill details</span>
+                        }
+                    </div>
+                    @if (hasUploadedQr(i)) {
+                    <span class="pay-qr-kind ok"><i class="pi pi-check-circle"></i> Official QR</span>
+                    } @else {
+                    <!-- wallet scanners reject anything that isn't a Raast/EMVCo code -->
+                    <span class="pay-qr-kind warn" title="Wallet apps cannot scan a generated code">
+                        <i class="pi pi-exclamation-triangle"></i> Camera only
+                    </span>
+                    }
+                    <div class="pay-qr-actions">
+                        <button type="button" class="link" (click)="qrInput.click()">
+                            {{ hasUploadedQr(i) ? 'Replace' : 'Upload official' }}
+                        </button>
+                        @if (hasUploadedQr(i)) {
+                        <button type="button" class="link muted" (click)="removeQr(i)">Remove</button>
+                        }
+                    </div>
+                    <input #qrInput type="file" class="d-none" accept=".png,.jpg,.jpeg,.webp"
+                        (change)="onPickQr(i, $event)" />
+                </div>
+
+                <button type="button" class="pay-remove" (click)="removePaymentMethod(i)" title="Remove method">
+                    <i class="pi pi-trash"></i>
+                </button>
+            </div>
+            }
+        </div>
+
+        @if (paymentMethods.length) {
+        <p class="pay-note warn">
+            <i class="pi pi-exclamation-triangle"></i>
+            <strong>Wallet apps can't scan a generated QR.</strong>
+            A generated code only shows the account details to a phone camera — Easypaisa, JazzCash and
+            bank apps reject it, because they only read Raast/EMVCo codes carrying a merchant ID issued
+            by the provider. For scan-and-pay inside the wallet, open your provider's merchant app or
+            portal, save your merchant QR as an image, and upload it here.
+        </p>
+        }
+    </div>
 </form>

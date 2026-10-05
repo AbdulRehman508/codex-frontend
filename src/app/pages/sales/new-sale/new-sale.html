@@ -103,6 +103,53 @@
             }
         </div>
 
+        <!-- quick add: type, pick, qty, Enter — no clicking "add" first -->
+        <div class="ns-quick">
+            <div class="ns-quick-prod ns-typeahead">
+                <label>Product</label>
+                <input #productInput type="text" [(ngModel)]="quick.product" name="quick-prod-{{ tab.id }}"
+                    placeholder="Type a product name" autocomplete="off"
+                    [class.ns-has-badge]="!!quick.product_id"
+                    (input)="onProductInput(quick.product)" (focus)="onProductInput(quick.product)"
+                    (keydown)="onProductKeydown($event)" (blur)="onProductBlur()" />
+                @if (quick.product_id) {
+                <span class="ns-picked" title="Product linked">
+                    <i class="pi pi-check-circle"></i> {{ quick.available }} in stock
+                </span>
+                }
+
+                @if (suggestOpen()) {
+                <div class="ns-suggest">
+                    @if (searching()) {
+                    <div class="ns-suggest-empty">Searching...</div>
+                    } @else if (suggestions().length === 0) {
+                    <div class="ns-suggest-empty">No matching product</div>
+                    } @else {
+                    @for (p of suggestions(); track p.id; let si = $index) {
+                    <div class="ns-suggest-item" [class.active]="activeSuggestion() === si"
+                        (mousedown)="pickProduct(p)" (mouseenter)="activeSuggestion.set(si)">
+                        <span class="ns-suggest-name">{{ p.name }}</span>
+                        <span class="ns-suggest-meta">
+                            {{ p.price | number: '1.2-2' }} · {{ p.quantity }} in stock
+                        </span>
+                    </div>
+                    }
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="ns-quick-qty">
+                <label>Qty</label>
+                <input #qtyInput type="number" min="1" [(ngModel)]="quick.qty" name="quick-qty-{{ tab.id }}"
+                    (keydown)="onQtyKeydown($event)" />
+            </div>
+
+            <button type="button" class="_primary-btn ns-quick-add" (click)="addQuickLine()">
+                <i class="pi pi-plus"></i> Add
+            </button>
+        </div>
+
         <div class="ns-lines">
             <div class="ns-lines-head">
                 <span class="col-prod">Product</span>
@@ -114,41 +161,8 @@
 
             @for (line of tab.lines; track $index; let i = $index) {
             <div class="ns-line">
-                <!-- product typeahead: pick from the suggestions to bind a real product -->
-                <div class="col-prod ns-typeahead">
-                    <input type="text" [(ngModel)]="line.product" name="prod-{{ tab.id }}-{{ i }}"
-                        placeholder="Type a product name" autocomplete="off"
-                        [class.ns-unbound]="line.product.trim() && !line.product_id"
-                        [class.ns-bound]="!!line.product_id"
-                        (input)="onProductInput(i, line.product)"
-                        (focus)="onProductInput(i, line.product)" (blur)="onProductBlur()" />
-                    @if (line.product_id) {
-                    <!-- sits inside the input's right edge so the row keeps its height -->
-                    <span class="ns-picked" title="Product linked">
-                        <i class="pi pi-check-circle"></i> {{ line.available }} in stock
-                    </span>
-                    }
-
-                    @if (openSuggestFor() === i) {
-                    <div class="ns-suggest">
-                        @if (searching()) {
-                        <div class="ns-suggest-empty">Searching...</div>
-                        } @else if (suggestions().length === 0) {
-                        <div class="ns-suggest-empty">No matching product</div>
-                        } @else {
-                        @for (p of suggestions(); track p.id) {
-                        <div class="ns-suggest-item" (mousedown)="pickProduct(i, p)">
-                            <span class="ns-suggest-name">{{ p.name }}</span>
-                            <span class="ns-suggest-meta">
-                                {{ p.price | number: '1.2-2' }} · {{ p.quantity }} in stock
-                            </span>
-                        </div>
-                        }
-                        }
-                    </div>
-                    }
-                </div>
-
+                <!-- product is fixed once added: remove the row to change it -->
+                <span class="col-prod ns-line-name" [title]="line.product">{{ line.product }}</span>
                 <input class="col-qty" type="number" min="1" [(ngModel)]="line.qty"
                     name="qty-{{ tab.id }}-{{ i }}" [class.ns-over]="overStock(line)" />
                 <input class="col-price" type="number" min="0" step="0.01" [(ngModel)]="line.price"
@@ -159,11 +173,9 @@
             @if (overStock(line)) {
             <p class="ns-line-warn">Only {{ line.available }} of "{{ line.product }}" left in stock.</p>
             }
+            } @empty {
+            <p class="ns-line-empty">No items yet — add one from the row above.</p>
             }
-
-            <button class="ns-add-line" (click)="addLine()">
-                <i class="pi pi-plus"></i> Add Item
-            </button>
         </div>
     </div>
 
