@@ -1,0 +1,374 @@
+.reports {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ---- header ---- */
+.rep-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--black);
+    }
+
+    p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--lightDarkGray);
+    }
+}
+
+.rep-actions {
+    display: flex;
+    gap: 8px;
+
+    button {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+}
+
+/* ---- report switcher ---- */
+.rep-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-radius: 12px;
+    align-self: flex-start;
+}
+
+.rep-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: none;
+    background: transparent;
+    color: var(--darkGray);
+    border-radius: 9px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+
+    .pi { font-size: 13px; }
+
+    &:hover { background: var(--lightGrayBG); }
+
+    &.active {
+        background: var(--secondary);
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary);
+        outline-offset: 1px;
+    }
+}
+
+/* ---- filters ---- */
+.rep-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+.rep-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 180px;
+
+    label {
+        font-size: 11px;
+        color: var(--lightDarkGray);
+    }
+
+    .position-relative input { width: 100%; }
+
+    &.date-range { min-width: 230px; }
+}
+
+.rep-presets {
+    display: flex;
+    gap: 4px;
+
+    button {
+        border: 1px solid var(--borderColor);
+        background: var(--white);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 12px;
+        color: var(--darkGray);
+        cursor: pointer;
+
+        &:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+    }
+}
+
+.rep-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--darkGray);
+    cursor: pointer;
+    padding-bottom: 7px;
+
+    input { cursor: pointer; }
+}
+
+.rep-reset {
+    margin-left: auto;
+}
+
+.rep-note {
+    margin: 0;
+    font-size: 12px;
+    color: var(--lightDarkGray);
+
+    .pi { margin-right: 4px; }
+}
+
+/* ---- body ---- */
+.rep-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: opacity 150ms ease;
+
+    // refetch holds the previous frame instead of flashing a skeleton
+    &.refetching { opacity: 0.55; }
+}
+
+.rep-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--lightDarkGray);
+    font-size: 14px;
+
+    p { margin: 0; }
+    .pi { font-size: 18px; }
+}
+
+/* ---- summary tiles ---- */
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.tile {
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-left: 3px solid var(--borderColor);
+    border-radius: 12px;
+    padding: 12px 14px;
+
+    &.primary { border-left-color: var(--primary); }
+    &.info { border-left-color: var(--info); }
+    &.danger { border-left-color: var(--danger); }
+    &.green { border-left-color: var(--green); }
+}
+
+.tile-label {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--lightDarkGray);
+}
+
+.tile-value {
+    margin: 4px 0 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--black);
+    white-space: nowrap;
+}
+
+/* ---- panel + table ---- */
+.panel {
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-radius: 16px;
+    padding: 16px 20px 20px;
+    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.rep-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--lightDarkGray);
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--borderColor);
+        white-space: nowrap;
+
+        .pi { font-size: 11px; margin-left: 2px; }
+    }
+
+    td {
+        padding: 11px 12px;
+        font-size: 13px;
+        color: var(--darkGray);
+        border-bottom: 1px solid var(--lightGrayBG);
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--lightGrayBG); }
+
+    .num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .empty {
+        text-align: center;
+        color: var(--lightDarkGray);
+        padding: 24px 12px;
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+
+    &.completed,
+    &.active { background: rgba(78, 197, 66, 0.14); color: #2f9e25; }
+    &.pending { background: rgba(245, 114, 0, 0.14); color: var(--info); }
+    &.refunded,
+    &.inactive { background: rgba(205, 24, 24, 0.10); color: var(--danger); }
+}
+
+/* ---- printed sheet (A4-ish, set up by the global print rules) ---- */
+#printArea {
+    display: none;
+}
+
+.rep-print {
+    color: #000;
+    font-size: 11px;
+
+    .rep-print-head {
+        border-bottom: 2px solid #000;
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+
+        h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        p {
+            margin: 2px 0 0;
+            font-size: 11px;
+        }
+    }
+
+    .rep-print-summary {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 24px;
+        margin-bottom: 12px;
+
+        div {
+            display: flex;
+            gap: 6px;
+        }
+
+        span { color: #444; }
+        strong { font-variant-numeric: tabular-nums; }
+    }
+
+    .rep-print-table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th,
+        td {
+            border: 1px solid #999;
+            padding: 4px 6px;
+            text-align: left;
+        }
+
+        th {
+            background: #eee;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        // repeat the header on every printed page
+        thead { display: table-header-group; }
+        tr { break-inside: avoid; }
+    }
+
+    .rep-print-foot {
+        margin-top: 8px;
+        font-size: 10px;
+        text-align: right;
+    }
+}
+
+@media (max-width: 760px) {
+    .rep-reset { margin-left: 0; }
+}
+
+/* the range picker renders its own input — match the other filter controls */
+:host ::ng-deep .rep-field p-datepicker {
+    display: block;
+    width: 100%;
+
+    .p-datepicker-input {
+        width: 100%;
+        border: 1px solid var(--borderColor);
+        border-radius: 8px;
+        padding: 7px 10px;
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0;
+        color: var(--darkGray);
+        outline: none;
+    }
+}

@@ -14,6 +14,8 @@ export interface Product {
   price: number;
   /** units currently held in the assigned bin */
   quantity: number;
+  /** latest landed cost from a purchase — set by the purchase module, read-only here */
+  cost_price: number;
   description: string | null;
   status: ProductStatus;
   rack_location_id: string | null;
@@ -61,6 +63,8 @@ export interface ProductListQuery {
   office_id?: string;
   rack_id?: string;
   status?: ProductStatus;
+  /** exact barcode match — what a scanner sends */
+  barcode?: string;
   sort?:
     | 'name'
     | 'sku'

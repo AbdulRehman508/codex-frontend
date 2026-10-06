@@ -1,0 +1,40 @@
+.nf {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+}
+
+.nf-code {
+    margin: 0;
+    font-size: 96px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--secondary);
+    letter-spacing: -0.04em;
+}
+
+h1 {
+    margin: 4px 0 0;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--black);
+}
+
+.nf-text {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--lightDarkGray);
+    max-width: 420px;
+}
+
+.nf-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+
+    a { text-decoration: none; display: inline-flex; align-items: center; }
+}

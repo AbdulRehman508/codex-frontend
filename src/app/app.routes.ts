@@ -16,6 +16,13 @@ export const routes: Routes = [
     {
         path: '',
         children: [...routesAuthentication]
+    },
+
+    // anything else: a real 404 instead of a blank screen
+    {
+        path: '**',
+        loadComponent: () =>
+            import('./pages/not-found/not-found').then((c) => c.NotFound)
     }
 ];
 

@@ -1,1 +1,231 @@
-<p>stock works!</p>
+<div class="stock-page">
+
+    <div class="stock-head">
+        <div>
+            <h2>Stock</h2>
+            <p>Damage, loss, returns and shelf counts — everything that moved outside a sale or a purchase.</p>
+        </div>
+    </div>
+
+    <!-- Filters: the widgets below follow whatever is set here -->
+    <div class="filter-bar">
+        <div class="filter-field">
+            <label>Search</label>
+            <div class="position-relative">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="stock-search"
+                    class="_input-icon custom-placeholder" placeholder="Search product / SKU / note" />
+                <i class="pi pi-search _search-icon f-14"></i>
+                @if (searchTerm) {
+                <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
+                }
+            </div>
+        </div>
+        <div class="filter-field date-range">
+            <label>Date Range</label>
+            <p-datepicker [(ngModel)]="dateRange" name="date-range" selectionMode="range" dateFormat="dd-mm-yy"
+                placeholder="Select date range" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
+                appendTo="body" (onSelect)="onDateRangeChange()" (onClear)="onDateRangeChange()">
+            </p-datepicker>
+        </div>
+        <div class="filter-field">
+            <label>Movement</label>
+            <ng-select [(ngModel)]="typeFilter" [items]="typeList" bindLabel="label" bindValue="value"
+                placeholder="All movements" (change)="onFilterChange()"></ng-select>
+        </div>
+        <div class="filter-field">
+            <label>Reason</label>
+            <ng-select [(ngModel)]="reasonFilter" [items]="reasonList" bindLabel="label" bindValue="value"
+                placeholder="All reasons" (change)="onFilterChange()"></ng-select>
+        </div>
+        <button class="_outline-btn filter-reset" (click)="clearSearch()">Reset</button>
+
+        <div class="filter-spacer"></div>
+
+        @if (perm.can(module, 'create')) {
+        <button class="_outline-btn" [disabled]="!hasOffice()" (click)="openDialog()"
+            [title]="hasOffice() ? 'Adjust a product count' : 'Select an office in the header first'">Adjust Stock</button>
+        }
+    </div>
+
+    <!-- Stat chips -->
+    <div class="stat-grid">
+        @for (s of stats(); track s.label) {
+        <div class="stat-card">
+            <div class="stat-icon" [ngClass]="s.tone">
+                <i [class]="s.icon"></i>
+            </div>
+            <div class="stat-body">
+                <p class="stat-label">{{ s.label }}</p>
+                <h3 class="stat-value">{{ s.value }}</h3>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="panel">
+        <div class="table-wrap">
+            <table class="stock-table">
+                <thead>
+                    <tr>
+                        <th class="cursor-pointer" (click)="changeSort('created_at')">
+                            Date <i class="pi" [ngClass]="sort() === 'created_at' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        </th>
+                        <th class="cursor-pointer" (click)="changeSort('product_name')">
+                            Product <i class="pi" [ngClass]="sort() === 'product_name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        </th>
+                        <th class="cursor-pointer" (click)="changeSort('type')">Movement</th>
+                        <th class="cursor-pointer" (click)="changeSort('reason')">Reason</th>
+                        <th class="num cursor-pointer" (click)="changeSort('quantity')">Units</th>
+                        <th class="num">Before</th>
+                        <th class="num cursor-pointer" (click)="changeSort('after_quantity')">After</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (loading()) {
+                    <tr><td colspan="8" class="empty">Loading...</td></tr>
+                    } @else if (!hasOffice()) {
+                    <tr><td colspan="8" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
+                    } @else if (rows().length === 0) {
+                    <tr><td colspan="8" class="empty">No stock adjustments yet.</td></tr>
+                    } @else {
+                    @for (r of rows(); track r.id) {
+                    <tr>
+                        <td>{{ r.created_at | date: 'yyyy-MM-dd HH:mm' }}</td>
+                        <td class="product">
+                            {{ r.product_name }}
+                            @if (r.sku) { <small>{{ r.sku }}</small> }
+                        </td>
+                        <td><span class="badge" [ngClass]="r.type">{{ typeLabel(r.type) }}</span></td>
+                        <td>{{ reasonLabel(r.reason) }}</td>
+                        <td class="num">
+                            <span class="delta" [ngClass]="rowDirection(r)">
+                                {{ rowDirection(r) === 'in' ? '+' : '−' }}{{ r.quantity }}
+                            </span>
+                        </td>
+                        <td class="num muted">{{ r.before_quantity }}</td>
+                        <td class="num strong">{{ r.after_quantity }}</td>
+                        <td class="note" [title]="r.note">{{ r.note || '—' }}</td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!loading() && total() > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <span class="f-14">Total: {{ total() }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+
+<!-- Adjust stock dialog -->
+@if (dialogOpen()) {
+<div class="sa-backdrop" (click)="closeDialog()"></div>
+<div class="sa-dialog" role="dialog" aria-label="Adjust stock">
+    <div class="sa-head">
+        <div>
+            <h3>Adjust Stock</h3>
+            <p>Entries are a permanent record — to correct one, post the opposite entry.</p>
+        </div>
+        <button class="sa-close" (click)="closeDialog()" title="Close"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="sa-body">
+        <div class="form-group sa-typeahead">
+            <label>Product <span class="text-danger">*</span></label>
+            <input #productInput type="text" [(ngModel)]="form.product" name="sa-product" autocomplete="off"
+                placeholder="Type a product name" (input)="onProductInput(form.product)"
+                (focus)="onProductInput(form.product)" (keydown)="onProductKeydown($event)" (blur)="onProductBlur()" />
+            @if (picked()) {
+            <span class="sa-picked"><i class="pi pi-check-circle"></i> {{ picked()!.quantity }} in stock</span>
+            }
+            @if (fieldError('product_id')) { <small class="text-danger">{{ fieldError('product_id') }}</small> }
+
+            @if (suggestOpen()) {
+            <div class="sa-suggest">
+                @if (searchingProduct()) {
+                <div class="sa-suggest-empty">Searching...</div>
+                } @else if (suggestions().length === 0) {
+                <div class="sa-suggest-empty">No matching product</div>
+                } @else {
+                @for (p of suggestions(); track p.id; let si = $index) {
+                <div class="sa-suggest-item" [class.active]="activeSuggestion() === si" (mousedown)="pickProduct(p)"
+                    (mouseenter)="activeSuggestion.set(si)">
+                    <span class="sa-suggest-name">{{ p.name }}</span>
+                    <span class="sa-suggest-meta">{{ p.quantity }} in stock</span>
+                </div>
+                }
+                }
+            </div>
+            }
+        </div>
+
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Movement</label>
+                    <ng-select [(ngModel)]="form.type" [items]="typeList" bindLabel="label" bindValue="value"
+                        [clearable]="false" (change)="onTypeChange()"></ng-select>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Reason</label>
+                    <ng-select [(ngModel)]="form.reason" [items]="reasonList" bindLabel="label" bindValue="value"
+                        [clearable]="false"></ng-select>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ form.type === 'recount' ? 'Counted total on the shelf' : 'Units' }}
+                        <span class="text-danger">*</span></label>
+                    <input #qtyInput type="number" min="0" [(ngModel)]="form.quantity" name="sa-qty"
+                        [class._inputError]="overDraw() || noChange() || !!fieldError('quantity')" />
+                    @if (fieldError('quantity')) { <small class="text-danger">{{ fieldError('quantity') }}</small> }
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>Note</label>
+                    <input type="text" [(ngModel)]="form.note" name="sa-note" placeholder="Optional" />
+                </div>
+            </div>
+        </div>
+
+        @if (picked()) {
+        <div class="sa-preview" [class.bad]="overDraw() || noChange()">
+            <div class="sa-preview-step">
+                <span>On file</span>
+                <strong>{{ picked()!.quantity }}</strong>
+            </div>
+            <i class="pi pi-arrow-right"></i>
+            <div class="sa-preview-step">
+                <span>After saving</span>
+                <strong [class.up]="(resultingQty() ?? 0) > picked()!.quantity"
+                    [class.down]="(resultingQty() ?? 0) < picked()!.quantity">{{ resultingQty() }}</strong>
+            </div>
+            @if (overDraw()) {
+            <span class="sa-preview-msg">Only {{ picked()!.quantity }} in stock.</span>
+            } @else if (noChange()) {
+            <span class="sa-preview-msg">That is already the figure on file.</span>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="sa-foot">
+        <button class="_cancel-btn" (click)="closeDialog()">Cancel</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="save()">
+            {{ saving() ? 'Saving...' : 'Save Adjustment' }}
+        </button>
+    </div>
+</div>
+}

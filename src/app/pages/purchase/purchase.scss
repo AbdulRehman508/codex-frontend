@@ -1,0 +1,59 @@
+.purchase-section {
+    .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 18px;
+
+        h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--black);
+            margin: 0;
+        }
+
+        p {
+            font-size: 13px;
+            color: var(--fullGray);
+            margin: 4px 0 0;
+        }
+    }
+
+    .section-tabs {
+        display: inline-flex;
+        gap: 4px;
+        padding: 4px;
+        border: 1px solid var(--borderColor);
+        border-radius: 10px;
+        background: var(--white);
+    }
+
+    .section-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--fullGray);
+        text-decoration: none;
+        transition: background-color .15s ease, color .15s ease;
+
+        i {
+            font-size: 13px;
+        }
+
+        &:hover {
+            background: var(--lightGrayBG);
+            color: var(--black);
+        }
+
+        &.active {
+            background: var(--secondary);
+            color: var(--primary);
+        }
+    }
+}

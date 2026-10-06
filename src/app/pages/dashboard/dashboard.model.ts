@@ -15,6 +15,10 @@ export interface DashboardOverview {
     refunds: Compared;
     /** what customers owe right now — a balance, not a period figure */
     outstanding_borrow: number;
+    /** value of the stock bought in from suppliers during the period */
+    purchases: Compared;
+    /** what this office owes suppliers right now — also a balance */
+    outstanding_payable: number;
   };
   /** only buckets that had sales; the page fills the empty ones */
   trend: { bucket: string; revenue: number; orders: number }[];

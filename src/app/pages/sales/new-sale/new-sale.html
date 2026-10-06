@@ -107,8 +107,9 @@
         <div class="ns-quick">
             <div class="ns-quick-prod ns-typeahead">
                 <label>Product</label>
+                @if (scanning()) { <span class="ns-scanning"><i class="pi pi-spin pi-spinner"></i> looking up…</span> }
                 <input #productInput type="text" [(ngModel)]="quick.product" name="quick-prod-{{ tab.id }}"
-                    placeholder="Type a product name" autocomplete="off"
+                    placeholder="Scan barcode or type a product name" autocomplete="off"
                     [class.ns-has-badge]="!!quick.product_id"
                     (input)="onProductInput(quick.product)" (focus)="onProductInput(quick.product)"
                     (keydown)="onProductKeydown($event)" (blur)="onProductBlur()" />
