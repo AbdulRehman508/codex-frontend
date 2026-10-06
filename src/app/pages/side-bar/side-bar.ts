@@ -32,8 +32,9 @@ export class SideBar {
     { label: 'Dashboard', icon: this.ImageIcon.home_icon, url: '/dashboard' },
     { label: 'Product', icon: this.ImageIcon.list_icon, url: '/product', module: 'products' },
     { label: 'Sales', icon: this.ImageIcon.sale_icon, url: '/sales', module: 'sales' },
-    // parked until these modules are finished (see access.constants.ts too)
-    // { label: 'Stock', icon: this.ImageIcon.stock_icon, url: '/stock', module: 'stock' },
+    { label: 'Purchase', icon: this.ImageIcon.stock_icon, url: '/purchase', anyOf: ['purchase', 'supplier'] },
+    { label: 'Stock', icon: this.ImageIcon.stock_icon, url: '/stock', module: 'stock' },
+    // parked until this module is finished (see access.constants.ts too)
     { label: 'Report', icon: this.ImageIcon.report_icon, url: '/report', module: 'reports' },
     { label: 'Location', icon: this.ImageIcon.location_icon, url: '/location', module: 'location' },
     // { label: 'Trace Product', icon: this.ImageIcon.find_icon, url: '/trace-product' },

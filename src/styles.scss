@@ -4,19 +4,23 @@
 @use "../public/assets/scss/index";
 @use "primeicons/primeicons.css";
 
-/* ---- Thermal receipt printing ----
-   Only #printArea reaches the paper, on an 80mm roll whose height grows with
-   the number of lines sold (no fixed page, no blank tail). */
+/* ---- Printing ----
+   Only #printArea reaches the paper. Two paper shapes share the rule: reports
+   print on a normal sheet, receipts on an 80mm roll that grows with the bill
+   (a named @page, because @page itself cannot be scoped by selector). */
 @media print {
     @page {
+        size: auto;
+        margin: 12mm 10mm;
+    }
+
+    @page receipt {
         size: 80mm auto;
-        // wider side margins so nothing sits on the paper edge
         margin: 4mm 6mm;
     }
 
     html,
     body {
-        width: 68mm;
         margin: 0;
         padding: 0;
         background: #fff;
@@ -36,6 +40,12 @@
         position: absolute;
         left: 0;
         top: 0;
+        width: 100%;
+    }
+
+    // the thermal slip opts into the narrow roll
+    #printArea.pos-receipt {
+        page: receipt;
         width: 68mm;
     }
 }

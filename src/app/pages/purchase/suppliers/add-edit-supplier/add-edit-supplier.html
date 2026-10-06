@@ -1,0 +1,136 @@
+<div class="sf-head">
+    <div>
+        <p class="f-16 _fw-600 mb-0">{{ pageTitle }}</p>
+        <p class="sf-sub">Suppliers are saved against the office picked in the header.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="_cancel-btn" (click)="close()">Cancel</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="saveSupplier()">
+            {{ saving() ? 'Saving...' : 'Save' }}
+        </button>
+    </div>
+</div>
+
+<form [formGroup]="supplierForm">
+    <div class="row">
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="name">Name <span class="text-danger">*</span></label>
+                <input type="text" id="name" formControlName="name"
+                    [ngClass]="{ _inputError: (submitted && supplierForm.controls['name'].invalid) || fieldError('name') }">
+                @if (submitted && supplierForm.controls['name'].invalid) {
+                <small class="text-danger">Name is required</small>
+                }
+                @if (fieldError('name')) { <small class="text-danger">{{ fieldError('name') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="company">Company</label>
+                <input type="text" id="company" formControlName="company"
+                    [ngClass]="{ _inputError: fieldError('company') }">
+                @if (fieldError('company')) { <small class="text-danger">{{ fieldError('company') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="mobile_no">Mobile No <span class="text-danger">*</span></label>
+                <input type="text" id="mobile_no" formControlName="mobile_no"
+                    [ngClass]="{ _inputError: (submitted && supplierForm.controls['mobile_no'].invalid) || fieldError('mobile_no') }">
+                @if (submitted && supplierForm.controls['mobile_no'].invalid) {
+                <small class="text-danger">Mobile no is required</small>
+                }
+                @if (fieldError('mobile_no')) { <small class="text-danger">{{ fieldError('mobile_no') }}</small> }
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" formControlName="email"
+                    [ngClass]="{ _inputError: (submitted && supplierForm.controls['email'].invalid) || fieldError('email') }">
+                @if (submitted && supplierForm.controls['email'].hasError('email')) {
+                <small class="text-danger">Enter a valid email or leave it blank</small>
+                }
+                @if (fieldError('email')) { <small class="text-danger">{{ fieldError('email') }}</small> }
+                <small class="d-block text-muted">Optional</small>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="status">Status</label>
+                <ng-select formControlName="status" [items]="statusList" placeholder="Select Status"></ng-select>
+            </div>
+        </div>
+
+        <!-- settlement: only when editing a supplier this branch still owes -->
+        @if (supplierId && payableAmount() > 0) {
+        <div class="col-sm-12">
+            <div class="payable-card">
+                <div class="payable-card-head">
+                    <span class="payable-card-icon"><i class="pi pi-wallet"></i></span>
+                    <div>
+                        <p class="payable-card-title">Outstanding Payable</p>
+                        <p class="payable-card-sub">Record a payment made to this supplier</p>
+                    </div>
+                </div>
+
+                <div class="payable-calc">
+                    <div class="payable-stat">
+                        <span class="payable-stat-label">Payable</span>
+                        <span class="payable-stat-value owed">{{ payableAmount() | number: '1.2-2' }}</span>
+                    </div>
+
+                    <span class="payable-op">−</span>
+
+                    <div class="payable-pay">
+                        <label for="pay_amount" class="payable-stat-label">Pay now</label>
+                        <div class="payable-pay-input" [class.invalid]="overPaying() || fieldError('amount')">
+                            <input type="number" id="pay_amount" min="0" step="0.01" placeholder="0.00"
+                                [ngModel]="payAmount()" (ngModelChange)="payAmount.set($event)"
+                                [ngModelOptions]="{ standalone: true }" />
+                            <button type="button" class="payable-full" (click)="payFull()">Pay full</button>
+                        </div>
+                    </div>
+
+                    <span class="payable-op">=</span>
+
+                    <div class="payable-stat">
+                        <span class="payable-stat-label">Remaining</span>
+                        <span class="payable-stat-value" [class.cleared]="remainingPayable() === 0">
+                            {{ remainingPayable() | number: '1.2-2' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="payable-progress">
+                    <div class="payable-progress-bar" [style.width.%]="clearedPct()"></div>
+                </div>
+                <div class="payable-foot">
+                    @if (overPaying()) {
+                    <span class="payable-error">Can't pay more than {{ payableAmount() | number: '1.2-2' }}</span>
+                    } @else if (fieldError('amount')) {
+                    <span class="payable-error">{{ fieldError('amount') }}</span>
+                    } @else if (remainingPayable() === 0) {
+                    <span class="payable-done"><i class="pi pi-check-circle"></i> Balance fully cleared</span>
+                    } @else {
+                    <span class="payable-hint">{{ clearedPct() | number: '1.0-0' }}% cleared with this payment</span>
+                    }
+                </div>
+            </div>
+        </div>
+        }
+
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" formControlName="address">
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea formControlName="notes" cols="20" rows="4"></textarea>
+            </div>
+        </div>
+    </div>
+</form>

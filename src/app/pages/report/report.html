@@ -1,1 +1,205 @@
-<p>report works!</p>
+<div class="reports">
+
+    <div class="rep-head">
+        <div>
+            <h2>Reports</h2>
+            <p>Sales, margin, stock, receivables and payables for the selected office.</p>
+        </div>
+        <div class="rep-actions">
+            <button type="button" class="_outline-btn" [disabled]="busy() || !hasOffice()" (click)="exportCsv()">
+                <i class="pi pi-download"></i> Export CSV
+            </button>
+            <button type="button" class="_primary-btn" [disabled]="busy() || !hasOffice()" (click)="print()">
+                <i class="pi pi-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    <!-- which report -->
+    <div class="rep-tabs" role="tablist">
+        @for (t of tabs; track t.key) {
+        <button type="button" class="rep-tab" role="tab" [class.active]="tab().key === t.key"
+            [attr.aria-selected]="tab().key === t.key" (click)="selectTab(t)">
+            <i [class]="t.icon"></i> {{ t.label }}
+        </button>
+        }
+    </div>
+
+    <!-- one filter row, scoping everything below it -->
+    <div class="rep-filters">
+        @if (tab().periodic) {
+        <div class="rep-field date-range">
+            <label>Date Range</label>
+            <p-datepicker [(ngModel)]="dateRange" name="rep-range" selectionMode="range" dateFormat="dd-mm-yy"
+                placeholder="All time" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
+                appendTo="body" (onSelect)="onDateRangeChange()" (onClear)="onDateRangeChange()">
+            </p-datepicker>
+        </div>
+        <div class="rep-presets">
+            <button type="button" (click)="setPreset(1)">Today</button>
+            <button type="button" (click)="setPreset(7)">7d</button>
+            <button type="button" (click)="setPreset(30)">30d</button>
+            <button type="button" (click)="setPreset(90)">90d</button>
+        </div>
+        }
+
+        <div class="rep-field">
+            <label>Search</label>
+            <div class="position-relative">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="rep-search"
+                    class="_input-icon custom-placeholder"
+                    [placeholder]="tab().key === 'sales' ? 'Invoice / customer' :
+                                   tab().key === 'receivables' ? 'Name / mobile' :
+                                   tab().key === 'payables' ? 'Supplier / company / mobile' : 'Product / SKU'" />
+                <i class="pi pi-search _search-icon f-14"></i>
+                @if (searchTerm) {
+                <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
+                }
+            </div>
+        </div>
+
+        @if (tab().key === 'sales') {
+        <div class="rep-field">
+            <label>Status</label>
+            <ng-select [(ngModel)]="statusFilter" [items]="statusList" placeholder="All"
+                (change)="onFilterChange()"></ng-select>
+        </div>
+        <div class="rep-field">
+            <label>Payment</label>
+            <ng-select [(ngModel)]="paymentFilter" [items]="paymentList" bindLabel="label" bindValue="value"
+                placeholder="All" (change)="onFilterChange()"></ng-select>
+        </div>
+        <label class="rep-check">
+            <input type="checkbox" class="form-check-input" [(ngModel)]="borrowOnly" (change)="onFilterChange()" />
+            <span>Credit bills only</span>
+        </label>
+        }
+
+        @if (tab().key === 'stock') {
+        <label class="rep-check">
+            <input type="checkbox" class="form-check-input" [(ngModel)]="lowOnly" (change)="onFilterChange()" />
+            <span>Low stock only</span>
+        </label>
+        }
+
+        <button type="button" class="_outline-btn rep-reset" (click)="clearFilters()">Reset</button>
+    </div>
+
+    @if (!tab().periodic) {
+    <p class="rep-note"><i class="pi pi-info-circle"></i> Stock is a snapshot of right now, so a date range does not apply.</p>
+    }
+    @if (tab().note) {
+    <p class="rep-note"><i class="pi pi-info-circle"></i> {{ tab().note }}</p>
+    }
+
+    @if (!hasOffice()) {
+    <div class="panel rep-empty">
+        <i class="pi pi-building"></i>
+        <p>Pick an office from the "Select Office" dropdown in the top bar.</p>
+    </div>
+    } @else {
+    <div class="rep-body" [class.refetching]="loading()">
+
+        <!-- totals for exactly what the filters match -->
+        <div class="tile-grid">
+            @for (tile of tab().tiles; track tile.key) {
+            <div class="tile" [ngClass]="tile.tone ?? ''">
+                <p class="tile-label">{{ tile.label }}</p>
+                <p class="tile-value">{{ tileValue(tile) }}</p>
+            </div>
+            }
+        </div>
+
+        <div class="panel">
+            <div class="table-wrap">
+                <table class="rep-table">
+                    <thead>
+                        <tr>
+                            @for (col of tab().columns; track col.key) {
+                            <th [class.num]="col.right" [class.cursor-pointer]="col.sort" (click)="changeSort(col)">
+                                {{ col.label }}
+                                @if (col.sort) {
+                                <i class="pi"
+                                    [ngClass]="sort() === col.sort ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                                }
+                            </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (loading() && !rows().length) {
+                        <tr><td [attr.colspan]="tab().columns.length" class="empty">Loading...</td></tr>
+                        } @else if (!rows().length) {
+                        <tr><td [attr.colspan]="tab().columns.length" class="empty">No rows for these filters.</td></tr>
+                        } @else {
+                        @for (row of rows(); track $index) {
+                        <tr>
+                            @for (col of tab().columns; track col.key) {
+                            <td [class.num]="col.right">
+                                @if (col.type === 'badge') {
+                                <span class="badge" [ngClass]="cell(row, col)">{{ cell(row, col) }}</span>
+                                } @else if (col.type === 'capital') {
+                                <span class="text-capitalize">{{ cell(row, col) }}</span>
+                                } @else {
+                                {{ cell(row, col) }}
+                                }
+                            </td>
+                            }
+                        </tr>
+                        }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (total() > 0) {
+            <div class="d-flex align-items-center justify-content-between mt-3">
+                <span class="f-14">{{ total() }} row(s) · {{ periodLabel() }}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+                    <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+                    <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+    }
+</div>
+
+<!-- printed sheet: hidden on screen, the only thing @media print shows -->
+@if (printRows().length) {
+<div id="printArea" class="rep-print">
+    <div class="rep-print-head">
+        <h1>{{ tab().label }} Report</h1>
+        <p>{{ periodLabel() }} · printed {{ printedAt() | date: 'dd MMM yyyy HH:mm' }}</p>
+    </div>
+
+    <div class="rep-print-summary">
+        @for (tile of tab().tiles; track tile.key) {
+        <div><span>{{ tile.label }}</span><strong>{{ tileValue(tile) }}</strong></div>
+        }
+    </div>
+
+    <table class="rep-print-table">
+        <thead>
+            <tr>
+                @for (col of tab().columns; track col.key) {
+                <th [class.num]="col.right">{{ col.label }}</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @for (row of printRows(); track $index) {
+            <tr>
+                @for (col of tab().columns; track col.key) {
+                <td [class.num]="col.right">{{ cell(row, col) }}</td>
+                }
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <p class="rep-print-foot">{{ printRows().length }} row(s)</p>
+</div>
+}

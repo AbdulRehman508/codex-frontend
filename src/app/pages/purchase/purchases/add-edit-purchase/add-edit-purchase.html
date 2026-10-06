@@ -1,0 +1,193 @@
+<div class="pf-page">
+
+    <!-- Header -->
+    <div class="pf-head">
+        <div>
+            <h3>{{ pageTitle }}</h3>
+            @if (purchaseNo()) {
+            <p class="pf-sub">Bill <strong>{{ purchaseNo() }}</strong></p>
+            } @else {
+            <p class="pf-sub">Received stock is added to the branch inventory on save.</p>
+            }
+        </div>
+        <div class="d-flex gap-2">
+            <button class="_cancel-btn" (click)="cancel()">Cancel</button>
+            <button class="_primary-btn" [disabled]="saving() || loading()" (click)="save()">
+                {{ saving() ? 'Saving...' : 'Save Purchase' }}
+            </button>
+        </div>
+    </div>
+
+    @if (!hasOffice()) {
+    <div class="pf-notice">Pick an office from the "Select Office" dropdown in the top bar first.</div>
+    }
+
+    <!-- Supplier / bill header -->
+    <div class="pf-card">
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label>Supplier <span class="text-danger">*</span></label>
+                    <ng-select [(ngModel)]="supplierId" [items]="suppliers()" bindLabel="name" bindValue="id"
+                        placeholder="Select supplier" [class._inputError]="!!fieldError('supplier_id')">
+                        <ng-template ng-option-tmp let-item="item">
+                            <div class="pf-supplier-opt">
+                                <span>{{ item.name }}</span>
+                                <small>{{ item.company || item.mobile_no }}</small>
+                            </div>
+                        </ng-template>
+                    </ng-select>
+                    @if (fieldError('supplier_id')) { <small class="text-danger">{{ fieldError('supplier_id') }}</small> }
+                    <small class="d-block text-muted">
+                        Missing one? <a routerLink="/purchase/suppliers/add">Add a supplier</a>
+                    </small>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label>Supplier Invoice No</label>
+                    <input type="text" [(ngModel)]="supplierInvoiceNo" name="supplier-invoice"
+                        placeholder="As printed on their bill" />
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label>Status</label>
+                    <ng-select [(ngModel)]="status" [items]="statusList" bindLabel="label" bindValue="value"
+                        [clearable]="false" placeholder="Status"></ng-select>
+                    <small class="d-block text-muted">Only "Received" moves stock and the payable.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Items -->
+    <div class="pf-card">
+        <p class="pf-card-title">Items</p>
+
+        <!-- quick add: type, pick, qty, cost, Enter -->
+        <div class="pf-quick">
+            <div class="pf-quick-prod pf-typeahead">
+                <label>Product</label>
+                <input #productInput type="text" [(ngModel)]="quick.product" name="quick-prod" autocomplete="off"
+                    placeholder="Type a product name" (input)="onProductInput(quick.product)"
+                    (focus)="onProductInput(quick.product)" (keydown)="onProductKeydown($event)"
+                    (blur)="onProductBlur()" />
+                @if (quick.product_id) {
+                <span class="pf-picked" title="Product linked"><i class="pi pi-check-circle"></i> linked</span>
+                }
+
+                @if (suggestOpen()) {
+                <div class="pf-suggest">
+                    @if (searching()) {
+                    <div class="pf-suggest-empty">Searching...</div>
+                    } @else if (suggestions().length === 0) {
+                    <div class="pf-suggest-empty">No matching product</div>
+                    } @else {
+                    @for (p of suggestions(); track p.id; let si = $index) {
+                    <div class="pf-suggest-item" [class.active]="activeSuggestion() === si" (mousedown)="pickProduct(p)"
+                        (mouseenter)="activeSuggestion.set(si)">
+                        <span class="pf-suggest-name">{{ p.name }}</span>
+                        <span class="pf-suggest-meta">{{ p.quantity }} in stock</span>
+                    </div>
+                    }
+                    }
+                </div>
+                }
+            </div>
+
+            <div class="pf-quick-num">
+                <label>Qty</label>
+                <input #qtyInput type="number" min="1" [(ngModel)]="quick.qty" name="quick-qty"
+                    (keydown)="onQtyKeydown($event)" />
+            </div>
+
+            <div class="pf-quick-num">
+                <label>Cost Price</label>
+                <input #costInput type="number" min="0" step="0.01" [(ngModel)]="quick.cost" name="quick-cost"
+                    (keydown)="onCostKeydown($event)" />
+            </div>
+
+            <button type="button" class="_primary-btn pf-quick-add" (click)="addQuickLine()">
+                <i class="pi pi-plus"></i> Add
+            </button>
+        </div>
+
+        <div class="pf-lines">
+            <div class="pf-lines-head">
+                <span class="col-prod">Product</span>
+                <span class="col-num">Qty</span>
+                <span class="col-num">Cost</span>
+                <span class="col-total">Line Total</span>
+                <span class="col-act"></span>
+            </div>
+
+            @for (line of lines(); track $index; let i = $index) {
+            <div class="pf-line">
+                <!-- product is fixed once added: remove the row to change it -->
+                <span class="col-prod pf-line-name" [title]="line.name">
+                    {{ line.name }}
+                    @if (line.sku) { <small>{{ line.sku }}</small> }
+                </span>
+                <input class="col-num" type="number" min="1" [ngModel]="line.qty"
+                    (ngModelChange)="updateLine(i, { qty: $event })" name="qty-{{ i }}" />
+                <input class="col-num" type="number" min="0" step="0.01" [ngModel]="line.cost"
+                    (ngModelChange)="updateLine(i, { cost: $event })" name="cost-{{ i }}" />
+                <span class="col-total">{{ lineTotal(line) | number: '1.2-2' }}</span>
+                <i class="pi pi-trash col-act pf-line-del" (click)="removeLine(i)" title="Remove"></i>
+            </div>
+            } @empty {
+            <p class="pf-line-empty">No items yet — add one from the row above.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Totals + notes -->
+    <div class="pf-bottom">
+        <div class="pf-card pf-notes">
+            <div class="form-group mb-0">
+                <label>Notes</label>
+                <textarea rows="5" [(ngModel)]="notes" name="notes"
+                    placeholder="Anything worth remembering about this delivery"></textarea>
+            </div>
+        </div>
+
+        <div class="pf-card pf-totals">
+            <div class="pf-total-row">
+                <span>Subtotal</span>
+                <strong>{{ subtotal() | number: '1.2-2' }}</strong>
+            </div>
+            <div class="pf-total-row">
+                <label for="discount">Discount</label>
+                <input id="discount" type="number" min="0" step="0.01" [(ngModel)]="discount" name="discount"
+                    [class.invalid]="discountTooBig()" />
+            </div>
+            @if (discountTooBig()) {
+            <p class="pf-err">Discount is more than the subtotal.</p>
+            }
+            <div class="pf-total-row grand">
+                <span>Total</span>
+                <strong>{{ total() | number: '1.2-2' }}</strong>
+            </div>
+            <div class="pf-total-row">
+                <label for="paid">Paid now</label>
+                <div class="pf-paid-input" [class.invalid]="overPaid()">
+                    <input id="paid" type="number" min="0" step="0.01" [ngModel]="paid"
+                        (ngModelChange)="onPaidChange($event)" name="paid" placeholder="0.00" />
+                    <button type="button" (click)="payFull()" title="Pay the bill in full">Full</button>
+                    <button type="button" (click)="payNothing()" title="Pay nothing now — all on credit">None</button>
+                </div>
+            </div>
+            @if (overPaid()) {
+            <p class="pf-err">Paid is more than the total.</p>
+            }
+            <div class="pf-total-row payable">
+                <span>Payable to supplier</span>
+                <strong>{{ due() | number: '1.2-2' }}</strong>
+            </div>
+            @if (fieldError('paid_amount')) { <p class="pf-err">{{ fieldError('paid_amount') }}</p> }
+            @if (fieldError('discount')) { <p class="pf-err">{{ fieldError('discount') }}</p> }
+            @if (fieldError('lines')) { <p class="pf-err">{{ fieldError('lines') }}</p> }
+        </div>
+    </div>
+</div>

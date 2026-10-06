@@ -101,6 +101,8 @@ export class NewSale {
   /** which suggestion ↑/↓ has landed on; Enter takes it */
   activeSuggestion = signal(0);
   searching = signal(false);
+  /** a scanned barcode is being looked up */
+  scanning = signal(false);
   private search$ = new Subject<string>();
 
   @ViewChild('productInput') productInput?: ElementRef<HTMLInputElement>;
@@ -425,7 +427,45 @@ export class NewSale {
       this.pickProduct(highlighted);
     } else if (this.quick.product_id) {
       this.addQuickLine();
+    } else {
+      // nothing picked: a scanner just typed a barcode and hit Enter
+      this.addByBarcode(this.quick.product);
     }
+  }
+
+  /**
+   * Barcode scanners type the code and send Enter, far faster than the
+   * typeahead debounce. Look the code up exactly and put it straight on the
+   * bill, so the counter never touches the mouse.
+   */
+  private addByBarcode(code: string) {
+    const barcode = code.trim();
+    if (!barcode) return;
+    this.scanning.set(true);
+    this.productApi
+      .listProducts({
+        office_id: this.ctx.selectedOfficeId() ?? undefined,
+        barcode,
+        status: 'active',
+        limit: 1,
+      })
+      .subscribe({
+        next: (res) => {
+          this.scanning.set(false);
+          const hit = res.data[0];
+          if (!hit) {
+            this.toast.add({ severity: 'warn', summary: 'Not found', detail: `No active product with barcode "${barcode}"` });
+            this.focus(this.productInput, true);
+            return;
+          }
+          this.pickProduct(hit);
+          this.addQuickLine();
+        },
+        error: () => {
+          this.scanning.set(false);
+          this.toast.add({ severity: 'error', summary: 'Error', detail: 'Barcode lookup failed' });
+        },
+      });
   }
 
   /** Enter in the qty box adds the item too */

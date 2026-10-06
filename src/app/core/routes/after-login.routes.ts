@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { userRoutes } from './user.routes';
+import { purchaseRoutes } from './purchase.routes';
 import { settingRoutes } from './setting.routes';
 import { accessGuard } from '../guards/access.guard';
 
@@ -51,6 +52,14 @@ export const afterLoginRoutes: Routes = [
         data: { module: 'sales' },
         loadComponent: () =>
           import('../../pages/sales/sales').then((c) => c.Sales),
+      },
+      {
+        path: 'purchase',
+        canActivate: [accessGuard],
+        data: { anyOf: ['purchase', 'supplier'] },
+        loadComponent: () =>
+          import('../../pages/purchase/purchase').then((c) => c.PurchaseSection),
+        children: [...purchaseRoutes],
       },
       {
         path: 'stock',

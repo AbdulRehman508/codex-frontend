@@ -1,0 +1,13 @@
+<div class="nf">
+    <p class="nf-code">404</p>
+    <h1>Page not found</h1>
+    <p class="nf-text">
+        The page you are looking for was moved, removed, or never existed.
+    </p>
+    <div class="nf-actions">
+        <button type="button" class="_cancel-btn" (click)="back()">Go back</button>
+        <a class="_primary-btn" [routerLink]="homeLink">
+            {{ homeLink === '/login' ? 'Sign in' : 'Dashboard' }}
+        </a>
+    </div>
+</div>

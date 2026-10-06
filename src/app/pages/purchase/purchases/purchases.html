@@ -1,0 +1,141 @@
+<div class="purchases-page">
+
+    <!-- Filters: the widgets below follow whatever is set here -->
+    <div class="filter-bar">
+        <div class="filter-field">
+            <label>Search</label>
+            <div class="position-relative">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="purchase-search"
+                    class="_input-icon custom-placeholder" placeholder="Search bill / supplier" />
+                <i class="pi pi-search _search-icon f-14"></i>
+                @if (searchTerm) {
+                <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
+                }
+            </div>
+        </div>
+        <div class="filter-field date-range">
+            <label>Date Range</label>
+            <p-datepicker [(ngModel)]="dateRange" name="date-range" selectionMode="range" dateFormat="dd-mm-yy"
+                placeholder="Select date range" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
+                appendTo="body" (onSelect)="onDateRangeChange()" (onClear)="onDateRangeChange()">
+            </p-datepicker>
+        </div>
+        <div class="filter-field">
+            <label>Supplier</label>
+            <ng-select [(ngModel)]="supplierFilter" [items]="suppliers()" bindLabel="name" bindValue="id"
+                placeholder="All suppliers" (change)="onFilterChange()">
+            </ng-select>
+        </div>
+        <div class="filter-field">
+            <label>Status</label>
+            <ng-select [(ngModel)]="statusFilter" [items]="statusList" bindLabel="label" bindValue="value"
+                placeholder="All statuses" (change)="onFilterChange()">
+            </ng-select>
+        </div>
+        <label class="filter-toggle" title="Only bills with something still payable">
+            <input type="checkbox" class="form-check-input" [(ngModel)]="dueOnly" (change)="onFilterChange()" />
+            <span>Unpaid only</span>
+        </label>
+        <button class="_outline-btn filter-reset" (click)="clearSearch()">Reset</button>
+
+        <div class="filter-spacer"></div>
+
+        @if (perm.can(module, 'create')) {
+        <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/purchase/list/add']"
+            [title]="hasOffice() ? 'Record a purchase' : 'Select an office in the header first'">New Purchase</button>
+        }
+    </div>
+
+    <!-- Stat chips -->
+    <div class="stat-grid">
+        @for (s of stats(); track s.label) {
+        <div class="stat-card">
+            <div class="stat-icon" [ngClass]="s.tone">
+                <i [class]="s.icon"></i>
+            </div>
+            <div class="stat-body">
+                <p class="stat-label">{{ s.label }}</p>
+                <h3 class="stat-value">{{ s.value }}</h3>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Purchases table -->
+    <div class="panel">
+        <div class="table-wrap">
+            <table class="purchase-table">
+                <thead>
+                    <tr>
+                        <th class="cursor-pointer" (click)="changeSort('purchase_no')">
+                            Bill No <i class="pi" [ngClass]="sort() === 'purchase_no' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        </th>
+                        <th class="cursor-pointer" (click)="changeSort('created_at')">
+                            Date <i class="pi" [ngClass]="sort() === 'created_at' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        </th>
+                        <th class="cursor-pointer" (click)="changeSort('supplier_name')">
+                            Supplier <i class="pi" [ngClass]="sort() === 'supplier_name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        </th>
+                        <th>Their Invoice</th>
+                        <th class="cursor-pointer" (click)="changeSort('items_count')">Items</th>
+                        <th class="cursor-pointer" (click)="changeSort('total')">Total</th>
+                        <th class="cursor-pointer" (click)="changeSort('paid_amount')">Paid</th>
+                        <th class="cursor-pointer" (click)="changeSort('due_amount')">Payable</th>
+                        <th class="cursor-pointer" (click)="changeSort('status')">Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (loading()) {
+                    <tr><td colspan="10" class="empty">Loading...</td></tr>
+                    } @else if (!hasOffice()) {
+                    <tr><td colspan="10" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
+                    } @else if (rows().length === 0) {
+                    <tr><td colspan="10" class="empty">No purchases found.</td></tr>
+                    } @else {
+                    @for (p of rows(); track p.id) {
+                    <tr>
+                        <td class="bill-no">{{ p.purchase_no }}</td>
+                        <td>{{ p.created_at | date: 'yyyy-MM-dd HH:mm' }}</td>
+                        <td>{{ p.supplier_name }}</td>
+                        <td>{{ p.supplier_invoice_no || '—' }}</td>
+                        <td>{{ p.items_count }}</td>
+                        <td class="amount">{{ p.total | number: '1.2-2' }}</td>
+                        <td class="amount">{{ p.paid_amount | number: '1.2-2' }}</td>
+                        <td class="amount">
+                            @if (p.due_amount > 0) {
+                            <span class="badge due">{{ p.due_amount | number: '1.2-2' }}</span>
+                            } @else { — }
+                        </td>
+                        <td><span class="badge" [ngClass]="p.status">{{ p.status }}</span></td>
+                        <td>
+                            @if (perm.can(module, 'edit')) {
+                            <button class="ns-edit-btn" [routerLink]="['/purchase/list/edit', p.id]" title="Edit purchase">
+                                <i class="pi pi-pencil"></i>
+                            </button>
+                            }
+                            @if (perm.can(module, 'delete')) {
+                            <button class="ns-edit-btn" (click)="deletePurchase(p)" title="Delete (reverses stock)">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                            }
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!loading() && total() > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <span class="f-14">Total: {{ total() }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            </div>
+        </div>
+        }
+    </div>
+</div>

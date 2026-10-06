@@ -2,6 +2,7 @@ import { HttpInterceptorFn } from '@angular/common/http';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
+import { MessageService } from 'primeng/api';
 import { catchError, throwError } from 'rxjs';
 import { TokenService } from '../services/token.service';
 
@@ -17,6 +18,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   const tokenService = inject(TokenService);
   const router = inject(Router);
+  const toast = inject(MessageService);
   const token = tokenService.getToken();
 
   const authReq = token
@@ -28,6 +30,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (err?.status === 401) {
         tokenService.clearSession();
         router.navigateByUrl('/login');
+      }
+      // the server enforces the permission matrix too, so a stale screen can
+      // still hit a wall — say so plainly instead of failing silently
+      if (err?.status === 403) {
+        toast.add({
+          severity: 'warn',
+          summary: 'Not allowed',
+          detail: err?.error?.message ?? 'You do not have permission for this action',
+        });
       }
       return throwError(() => err);
     })

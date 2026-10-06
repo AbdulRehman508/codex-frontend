@@ -1,0 +1,117 @@
+<div class="suppliers-page">
+
+    <div class="filter-bar">
+        <div class="filter-field">
+            <label>Search</label>
+            <div class="position-relative">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="supplier-search"
+                    class="_input-icon custom-placeholder" placeholder="Search name / company / mobile" />
+                <i class="pi pi-search _search-icon f-14"></i>
+                @if (searchTerm) {
+                <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
+                }
+            </div>
+        </div>
+        <div class="filter-field">
+            <label>Status</label>
+            <ng-select [(ngModel)]="statusFilter" [items]="statusList" placeholder="All statuses"
+                (change)="onFilterChange()"></ng-select>
+        </div>
+        <button class="_outline-btn filter-reset" (click)="clearSearch()">Reset</button>
+
+        <div class="filter-spacer"></div>
+
+        @if (perm.can(module, 'create')) {
+        <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/purchase/suppliers/add']"
+            [title]="hasOffice() ? 'Add a supplier' : 'Select an office in the header first'">Add Supplier</button>
+        }
+    </div>
+
+    <div class="panel">
+        <div class="table-wrap">
+            <table class="supplier-table">
+                <thead>
+                    <tr>
+                        <th class="cursor-pointer" (click)="changeSort('name')">
+                            Name <i class="pi" [ngClass]="sort() === 'name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        </th>
+                        <th class="cursor-pointer" (click)="changeSort('company')">Company</th>
+                        <th class="cursor-pointer" (click)="changeSort('mobile_no')">Mobile No</th>
+                        <th>Email</th>
+                        <th class="cursor-pointer" (click)="changeSort('payable_amount')">
+                            Payable <i class="pi" [ngClass]="sort() === 'payable_amount' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        </th>
+                        <th class="cursor-pointer" (click)="changeSort('status')">Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (loading()) {
+                    <tr><td colspan="7" class="empty">Loading...</td></tr>
+                    } @else if (!hasOffice()) {
+                    <tr><td colspan="7" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
+                    } @else if (rows().length === 0) {
+                    <tr><td colspan="7" class="empty">No suppliers yet.</td></tr>
+                    } @else {
+                    @for (s of rows(); track s.id) {
+                    <tr>
+                        <td class="name">{{ s.name }}</td>
+                        <td>{{ s.company || '—' }}</td>
+                        <td>{{ s.mobile_no }}</td>
+                        <td>{{ s.email ?? '—' }}</td>
+                        <td class="amount">
+                            @if (s.payable_amount > 0) {
+                            <span class="badge payable" title="Still owed to this supplier">
+                                {{ s.payable_amount | number: '1.2-2' }}
+                            </span>
+                            } @else {
+                            <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
+                                [ngClass]="s.status === 'active' ? 'active' : 'inactive'" (click)="toggleStatus(s)"
+                                [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">{{ s.status }}</span>
+                        </td>
+                        <td>
+                            @if (perm.can(module, 'edit')) {
+                            @if (s.payable_amount > 0) {
+                            <button class="ns-edit-btn pay" [routerLink]="['/purchase/suppliers/edit', s.id]"
+                                title="Record a payment">
+                                <i class="pi pi-wallet"></i>
+                            </button>
+                            }
+                            <button class="ns-edit-btn" [routerLink]="['/purchase/suppliers/edit', s.id]" title="Edit">
+                                <i class="pi pi-pencil"></i>
+                            </button>
+                            }
+                            @if (perm.can(module, 'delete')) {
+                            <button class="ns-edit-btn" (click)="deleteOne(s)" title="Delete">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                            }
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!loading() && total() > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <span class="f-14">
+                Total: {{ total() }}
+                @if (pagePayable() > 0) {
+                <span class="page-payable">· payable on this page {{ pagePayable() | number: '1.2-2' }}</span>
+                }
+            </span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            </div>
+        </div>
+        }
+    </div>
+</div>

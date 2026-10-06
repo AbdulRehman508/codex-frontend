@@ -139,6 +139,7 @@ export class Dashboard {
       this.tile('Orders', k.orders, 'pi pi-shopping-cart', 'info', true, false),
       this.tile('New Customers', k.new_customers, 'pi pi-users', 'green', true, false),
       this.tile('Refunds', k.refunds, 'pi pi-undo', 'danger', false, true),
+      this.tile('Purchases', k.purchases, 'pi pi-shopping-bag', 'info', false, true),
       {
         label: 'Outstanding Borrow',
         value: compact(k.outstanding_borrow),
@@ -147,7 +148,17 @@ export class Dashboard {
         tone: 'info',
         delta: null,
         upIsGood: false,
-        note: 'owed right now',
+        note: 'owed to you right now',
+      },
+      {
+        label: 'Supplier Payable',
+        value: compact(k.outstanding_payable),
+        title: money(k.outstanding_payable),
+        icon: 'pi pi-truck',
+        tone: 'danger',
+        delta: null,
+        upIsGood: false,
+        note: 'you owe right now',
       },
     ];
   });

@@ -1,0 +1,142 @@
+.suppliers-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 190px;
+
+    label {
+        font-size: 11px;
+        color: var(--lightDarkGray);
+    }
+
+    .position-relative input {
+        width: 100%;
+    }
+}
+
+.filter-reset {
+    flex: 0 0 auto;
+}
+
+/* pushes the add button to the far edge of the bar */
+.filter-spacer {
+    flex: 1 1 auto;
+}
+
+.panel {
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.supplier-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--lightDarkGray);
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--borderColor);
+        white-space: nowrap;
+    }
+
+    td {
+        padding: 14px 12px;
+        font-size: 13px;
+        color: var(--darkGray);
+        border-bottom: 1px solid var(--lightGrayBG);
+        white-space: nowrap;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tbody tr:hover {
+        background: var(--lightGrayBG);
+    }
+}
+
+.name {
+    font-weight: 600;
+    color: var(--black);
+}
+
+.amount {
+    font-weight: 600;
+}
+
+.empty {
+    text-align: center;
+    color: var(--lightDarkGray);
+    padding: 30px;
+}
+
+.page-payable {
+    color: var(--info);
+    margin-left: 4px;
+}
+
+.ns-edit-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--borderColor);
+    background: var(--white);
+    color: var(--primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    margin-right: 6px;
+    transition: background 150ms ease, border-color 150ms ease;
+
+    &:hover { background: var(--secondary); border-color: var(--primary); }
+
+    // the "money owed" action reads as a warning, not a neutral edit
+    &.pay {
+        color: var(--info);
+
+        &:hover { background: rgba(245, 114, 0, 0.1); border-color: var(--info); }
+    }
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+
+    &.active   { background: rgba(78, 197, 66, 0.14); color: #2f9e25; }
+    &.inactive { background: rgba(26, 47, 69, 0.08);  color: var(--fullGray); }
+    &.payable  { background: rgba(245, 114, 0, 0.14); color: var(--info); }
+}
