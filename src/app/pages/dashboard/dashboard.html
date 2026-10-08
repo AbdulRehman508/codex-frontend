@@ -274,7 +274,9 @@
                 <div class="stock-item">
                     <div class="stock-info">
                         <p class="product-name" [title]="s.name">{{ s.name }}</p>
-                        <span class="product-sold">{{ s.sku }}</span>
+                        <span class="product-sold">
+                            {{ s.sku }}@if (s.min_stock > 0) { · reorder at {{ s.min_stock }} }
+                        </span>
                     </div>
                     <!-- status carries a text label, never colour alone -->
                     <span class="stock-badge" [class.out]="s.quantity === 0">

@@ -531,3 +531,20 @@
     font-size: 11px;
     color: var(--primary);
 }
+
+/* tax breakdown above the total — quiet, the total stays the loud figure */
+.ns-tax {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    gap: 2px 16px;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--lightDarkGray);
+
+    strong {
+        text-align: right;
+        font-weight: 600;
+        color: var(--fullGray);
+    }
+}

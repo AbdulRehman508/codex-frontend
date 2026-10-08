@@ -22,6 +22,9 @@
         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
     </div>
     }
+    <button class="_outline-btn" (click)="openLabels()" title="Print shelf labels for the ticked products">
+        <i class="pi pi-tags"></i> Labels
+    </button>
     @if (perm.can(module, 'create')) {
     <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/product/add']"
         [title]="hasOffice() ? 'Add a product' : 'Select an office in the header first'">Add New</button>
@@ -110,3 +113,77 @@
     </div>
     }
 </div>
+
+<!-- Shelf labels: the dialog is screen-only, the sheet below it is what prints -->
+@if (labelDialogOpen()) {
+<div class="lb-backdrop no-print" (click)="closeLabels()"></div>
+<div class="lb-dialog no-print" role="dialog" aria-label="Print shelf labels">
+    <div class="lb-head">
+        <div>
+            <h3>Shelf Labels</h3>
+            <p>Barcodes come from each product's barcode, or its SKU when there is none.</p>
+        </div>
+        <button class="lb-close" (click)="closeLabels()" title="Close"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="lb-body">
+        @if (buildingLabels()) {
+        <p class="lb-empty">Building labels...</p>
+        } @else if (!labels().length) {
+        <p class="lb-empty">Nothing to print.</p>
+        } @else {
+        <div class="lb-controls">
+            <div class="lb-field">
+                <label for="lb-copies">Copies each</label>
+                <input id="lb-copies" type="number" min="1" max="50" [(ngModel)]="labelCopies" name="lb-copies" />
+            </div>
+            <label class="lb-toggle">
+                <input type="checkbox" class="form-check-input" [(ngModel)]="labelShowName" name="lb-name" />
+                <span>Product name</span>
+            </label>
+            <label class="lb-toggle">
+                <input type="checkbox" class="form-check-input" [(ngModel)]="labelShowPrice" name="lb-price" />
+                <span>Price</span>
+            </label>
+            <span class="lb-count">{{ labelSheet().length }} label(s)</span>
+        </div>
+
+        <div class="lb-preview">
+            @for (l of labelSheet(); track $index) {
+            <div class="lb-label">
+                @if (labelShowName) { <p class="lb-name" [title]="l.name">{{ l.name }}</p> }
+                @if (l.barcode_src) {
+                <img [src]="l.barcode_src" [alt]="l.code" />
+                } @else {
+                <p class="lb-nocode">{{ l.code }}</p>
+                }
+                @if (labelShowPrice) { <p class="lb-price">{{ l.price | number: '1.2-2' }}</p> }
+            </div>
+            }
+        </div>
+        }
+    </div>
+
+    <div class="lb-foot">
+        <button class="_cancel-btn" (click)="closeLabels()">Close</button>
+        <button class="_primary-btn" [disabled]="!labels().length" (click)="printLabels()">
+            <i class="pi pi-print"></i> Print
+        </button>
+    </div>
+</div>
+
+<!-- what the printer gets: labels only, no chrome -->
+<div id="labelSheet" class="lb-sheet">
+    @for (l of labelSheet(); track $index) {
+    <div class="lb-label">
+        @if (labelShowName) { <p class="lb-name">{{ l.name }}</p> }
+        @if (l.barcode_src) {
+        <img [src]="l.barcode_src" [alt]="l.code" />
+        } @else {
+        <p class="lb-nocode">{{ l.code }}</p>
+        }
+        @if (labelShowPrice) { <p class="lb-price">{{ l.price | number: '1.2-2' }}</p> }
+    </div>
+    }
+</div>
+}

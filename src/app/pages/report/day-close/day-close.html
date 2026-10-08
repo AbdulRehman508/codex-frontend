@@ -1,0 +1,133 @@
+<div class="dc-page">
+
+    <!-- controls: not printed -->
+    <div class="dc-bar no-print">
+        <div>
+            <a class="dc-back" routerLink="/report"><i class="pi pi-arrow-left"></i> Reports</a>
+            <h2>Day Close</h2>
+            <p>What the day came to: takings, credit given, money paid out and the cash drawer.</p>
+        </div>
+        <div class="dc-controls">
+            <button class="_outline-btn icon" (click)="shiftDay(-1)" title="Previous day">
+                <i class="pi pi-chevron-left"></i>
+            </button>
+            <p-datepicker [(ngModel)]="day" name="dc-day" dateFormat="dd-mm-yy" [maxDate]="today"
+                [readonlyInput]="true" appendTo="body" (onSelect)="onDateChange()"></p-datepicker>
+            <button class="_outline-btn icon" [disabled]="isToday()" (click)="shiftDay(1)" title="Next day">
+                <i class="pi pi-chevron-right"></i>
+            </button>
+            <button class="_outline-btn" [disabled]="isToday()" (click)="goToday()">Today</button>
+            <button class="_primary-btn" [disabled]="!data()" (click)="print()">
+                <i class="pi pi-print"></i> Print
+            </button>
+        </div>
+    </div>
+
+    @if (!hasOffice()) {
+    <div class="dc-sheet dc-empty no-print">
+        <i class="pi pi-building"></i>
+        <p>Pick an office from the "Select Office" dropdown in the top bar.</p>
+    </div>
+    } @else if (loading() && !data()) {
+    <div class="dc-sheet dc-empty no-print"><p>Loading...</p></div>
+    } @else if (data(); as d) {
+
+    <!-- the sheet itself: this is what prints -->
+    <div class="dc-sheet" [class.refetching]="loading()">
+        <div class="dc-head">
+            <div>
+                <h3>{{ officeName() || 'Day Close' }}</h3>
+                <p>Closing sheet for {{ d.date }} <span class="dc-tz">({{ d.tz }})</span></p>
+            </div>
+            @if (printedAt()) {
+            <p class="dc-stamp">Printed {{ printedAt() | date: 'yyyy-MM-dd HH:mm' }}</p>
+            }
+        </div>
+
+        <!-- the number a shopkeeper actually counts against -->
+        <div class="dc-drawer">
+            <div class="dc-drawer-main">
+                <span>Cash expected in drawer</span>
+                <strong>{{ d.cash_drawer.expected | number: '1.2-2' }}</strong>
+            </div>
+            <div class="dc-drawer-split">
+                <div><span>Cash in</span><strong>{{ d.cash_drawer.in | number: '1.2-2' }}</strong></div>
+                <div><span>Paid out</span><strong>−{{ d.cash_drawer.out | number: '1.2-2' }}</strong></div>
+            </div>
+            <p class="dc-note">Cash sales and debts settled today, less cash handed to suppliers. Online takings are not in the drawer.</p>
+        </div>
+
+        <div class="dc-grid">
+            <section class="dc-block">
+                <h4>Sales</h4>
+                <div class="dc-row"><span>Bills</span><span>{{ d.sales.orders }}</span></div>
+                <div class="dc-row"><span>Gross</span><span>{{ d.sales.gross | number: '1.2-2' }}</span></div>
+                <div class="dc-row"><span>Discount</span><span>−{{ d.sales.discount | number: '1.2-2' }}</span></div>
+                @if (d.sales.tax > 0) {
+                <div class="dc-row"><span>Tax</span><span>{{ d.sales.tax | number: '1.2-2' }}</span></div>
+                }
+                <div class="dc-row total"><span>Net sales</span><span>{{ d.sales.net | number: '1.2-2' }}</span></div>
+                @if (d.sales.refunds > 0) {
+                <div class="dc-row warn">
+                    <span>Refunded ({{ d.sales.refunds }})</span>
+                    <span>−{{ d.sales.refunded | number: '1.2-2' }}</span>
+                </div>
+                }
+            </section>
+
+            <section class="dc-block">
+                <h4>Collected</h4>
+                <div class="dc-row">
+                    <span>Cash ({{ d.payments.cash_orders }} bills)</span>
+                    <span>{{ d.payments.cash | number: '1.2-2' }}</span>
+                </div>
+                <div class="dc-row">
+                    <span>Online ({{ d.payments.online_orders }} bills)</span>
+                    <span>{{ d.payments.online | number: '1.2-2' }}</span>
+                </div>
+                <div class="dc-row">
+                    <span>Old debts settled ({{ d.payments.repayment_count }})</span>
+                    <span>{{ d.payments.customer_repayments | number: '1.2-2' }}</span>
+                </div>
+                <div class="dc-row total">
+                    <span>Taken today</span>
+                    <span>{{ (d.payments.collected + d.payments.customer_repayments) | number: '1.2-2' }}</span>
+                </div>
+                @if (d.payments.credit_given > 0) {
+                <div class="dc-row warn">
+                    <span>Given on credit</span>
+                    <span>{{ d.payments.credit_given | number: '1.2-2' }}</span>
+                </div>
+                }
+            </section>
+
+            <section class="dc-block">
+                <h4>Paid out</h4>
+                <div class="dc-row"><span>Purchase bills</span><span>{{ d.purchases.bills }}</span></div>
+                <div class="dc-row"><span>Stock bought in</span><span>{{ d.purchases.total | number: '1.2-2' }}</span></div>
+                <div class="dc-row"><span>Paid on the bill</span><span>{{ d.purchases.paid | number: '1.2-2' }}</span></div>
+                <div class="dc-row">
+                    <span>Supplier payments ({{ d.purchases.payment_count }})</span>
+                    <span>{{ d.purchases.supplier_payments | number: '1.2-2' }}</span>
+                </div>
+                <div class="dc-row total">
+                    <span>Out today</span>
+                    <span>{{ (d.purchases.paid + d.purchases.supplier_payments) | number: '1.2-2' }}</span>
+                </div>
+            </section>
+
+            <section class="dc-block">
+                <h4>Stock moves</h4>
+                <div class="dc-row"><span>Adjustments posted</span><span>{{ d.stock.adjustments }}</span></div>
+                <div class="dc-row"><span>Branch transfers</span><span>{{ d.stock.transfers }}</span></div>
+                <p class="dc-note">Damage, recounts and stock sent between branches — anything that moved outside a sale or a purchase.</p>
+            </section>
+        </div>
+
+        <div class="dc-sign">
+            <div><span class="dc-line"></span><p>Counted by</p></div>
+            <div><span class="dc-line"></span><p>Checked by</p></div>
+        </div>
+    </div>
+    }
+</div>

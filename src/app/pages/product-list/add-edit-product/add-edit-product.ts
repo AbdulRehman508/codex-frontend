@@ -23,7 +23,13 @@ import {
   RowOption,
 } from '../../location/location.model';
 import { ProductApiService } from '../product.api';
-import { CreateProductDto, Product, ProductStatus } from '../product.model';
+import {
+  CreateProductDto,
+  PRODUCT_UNITS,
+  Product,
+  ProductStatus,
+  ProductUnit,
+} from '../product.model';
 
 @Component({
   selector: 'app-add-edit-product',
@@ -47,6 +53,7 @@ export class AddEditProduct {
   pageTitle = 'Add Product';
   productId: string | null = null;
   statusList: ProductStatus[] = ['active', 'inactive'];
+  unitList: ProductUnit[] = PRODUCT_UNITS;
 
   // dependent dropdown data: rack -> row -> column -> bin
   rackList = signal<RackListRow[]>([]);
@@ -69,6 +76,10 @@ export class AddEditProduct {
       // held as a formatted string ("1,499.99"); parsed back to a number on save
       price: ['0', priceValidator],
       quantity: [0, [Validators.required, Validators.min(0)]],
+      // 0 = fall back to the office-wide low-stock mark
+      min_stock: [0, [Validators.min(0)]],
+      unit: ['pcs'],
+      pack_size: [1, [Validators.min(1)]],
       description: [''],
       status: ['active'],
       // location chain — only rack_location_id is persisted
@@ -116,6 +127,9 @@ export class AddEditProduct {
           barcode: product.barcode ?? '',
           price: formatPrice(product.price),
           quantity: product.quantity,
+          min_stock: product.min_stock ?? 0,
+          unit: product.unit ?? 'pcs',
+          pack_size: product.pack_size ?? 1,
           description: product.description ?? '',
           status: product.status,
           rack_id: product.rack_id,
@@ -277,6 +291,9 @@ export class AddEditProduct {
       barcode: v.barcode ? v.barcode.toString().trim() : null,
       price: parsePrice(v.price),
       quantity: Number(v.quantity) || 0,
+      min_stock: Number(v.min_stock) || 0,
+      unit: v.unit || 'pcs',
+      pack_size: Number(v.pack_size) || 1,
       description: v.description || undefined,
       status: v.status,
       rack_location_id: v.rack_location_id ?? null,

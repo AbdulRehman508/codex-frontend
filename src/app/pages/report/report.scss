@@ -372,3 +372,15 @@
         outline: none;
     }
 }
+
+/* the expiry window is a plain number box, sized like the other controls */
+.rep-num {
+    width: 120px;
+    border: 1px solid var(--borderColor);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    outline: none;
+
+    &:focus { border-color: var(--primary); }
+}

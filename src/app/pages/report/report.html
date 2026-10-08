@@ -6,6 +6,9 @@
             <p>Sales, margin, stock, receivables and payables for the selected office.</p>
         </div>
         <div class="rep-actions">
+            <button type="button" class="_outline-btn" routerLink="/report/day-close">
+                <i class="pi pi-calculator"></i> Day Close
+            </button>
             <button type="button" class="_outline-btn" [disabled]="busy() || !hasOffice()" (click)="exportCsv()">
                 <i class="pi pi-download"></i> Export CSV
             </button>
@@ -79,6 +82,18 @@
         <label class="rep-check">
             <input type="checkbox" class="form-check-input" [(ngModel)]="lowOnly" (change)="onFilterChange()" />
             <span>Low stock only</span>
+        </label>
+        }
+
+        @if (tab().key === 'expiry') {
+        <div class="rep-field">
+            <label>Expiring within (days)</label>
+            <input type="number" min="0" max="365" [(ngModel)]="withinDays" name="within-days"
+                (change)="onFilterChange()" class="rep-num" />
+        </div>
+        <label class="rep-check">
+            <input type="checkbox" class="form-check-input" [(ngModel)]="expiredOnly" (change)="onFilterChange()" />
+            <span>Already expired only</span>
         </label>
         }
 

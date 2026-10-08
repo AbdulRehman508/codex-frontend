@@ -20,7 +20,8 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "allowedCommonJsDependencies": [
-              "qrcode"
+              "qrcode",
+              "jsbarcode"
             ],
             "inlineStyleLanguage": "scss",
             "assets": [

@@ -34,5 +34,21 @@ export const settingRoutes: Routes = [
         loadComponent: () =>
             import('../../pages/setting/role/role').then((c) => c.Role),
     },
+    {
+        // restoring a deleted record is an owner's call, not a cashier's
+        path: 'trash',
+        canActivate: [accessGuard],
+        data: { adminOnly: true },
+        loadComponent: () =>
+            import('../../pages/setting/trash/trash').then((c) => c.Trash),
+    },
+    {
+        // the trail spans every branch and user, so it is the owner's view
+        path: 'activity',
+        canActivate: [accessGuard],
+        data: { adminOnly: true },
+        loadComponent: () =>
+            import('../../pages/setting/activity/activity').then((c) => c.Activity),
+    },
 
 ];

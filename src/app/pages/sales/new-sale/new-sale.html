@@ -182,6 +182,15 @@
 
     <!-- Footer -->
     <div class="ns-footer">
+        @if (taxRate() > 0) {
+        <!-- only a taxed branch sees the breakdown -->
+        <div class="ns-tax">
+            <span>{{ taxInclusive() ? 'Net' : 'Subtotal' }}</span>
+            <strong>{{ (taxInclusive() ? netTotal(tab) - taxAmount(tab) : netTotal(tab)) | number:'1.2-2' }}</strong>
+            <span>{{ taxName() }} {{ taxRate() }}%{{ taxInclusive() ? ' (incl.)' : '' }}</span>
+            <strong>{{ taxAmount(tab) | number:'1.2-2' }}</strong>
+        </div>
+        }
         <div class="ns-total">
             <span>Total</span>
             <strong>{{ orderTotal(tab) | number:'1.2-2' }}</strong>

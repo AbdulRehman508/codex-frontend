@@ -31,6 +31,9 @@ interface FormLine {
   sku: string;
   qty: number;
   cost: number;
+  /** optional: only goods that carry a batch or a date need these */
+  batch_no: string;
+  expiry_date: string;
 }
 
 /** the quick-add row above the table */
@@ -40,10 +43,25 @@ interface QuickAdd {
   sku: string;
   qty: number;
   cost: number;
+  /** what one stock unit is called, for the labels */
+  unit: string;
+  /** stock units in one supplier pack; 1 = the product is bought loose */
+  packSize: number;
+  /** true while qty and cost are being entered per pack, not per unit */
+  packMode: boolean;
 }
 
 function emptyQuickAdd(): QuickAdd {
-  return { product_id: null, product: '', sku: '', qty: 1, cost: 0 };
+  return {
+    product_id: null,
+    product: '',
+    sku: '',
+    qty: 1,
+    cost: 0,
+    unit: 'pcs',
+    packSize: 1,
+    packMode: false,
+  };
 }
 
 function round2(n: number): number {
@@ -91,6 +109,8 @@ export class AddEditPurchase {
   // ---- lines + quick add ----
   lines = signal<FormLine[]>([]);
   quick: QuickAdd = emptyQuickAdd();
+  /** batch + expiry inputs are hidden until the buyer asks for them */
+  showBatchFields = false;
   suggestions = signal<ProductListRow[]>([]);
   suggestOpen = signal(false);
   /** which suggestion ↑/↓ has landed on; Enter takes it */
@@ -183,15 +203,18 @@ export class AddEditPurchase {
         this.discount = p.discount ?? 0;
         this.paid = p.paid_amount ?? 0;
         this.paidTouched = true; // an existing bill keeps the paid figure it was saved with
-        this.lines.set(
-          (p.lines ?? []).map((l) => ({
-            product_id: l.product_id,
-            name: l.name,
-            sku: l.sku ?? '',
-            qty: l.quantity,
-            cost: l.cost_price,
-          })),
-        );
+        const lines = (p.lines ?? []).map((l) => ({
+          product_id: l.product_id,
+          name: l.name,
+          sku: l.sku ?? '',
+          qty: l.quantity,
+          cost: l.cost_price,
+          batch_no: l.batch_no ?? '',
+          expiry_date: l.expiry_date ? l.expiry_date.slice(0, 10) : '',
+        }));
+        this.lines.set(lines);
+        // a bill that already tracks batches opens with the fields showing
+        this.showBatchFields = lines.some((l) => l.batch_no || l.expiry_date);
         this.loading.set(false);
       },
       error: (err) => {
@@ -228,8 +251,17 @@ export class AddEditPurchase {
         next: (full) => {
           if (this.quick.product_id !== product.id) return; // user moved on
           this.quick.sku = full.sku ?? '';
+          this.quick.unit = full.unit ?? 'pcs';
+          this.quick.packSize = full.pack_size && full.pack_size > 1 ? full.pack_size : 1;
+          // a product bought by the carton defaults to entering cartons
+          this.quick.packMode = this.quick.packSize > 1;
           // prefill the last cost we paid; the buyer can type over it
-          if (!this.quick.cost) this.quick.cost = full.cost_price || 0;
+          if (!this.quick.cost) {
+            const unitCost = full.cost_price || 0;
+            this.quick.cost = this.quick.packMode
+              ? round2(unitCost * this.quick.packSize)
+              : unitCost;
+          }
         },
         error: () => {
           // cost prefill is a nicety — typing it by hand still works
@@ -301,16 +333,55 @@ export class AddEditPurchase {
       return;
     }
 
+    // the bill is always stored in stock units: packs are converted here, so
+    // "2 cartons at 6000" becomes 48 units at 250
+    const packs = q.packMode && q.packSize > 1 ? q.packSize : 1;
+    const units = qty * packs;
+    const unitCost = round2(cost / packs);
+
     const list = [...this.lines()];
     const existing = list.find((l) => l.product_id === q.product_id);
     if (existing) {
-      existing.qty += qty;
-      existing.cost = cost; // the latest cost wins
+      existing.qty += units;
+      existing.cost = unitCost; // the latest cost wins
     } else {
-      list.push({ product_id: q.product_id, name: q.product, sku: q.sku, qty, cost });
+      list.push({
+        product_id: q.product_id,
+        name: q.product,
+        sku: q.sku,
+        qty: units,
+        cost: unitCost,
+        batch_no: '',
+        expiry_date: '',
+      });
     }
     this.lines.set(list);
     this.resetQuick();
+  }
+
+  /** flip the quick-add row between packs and loose units, keeping the money */
+  togglePackMode() {
+    const q = this.quick;
+    if (q.packSize <= 1) return;
+    const cost = Number(q.cost) || 0;
+    q.packMode = !q.packMode;
+    // a cost typed per carton becomes the per-unit cost, and back again
+    q.cost = q.packMode ? round2(cost * q.packSize) : round2(cost / q.packSize);
+  }
+
+  /** "= 48 pcs @ 250.00 each", shown under the quick-add row */
+  packHint(): string | null {
+    const q = this.quick;
+    if (!q.product_id || !q.packMode || q.packSize <= 1) return null;
+    const qty = Number(q.qty) || 0;
+    const cost = Number(q.cost) || 0;
+    if (qty < 1) return null;
+    const units = qty * q.packSize;
+    const each = round2(cost / q.packSize);
+    return `= ${units} ${q.unit} @ ${each.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} each`;
   }
 
   removeLine(index: number) {
@@ -409,6 +480,9 @@ export class AddEditPurchase {
         product_id: l.product_id,
         quantity: Number(l.qty) || 0,
         cost_price: Number(l.cost) || 0,
+        // only sent when the buyer filled them in
+        batch_no: l.batch_no?.trim() || undefined,
+        expiry_date: l.expiry_date || undefined,
       })),
       discount: Number(this.discount) || 0,
       paid_amount: this.paidTouched ? this.paidValue() : this.total(),

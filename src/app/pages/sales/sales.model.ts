@@ -28,6 +28,11 @@ export interface Sale {
   items_count: number;
   subtotal: number;
   discount: number;
+  /** tax snapshot taken when the bill was written */
+  tax_name?: string;
+  tax_rate?: number;
+  tax_inclusive?: boolean;
+  tax_amount?: number;
   total: number;
   /** handed over at the counter */
   paid_amount: number;
@@ -45,6 +50,8 @@ export interface Sale {
   office_mobile_no?: string | null;
   /** scan-to-pay accounts, printed at the foot of online bills */
   office_payment_methods?: OfficePaymentMethod[];
+  /** tax registration printed under the shop name */
+  office_tax_number?: string;
 }
 
 /** Slim row returned by the list endpoint. */

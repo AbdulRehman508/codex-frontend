@@ -1,0 +1,249 @@
+.dc-page {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ---- controls ---- */
+.dc-bar {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+
+    h2 {
+        margin: 6px 0 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--black);
+    }
+
+    p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--lightDarkGray);
+    }
+}
+
+.dc-back {
+    font-size: 12px;
+    color: var(--primary);
+    text-decoration: none;
+
+    i { font-size: 11px; margin-right: 4px; }
+    &:hover { text-decoration: underline; }
+}
+
+.dc-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+._outline-btn.icon {
+    padding: 7px 10px;
+    line-height: 1;
+}
+
+:host ::ng-deep .dc-controls p-datepicker .p-datepicker-input {
+    border: 1px solid var(--borderColor);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    outline: none;
+    width: 140px;
+}
+
+/* ---- the sheet ---- */
+.dc-sheet {
+    background: var(--white);
+    border: 1px solid var(--borderColor);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+    transition: opacity 150ms ease;
+
+    &.refetching { opacity: 0.6; }
+}
+
+.dc-empty {
+    text-align: center;
+    color: var(--lightDarkGray);
+    padding: 40px;
+
+    i { font-size: 26px; display: block; margin-bottom: 10px; }
+    p { margin: 0; }
+}
+
+.dc-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--borderColor);
+
+    h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--black);
+    }
+
+    p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: var(--fullGray);
+    }
+}
+
+.dc-tz { color: var(--lightDarkGray); font-size: 11px; }
+
+.dc-stamp {
+    font-size: 11px;
+    color: var(--lightDarkGray);
+    white-space: nowrap;
+}
+
+/* the drawer figure is the point of the whole sheet */
+.dc-drawer {
+    margin: 18px 0 22px;
+    padding: 18px 20px;
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
+    background: var(--secondary);
+    border-radius: 14px;
+}
+
+.dc-drawer-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+
+    span {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--primary);
+    }
+
+    strong {
+        font-size: 30px;
+        font-weight: 700;
+        color: var(--black);
+    }
+}
+
+.dc-drawer-split {
+    display: flex;
+    gap: 28px;
+    margin-top: 10px;
+
+    div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    span { font-size: 11px; color: var(--fullGray); }
+    strong { font-size: 15px; font-weight: 600; color: var(--black); }
+}
+
+.dc-note {
+    margin: 10px 0 0;
+    font-size: 11px;
+    color: var(--lightDarkGray);
+}
+
+/* ---- blocks ---- */
+.dc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.dc-block {
+    border: 1px solid var(--borderColor);
+    border-radius: 12px;
+    padding: 14px 16px;
+
+    h4 {
+        margin: 0 0 10px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--lightDarkGray);
+    }
+}
+
+.dc-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 5px 0;
+    font-size: 13px;
+    color: var(--fullGray);
+
+    span:last-child {
+        font-weight: 600;
+        color: var(--black);
+        white-space: nowrap;
+    }
+
+    &.total {
+        margin-top: 6px;
+        padding-top: 8px;
+        border-top: 1px solid var(--borderColor);
+
+        span:first-child { font-weight: 600; color: var(--black); }
+        span:last-child { font-size: 15px; }
+    }
+
+    &.warn span:last-child { color: var(--info); }
+}
+
+/* ---- signatures ---- */
+.dc-sign {
+    display: flex;
+    gap: 60px;
+    margin-top: 34px;
+
+    div { flex: 0 0 200px; }
+
+    .dc-line {
+        display: block;
+        height: 1px;
+        background: var(--mediumGray);
+    }
+
+    p {
+        margin: 6px 0 0;
+        font-size: 11px;
+        color: var(--lightDarkGray);
+    }
+}
+
+/* ---- print: just the sheet, flat on the page ---- */
+@media print {
+    .no-print { display: none !important; }
+
+    .dc-sheet {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        border-radius: 0;
+    }
+
+    .dc-drawer {
+        border: 1px solid #999;
+        background: #fff;
+    }
+
+    .dc-grid { grid-template-columns: 1fr 1fr; }
+
+    .dc-block { break-inside: avoid; }
+}

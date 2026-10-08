@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageService } from 'primeng/api';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -16,7 +17,7 @@ import { ReportKey, ReportQuery, ReportRow } from './report.model';
 interface Column {
   key: string;
   label: string;
-  type: 'text' | 'num' | 'money' | 'date' | 'badge' | 'capital' | 'percent';
+  type: 'text' | 'num' | 'money' | 'date' | 'day' | 'badge' | 'capital' | 'percent';
   /** sort key the API accepts; omitted = not sortable */
   sort?: string;
   /** right-align numbers */
@@ -54,6 +55,7 @@ const TABS: Tab[] = [
       { key: 'customer_name', label: 'Customer', type: 'text', sort: 'customer_name' },
       { key: 'items_count', label: 'Items', type: 'num', sort: 'items_count', right: true },
       { key: 'payment_method', label: 'Payment', type: 'capital' },
+      { key: 'tax_amount', label: 'Tax', type: 'money', right: true },
       { key: 'total', label: 'Total', type: 'money', sort: 'total', right: true },
       { key: 'paid_amount', label: 'Paid', type: 'money', sort: 'paid_amount', right: true },
       { key: 'borrow_amount', label: 'Borrow', type: 'money', sort: 'borrow_amount', right: true },
@@ -65,6 +67,7 @@ const TABS: Tab[] = [
       { key: 'paid', label: 'Received', money: true },
       { key: 'borrow', label: 'On Credit', money: true, tone: 'info' },
       { key: 'discount', label: 'Discount', money: true },
+      { key: 'tax', label: 'Tax Charged', money: true },
       { key: 'refunded', label: 'Refunded', money: true, tone: 'danger' },
       { key: 'average_order', label: 'Avg. Order', money: true },
     ],
@@ -105,15 +108,21 @@ const TABS: Tab[] = [
       { key: 'name', label: 'Product', type: 'text', sort: 'name' },
       { key: 'sku', label: 'SKU', type: 'text', sort: 'sku' },
       { key: 'location_code', label: 'Location', type: 'text' },
+      { key: 'unit', label: 'Unit', type: 'text' },
       { key: 'quantity', label: 'In Stock', type: 'num', sort: 'quantity', right: true },
+      { key: 'min_stock', label: 'Reorder At', type: 'num', sort: 'min_stock', right: true },
       { key: 'price', label: 'Price', type: 'money', sort: 'price', right: true },
-      { key: 'stock_value', label: 'Stock Value', type: 'money', sort: 'stock_value', right: true },
+      { key: 'cost_price', label: 'Cost', type: 'money', right: true },
+      { key: 'stock_value', label: 'Retail Value', type: 'money', sort: 'stock_value', right: true },
+      { key: 'cost_value', label: 'Value at Cost', type: 'money', sort: 'cost_value', right: true },
       { key: 'status', label: 'Status', type: 'badge' },
     ],
+    note: 'Low stock uses each product’s own reorder level, or the shop default when it has none.',
     tiles: [
       { key: 'products', label: 'Products' },
       { key: 'units', label: 'Units' },
-      { key: 'stock_value', label: 'Stock Value', money: true, tone: 'primary' },
+      { key: 'stock_value', label: 'Retail Value', money: true, tone: 'primary' },
+      { key: 'cost_value', label: 'Value at Cost', money: true, tone: 'green' },
       { key: 'low_stock', label: 'Low Stock', tone: 'info' },
       { key: 'out_of_stock', label: 'Out of Stock', tone: 'danger' },
     ],
@@ -136,6 +145,32 @@ const TABS: Tab[] = [
       { key: 'paid_in_period', label: 'Repaid', money: true },
       { key: 'outstanding', label: 'Outstanding Now', money: true, tone: 'info' },
     ],
+  },
+  {
+    key: 'expiry',
+    label: 'Expiry',
+    icon: 'pi pi-clock',
+    // a lot's date has nothing to do with the period filter
+    periodic: false,
+    columns: [
+      { key: 'product_name', label: 'Product', type: 'text', sort: 'product_name' },
+      { key: 'sku', label: 'SKU', type: 'text' },
+      { key: 'batch_no', label: 'Batch', type: 'text' },
+      { key: 'expiry_date', label: 'Expires', type: 'day', sort: 'expiry_date' },
+      { key: 'days_left', label: 'Days Left', type: 'num', right: true },
+      { key: 'quantity', label: 'Units In', type: 'num', sort: 'quantity', right: true },
+      { key: 'cost_value', label: 'Value at Cost', type: 'money', right: true },
+      { key: 'purchase_no', label: 'Bill', type: 'text' },
+      { key: 'supplier_name', label: 'Supplier', type: 'text' },
+    ],
+    tiles: [
+      { key: 'lots', label: 'Lots' },
+      { key: 'units', label: 'Units Received', },
+      { key: 'cost_value', label: 'Value at Cost', money: true, tone: 'primary' },
+      { key: 'expired_lots', label: 'Already Expired', tone: 'danger' },
+      { key: 'expired_units', label: 'Expired Units', tone: 'danger' },
+    ],
+    note: 'Units are what came in on each batch. Write off what has gone off with a stock adjustment (reason expired).',
   },
   {
     key: 'payables',
@@ -164,7 +199,7 @@ const EXPORT_LIMIT = 5000;
 
 @Component({
   selector: 'app-report',
-  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, DatePickerModule],
   templateUrl: './report.html',
   styleUrl: './report.scss',
 })
@@ -195,6 +230,9 @@ export class Report {
   paymentFilter: string | null = null;
   borrowOnly = false;
   lowOnly = false;
+  // expiry tab: how far ahead to look, and whether to show only what is past
+  withinDays = 30;
+  expiredOnly = false;
   sort = signal<string | null>(null);
   order = signal<'asc' | 'desc'>('desc');
 
@@ -273,6 +311,10 @@ export class Report {
     if (t.key === 'stock' && this.lowOnly) {
       q.low_only = true;
     }
+    if (t.key === 'expiry') {
+      q.within_days = Number(this.withinDays) || 30;
+      if (this.expiredOnly) q.expired_only = true;
+    }
     return q;
   }
 
@@ -312,6 +354,8 @@ export class Report {
     this.paymentFilter = null;
     this.borrowOnly = false;
     this.lowOnly = false;
+    this.withinDays = 30;
+    this.expiredOnly = false;
     this.load();
   }
 
@@ -346,6 +390,8 @@ export class Report {
     this.paymentFilter = null;
     this.borrowOnly = false;
     this.lowOnly = false;
+    this.withinDays = 30;
+    this.expiredOnly = false;
     this.sort.set(null);
     this.order.set('desc');
     this.page.set(1);
@@ -382,6 +428,13 @@ export class Report {
         return money(Number(value));
       case 'percent':
         return `${Number(value).toFixed(1)}%`;
+      case 'day':
+        // a use-by date has no time of day worth printing
+        return new Date(String(value)).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+        });
       case 'num':
         return Number(value).toLocaleString('en-US');
       case 'date':

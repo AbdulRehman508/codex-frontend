@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { userRoutes } from './user.routes';
 import { purchaseRoutes } from './purchase.routes';
+import { stockRoutes } from './stock.routes';
 import { settingRoutes } from './setting.routes';
 import { accessGuard } from '../guards/access.guard';
 
@@ -67,6 +68,7 @@ export const afterLoginRoutes: Routes = [
         data: { module: 'stock' },
         loadComponent: () =>
           import('../../pages/stock/stock').then((c) => c.Stock),
+        children: [...stockRoutes],
       },
       {
         path: 'report',
@@ -74,6 +76,16 @@ export const afterLoginRoutes: Routes = [
         data: { module: 'reports' },
         loadComponent: () =>
           import('../../pages/report/report').then((c) => c.Report),
+      },
+      {
+        // its own page: a closing sheet, not another grid
+        path: 'report/day-close',
+        canActivate: [accessGuard],
+        data: { module: 'reports' },
+        loadComponent: () =>
+          import('../../pages/report/day-close/day-close').then(
+            (c) => c.DayCloseSheet,
+          ),
       },
       {
         path: 'location',

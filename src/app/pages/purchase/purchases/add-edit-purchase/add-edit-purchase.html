@@ -63,7 +63,13 @@
 
     <!-- Items -->
     <div class="pf-card">
-        <p class="pf-card-title">Items</p>
+        <div class="pf-items-head">
+            <p class="pf-card-title">Items</p>
+            <label class="pf-batch-toggle" title="For goods that carry a batch number or a use-by date">
+                <input type="checkbox" class="form-check-input" [(ngModel)]="showBatchFields" name="show-batch" />
+                <span>Track batch &amp; expiry</span>
+            </label>
+        </div>
 
         <!-- quick add: type, pick, qty, cost, Enter -->
         <div class="pf-quick">
@@ -97,25 +103,42 @@
             </div>
 
             <div class="pf-quick-num">
-                <label>Qty</label>
+                <label>{{ quick.packMode ? 'Packs' : 'Qty' }}</label>
                 <input #qtyInput type="number" min="1" [(ngModel)]="quick.qty" name="quick-qty"
                     (keydown)="onQtyKeydown($event)" />
             </div>
 
             <div class="pf-quick-num">
-                <label>Cost Price</label>
+                <label>{{ quick.packMode ? 'Cost / Pack' : 'Cost Price' }}</label>
                 <input #costInput type="number" min="0" step="0.01" [(ngModel)]="quick.cost" name="quick-cost"
                     (keydown)="onCostKeydown($event)" />
             </div>
+
+            <!-- only worth showing for products that come in packs -->
+            @if (quick.packSize > 1) {
+            <button type="button" class="pf-pack-toggle" (click)="togglePackMode()"
+                [title]="'1 pack = ' + quick.packSize + ' ' + quick.unit">
+                <i class="pi" [ngClass]="quick.packMode ? 'pi-box' : 'pi-tag'"></i>
+                {{ quick.packMode ? 'By pack (' + quick.packSize + ')' : 'By ' + quick.unit }}
+            </button>
+            }
 
             <button type="button" class="_primary-btn pf-quick-add" (click)="addQuickLine()">
                 <i class="pi pi-plus"></i> Add
             </button>
         </div>
 
+        @if (packHint()) {
+        <p class="pf-pack-hint"><i class="pi pi-arrow-right"></i> {{ packHint() }}</p>
+        }
+
         <div class="pf-lines">
-            <div class="pf-lines-head">
+            <div class="pf-lines-head" [class.with-batch]="showBatchFields">
                 <span class="col-prod">Product</span>
+                @if (showBatchFields) {
+                <span class="col-batch">Batch</span>
+                <span class="col-batch">Expires</span>
+                }
                 <span class="col-num">Qty</span>
                 <span class="col-num">Cost</span>
                 <span class="col-total">Line Total</span>
@@ -123,12 +146,18 @@
             </div>
 
             @for (line of lines(); track $index; let i = $index) {
-            <div class="pf-line">
+            <div class="pf-line" [class.with-batch]="showBatchFields">
                 <!-- product is fixed once added: remove the row to change it -->
                 <span class="col-prod pf-line-name" [title]="line.name">
                     {{ line.name }}
                     @if (line.sku) { <small>{{ line.sku }}</small> }
                 </span>
+                @if (showBatchFields) {
+                <input class="col-batch" type="text" placeholder="Lot no" [ngModel]="line.batch_no"
+                    (ngModelChange)="updateLine(i, { batch_no: $event })" name="batch-{{ i }}" />
+                <input class="col-batch" type="date" [ngModel]="line.expiry_date"
+                    (ngModelChange)="updateLine(i, { expiry_date: $event })" name="exp-{{ i }}" />
+                }
                 <input class="col-num" type="number" min="1" [ngModel]="line.qty"
                     (ngModelChange)="updateLine(i, { qty: $event })" name="qty-{{ i }}" />
                 <input class="col-num" type="number" min="0" step="0.01" [ngModel]="line.cost"
