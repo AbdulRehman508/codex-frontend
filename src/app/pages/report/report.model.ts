@@ -1,4 +1,10 @@
-export type ReportKey = 'sales' | 'products' | 'stock' | 'receivables' | 'payables';
+export type ReportKey =
+  | 'sales'
+  | 'products'
+  | 'stock'
+  | 'receivables'
+  | 'payables'
+  | 'expiry';
 
 /** Every report answers with the same envelope: a page of rows + totals. */
 export interface ReportPage<TRow, TSummary> {
@@ -19,6 +25,8 @@ export interface SalesReportRow {
   status: string;
   subtotal: number;
   discount: number;
+  /** sales tax on this bill */
+  tax_amount: number;
   total: number;
   paid_amount: number;
   borrow_amount: number;
@@ -28,6 +36,8 @@ export interface SalesReportSummary {
   orders: number;
   gross: number;
   discount: number;
+  /** sales tax charged across the period */
+  tax: number;
   net: number;
   paid: number;
   borrow: number;
@@ -64,9 +74,16 @@ export interface StockReportRow {
   id: string;
   name: string;
   sku: string;
+  unit: string;
   quantity: number;
+  /** this product's own reorder level, 0 when it uses the office-wide one */
+  min_stock: number;
   price: number;
+  cost_price: number;
+  /** quantity x sell price */
   stock_value: number;
+  /** quantity x landed cost — what the shelf is actually worth */
+  cost_value: number;
   status: string;
   location_code: string | null;
 }
@@ -75,6 +92,8 @@ export interface StockReportSummary {
   products: number;
   units: number;
   stock_value: number;
+  /** inventory valued at cost, the figure an owner books */
+  cost_value: number;
   low_stock: number;
   out_of_stock: number;
 }
@@ -112,13 +131,39 @@ export interface PayableSummary {
   paid_in_period: number;
 }
 
+export interface ExpiryRow {
+  id: string;
+  product_id: string;
+  product_name: string;
+  sku: string;
+  batch_no: string;
+  expiry_date: string | null;
+  /** days left; negative once the date has passed */
+  days_left: number | null;
+  quantity: number;
+  cost_price: number;
+  cost_value: number;
+  purchase_no: string;
+  supplier_name: string;
+  received_at: string | null;
+}
+
+export interface ExpirySummary {
+  lots: number;
+  units: number;
+  cost_value: number;
+  expired_lots: number;
+  expired_units: number;
+}
+
 /** Any row a report table can render. */
 export type ReportRow =
   | SalesReportRow
   | ProductReportRow
   | StockReportRow
   | ReceivableRow
-  | PayableRow;
+  | PayableRow
+  | ExpiryRow;
 
 export interface ReportQuery {
   page?: number;
@@ -136,6 +181,9 @@ export interface ReportQuery {
   // stock only
   low_only?: boolean;
   low_stock?: number;
+  // expiry only
+  within_days?: number;
+  expired_only?: boolean;
 }
 
 /** Standard response envelope. */

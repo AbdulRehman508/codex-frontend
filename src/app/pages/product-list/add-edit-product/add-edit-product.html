@@ -65,6 +65,32 @@
         </div>
         <div class="col-sm-4">
             <div class="form-group">
+                <label for="unit">Unit</label>
+                <ng-select formControlName="unit" [items]="unitList" [clearable]="false"
+                    placeholder="Select Unit"></ng-select>
+                <small class="d-block text-muted">What one unit of stock is counted as.</small>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="min_stock">Reorder Level</label>
+                <input type="number" min="0" step="1" id="min_stock" formControlName="min_stock"
+                    [ngClass]="{ _inputError: fieldError('min_stock') }">
+                @if (fieldError('min_stock')) { <small class="text-danger">{{ fieldError('min_stock') }}</small> }
+                <small class="d-block text-muted">Flag as low at or below this. 0 = use the shop default.</small>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="pack_size">Pack Size</label>
+                <input type="number" min="1" step="1" id="pack_size" formControlName="pack_size"
+                    [ngClass]="{ _inputError: fieldError('pack_size') }">
+                @if (fieldError('pack_size')) { <small class="text-danger">{{ fieldError('pack_size') }}</small> }
+                <small class="d-block text-muted">Units in one supplier pack (carton of 24 → 24).</small>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="form-group">
                 <label for="status">Status</label>
                 <ng-select formControlName="status" [items]="statusList" placeholder="Select Status"></ng-select>
             </div>

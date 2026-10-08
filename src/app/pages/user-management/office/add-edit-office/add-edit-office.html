@@ -116,6 +116,55 @@
         </div>
     </div>
 
+    <!-- Sales tax: applied to every bill this branch writes -->
+    <div class="pay-section">
+        <div class="pay-head">
+            <div>
+                <p class="pay-title">Sales Tax</p>
+                <p class="pay-sub">Applied to new bills from this branch and printed on the receipt.</p>
+            </div>
+            <label class="tax-switch">
+                <input type="checkbox" class="form-check-input" formControlName="tax_enabled" />
+                <span>{{ officeForm.get('tax_enabled')?.value ? 'On' : 'Off' }}</span>
+            </label>
+        </div>
+
+        @if (officeForm.get('tax_enabled')?.value) {
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label for="tax_name">Label on the bill</label>
+                    <input type="text" id="tax_name" formControlName="tax_name" placeholder="GST" />
+                    @if (fieldError('tax_name')) { <small class="text-danger">{{ fieldError('tax_name') }}</small> }
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label for="tax_rate">Rate %</label>
+                    <input type="number" id="tax_rate" min="0" max="100" step="0.01" formControlName="tax_rate"
+                        [ngClass]="{ _inputError: fieldError('tax_rate') }" />
+                    @if (fieldError('tax_rate')) { <small class="text-danger">{{ fieldError('tax_rate') }}</small> }
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label for="tax_number">Registration No</label>
+                    <input type="text" id="tax_number" formControlName="tax_number" placeholder="Optional" />
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label>Prices</label>
+                    <label class="tax-switch mt-1">
+                        <input type="checkbox" class="form-check-input" formControlName="tax_inclusive" />
+                        <span>{{ officeForm.get('tax_inclusive')?.value ? 'Already include tax' : 'Tax added on top' }}</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
     <!-- Online payment: each method prints as a scan-to-pay QR on online bills -->
     <div class="pay-section">
         <div class="pay-head">

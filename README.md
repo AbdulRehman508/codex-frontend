@@ -38,14 +38,17 @@ same build works on any domain.
 
 | Module | Notes |
 |---|---|
-| **Dashboard** | KPIs vs the previous period, sales trend, payment mix, top products, low stock |
-| **Products** | Catalogue, stock levels, bin assignment |
+| **Dashboard** | KPIs vs the previous period, sales trend, payment mix, top products, low stock, purchases and supplier payable |
+| **Products** | Catalogue, stock levels, bin assignment, per-product reorder level, unit + pack size, printable barcode labels |
 | **Location** | A rack generates every row/column/bin as its own record with a unique code |
-| **Sales (POS)** | Multi-tab orders, barcode scanning, credit sales, 80mm receipts with scan-to-pay QR |
+| **Sales (POS)** | Multi-tab orders, barcode scanning, credit sales, per-branch sales tax, 80mm receipts with scan-to-pay QR |
+| **Purchase** | Supplier bills that raise stock, buy-by-carton conversion, landed cost, batch & expiry, supplier book with payments |
+| **Stock** | Adjustments (damage, loss, expiry, recount) as a permanent audit trail, and branch-to-branch transfers |
 | **Customers** | Customer book, running borrow balances, recorded repayments |
-| **Reports** | Sales, item-wise sales, stock on hand, receivables — with CSV export and print |
+| **Reports** | Sales, item-wise with cost/profit/margin, stock on hand valued at cost, receivables, payables, expiry — CSV export and print |
+| **Day Close** | One day's takings, credit given, money paid out and the cash that should be in the drawer, printable |
 | **User Management** | Offices (admin only), staff, customers |
-| **Settings** | Roles and the per-role permission matrix |
+| **Settings** | Roles, the per-role permission matrix, the activity log and the trash (both admin only) |
 
 ### At the counter
 
@@ -56,6 +59,10 @@ The POS quick-add row is built for speed and never needs the mouse:
 - Scanning the same product again tops up its line instead of repeating it.
 - Stock is checked as the item is added, not after the bill is finished.
 
+The same row works on the purchase side, with one extra step: a product that
+comes in packs (a carton of 24) is entered as cartons and priced per carton —
+the bill stores units and the per-unit cost, so stock and margin stay right.
+
 ## Architecture
 
 ```
@@ -63,7 +70,8 @@ src/app/
   core/
     guards/        route gating (auth + permission matrix)
     interceptors/  bearer token, 401 sign-out, 403 notice
-    services/      ApiService, office context, permissions, token, QR, confirm
+    services/      ApiService, office context, permissions, token, QR,
+                   barcode, confirm
   layout/          shell: header, sidebar
   pages/           one folder per feature (component + .api.ts + .model.ts)
 ```

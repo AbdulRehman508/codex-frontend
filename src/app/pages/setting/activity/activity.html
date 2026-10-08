@@ -1,0 +1,94 @@
+<div class="activity-page">
+
+    <div class="activity-head">
+        <div>
+            <p class="f-16 _fw-600 mb-0">Activity Log</p>
+            <p class="activity-sub">Every change made in the system, newest first. Entries keep for six months.</p>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-field">
+            <label>Search</label>
+            <div class="position-relative">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="activity-search"
+                    class="_input-icon custom-placeholder" placeholder="Search user / record" />
+                <i class="pi pi-search _search-icon f-14"></i>
+                @if (searchTerm) {
+                <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
+                }
+            </div>
+        </div>
+        <div class="filter-field date-range">
+            <label>Date Range</label>
+            <p-datepicker [(ngModel)]="dateRange" name="date-range" selectionMode="range" dateFormat="dd-mm-yy"
+                placeholder="Select date range" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
+                appendTo="body" (onSelect)="onDateRangeChange()" (onClear)="onDateRangeChange()">
+            </p-datepicker>
+        </div>
+        <div class="filter-field">
+            <label>Module</label>
+            <ng-select [(ngModel)]="moduleFilter" [items]="moduleList" bindLabel="label" bindValue="value"
+                placeholder="All modules" (change)="onFilterChange()"></ng-select>
+        </div>
+        <div class="filter-field">
+            <label>Action</label>
+            <ng-select [(ngModel)]="actionFilter" [items]="actionList" bindLabel="label" bindValue="value"
+                placeholder="All actions" (change)="onFilterChange()"></ng-select>
+        </div>
+        <label class="filter-toggle" title="Include every branch, and sign-ins">
+            <input type="checkbox" class="form-check-input" [(ngModel)]="allOffices" (change)="onFilterChange()" />
+            <span>All branches</span>
+        </label>
+        <button class="_outline-btn filter-reset" (click)="clearFilters()">Reset</button>
+    </div>
+
+    <div class="panel">
+        <div class="table-wrap">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Module</th>
+                        <th>Record</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (loading()) {
+                    <tr><td colspan="6" class="empty">Loading...</td></tr>
+                    } @else if (rows().length === 0) {
+                    <tr><td colspan="6" class="empty">Nothing recorded for these filters.</td></tr>
+                    } @else {
+                    @for (r of rows(); track r.id) {
+                    <tr>
+                        <td>{{ r.created_at | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+                        <td class="user">
+                            {{ r.user_name || '—' }}
+                            <small>{{ r.user_email }}</small>
+                        </td>
+                        <td><span class="badge" [ngClass]="r.action">{{ actionLabel(r.action) }}</span></td>
+                        <td>{{ moduleLabel(r.module) }}</td>
+                        <td class="subject" [title]="r.path">{{ subject(r) }}</td>
+                        <td class="ip">{{ r.ip || '—' }}</td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!loading() && total() > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <span class="f-14">Total: {{ total() }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            </div>
+        </div>
+        }
+    </div>
+</div>

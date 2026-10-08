@@ -33,6 +33,16 @@ export interface Office {
   biography?: string;
   office_logo: string | null;
   payment_methods: OfficePaymentMethod[];
+  /** charge sales tax on this branch's bills */
+  tax_enabled: boolean;
+  /** what it is called on the bill: GST, VAT, Sales Tax ... */
+  tax_name: string;
+  /** percent, e.g. 17 for 17% */
+  tax_rate: number;
+  /** true when shelf prices already include the tax */
+  tax_inclusive: boolean;
+  /** registration number printed on the bill */
+  tax_number: string;
   created_at: string;
   updated_at: string;
 }
@@ -64,6 +74,11 @@ export interface CreateOfficeDto {
   office_logo?: string | null;
   /** the whole list replaces the stored one */
   payment_methods?: OfficePaymentMethod[];
+  tax_enabled?: boolean;
+  tax_name?: string;
+  tax_rate?: number;
+  tax_inclusive?: boolean;
+  tax_number?: string;
 }
 
 /** Body for PATCH (partial). */

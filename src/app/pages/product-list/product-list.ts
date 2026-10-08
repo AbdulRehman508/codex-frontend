@@ -4,10 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageService } from 'primeng/api';
-import { Subject } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { commonIcons } from '../../core/icon-images/common-icon';
+import { BarcodeService } from '../../core/services/barcode.service';
 import { ConfirmService } from '../../core/services/confirm.service';
 import { OfficeContextService } from '../../core/services/office-context.service';
 import { PermissionService } from '../../core/services/permission.service';
@@ -15,6 +16,16 @@ import { LocationApiService } from '../location/location.api';
 import { RackListRow } from '../location/location.model';
 import { ProductApiService } from './product.api';
 import { ProductListQuery, ProductListRow, ProductStatus } from './product.model';
+
+/** one label on the printed sheet */
+interface ProductLabel {
+  name: string;
+  sku: string;
+  price: number;
+  /** null when the code could not be encoded — the label still prints */
+  barcode_src: string | null;
+  code: string;
+}
 
 @Component({
   selector: 'app-product-list',
@@ -27,6 +38,7 @@ export class ProductList {
   private locationApi = inject(LocationApiService);
   private ctx = inject(OfficeContextService);
   private confirm = inject(ConfirmService);
+  private barcode = inject(BarcodeService);
   private toast = inject(MessageService);
   perm = inject(PermissionService);
   private search$ = new Subject<string>();
@@ -248,5 +260,78 @@ export class ProductList {
       this.page.update((p) => p - 1);
     }
     this.getProductList();
+  }
+
+  // ---- shelf labels ----
+
+  labelDialogOpen = signal(false);
+  buildingLabels = signal(false);
+  /** copies of each selected product, for a full sheet of one item */
+  labelCopies = 1;
+  labelShowPrice = true;
+  labelShowName = true;
+  labels = signal<ProductLabel[]>([]);
+  /** at most this many labels in one go — a sheet, not a print job queue */
+  readonly maxLabels = 200;
+
+  /** every copy of every label, which is what the sheet renders */
+  labelSheet = computed(() => {
+    const copies = Math.max(1, Math.min(50, Number(this.labelCopies) || 1));
+    const out: ProductLabel[] = [];
+    for (const label of this.labels()) {
+      for (let i = 0; i < copies; i++) out.push(label);
+    }
+    return out.slice(0, this.maxLabels);
+  });
+
+  async openLabels() {
+    const ids = [...this.selectedIds()];
+    if (!ids.length) {
+      this.toast.add({ severity: 'warn', summary: 'No selection', detail: 'Tick the products you want labels for' });
+      return;
+    }
+    this.labelDialogOpen.set(true);
+    this.buildingLabels.set(true);
+    this.labels.set([]);
+
+    const officeId = this.ctx.selectedOfficeId() ?? undefined;
+    try {
+      // the grid row is slim: the barcode and SKU come from the detail call
+      const products = await Promise.all(
+        ids.slice(0, 50).map((id) => firstValueFrom(this.api.getProduct(id, officeId))),
+      );
+      this.labels.set(
+        products.map((p) => {
+          // a shop without printed barcodes still has SKUs worth encoding
+          const code = (p.barcode ?? '').trim() || p.sku;
+          return {
+            name: p.name,
+            sku: p.sku,
+            price: p.price,
+            code,
+            barcode_src: this.barcode.toDataUrl(code),
+          };
+        }),
+      );
+    } catch (err: any) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: err?.error?.message ?? 'Could not build the labels',
+      });
+      this.labelDialogOpen.set(false);
+    } finally {
+      this.buildingLabels.set(false);
+    }
+  }
+
+  closeLabels() {
+    this.labelDialogOpen.set(false);
+    this.labels.set([]);
+  }
+
+  printLabels() {
+    // the sheet is already rendered; the print stylesheet hides the rest
+    setTimeout(() => window.print(), 50);
   }
 }

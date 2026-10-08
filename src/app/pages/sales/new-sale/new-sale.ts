@@ -11,6 +11,7 @@ import { ProductApiService } from '../../product-list/product.api';
 import { ProductListRow } from '../../product-list/product.model';
 import { CustomerApiService } from '../../user-management/customer/customer.api';
 import { CustomerListRow } from '../../user-management/customer/customer.model';
+import { OfficeApiService } from '../../user-management/office/office.api';
 import { SalesApiService } from '../sales.api';
 import { CreateSaleDto, PaymentMethod, Sale } from '../sales.model';
 
@@ -71,13 +72,16 @@ export class NewSale {
   private api = inject(SalesApiService);
   private productApi = inject(ProductApiService);
   private customerApi = inject(CustomerApiService);
+  private officeApi = inject(OfficeApiService);
   private ctx = inject(OfficeContextService);
   private toast = inject(MessageService);
 
   @Input() set open(value: boolean) {
     this._open.set(value);
-    if (value && this.tabs().length === 0) {
-      this.addTab();
+    if (value) {
+      // the branch may have changed its tax since the panel last opened
+      this.loadTaxSettings();
+      if (this.tabs().length === 0) this.addTab();
     }
   }
   get open() {
@@ -113,6 +117,29 @@ export class NewSale {
   customerSuggestOpen = signal(false);
   customerSearching = signal(false);
   private customerSearch$ = new Subject<string>();
+
+  // office tax settings, so the counter sees the same total the API writes
+  taxRate = signal(0);
+  taxName = signal('Tax');
+  taxInclusive = signal(false);
+
+  /** office tax settings, read when the panel opens */
+  private loadTaxSettings() {
+    const officeId = this.ctx.selectedOfficeId();
+    if (!officeId) {
+      this.taxRate.set(0);
+      return;
+    }
+    this.officeApi.getOffice(officeId).subscribe({
+      next: (office) => {
+        this.taxRate.set(office.tax_enabled ? (office.tax_rate ?? 0) : 0);
+        this.taxName.set(office.tax_name || 'Tax');
+        this.taxInclusive.set(!!office.tax_inclusive);
+      },
+      // no preview is better than a wrong one; the API still applies the tax
+      error: () => this.taxRate.set(0),
+    });
+  }
 
   paymentOptions: { label: string; value: PaymentMethod }[] = [
     { label: 'Cash', value: 'cash' },
@@ -300,9 +327,30 @@ export class NewSale {
     return (line.qty || 0) * (line.price || 0);
   }
 
-  orderTotal(tab: OrderTab | undefined): number {
+  /** what the lines come to before any tax */
+  netTotal(tab: OrderTab | undefined): number {
     if (!tab) return 0;
-    return tab.lines.reduce((sum, l) => sum + this.lineTotal(l), 0);
+    return round2(tab.lines.reduce((sum, l) => sum + this.lineTotal(l), 0));
+  }
+
+  /**
+   * Tax preview for the counter. The server recomputes it from the office
+   * settings when the bill is saved — this only keeps the screen honest.
+   */
+  taxAmount(tab: OrderTab | undefined): number {
+    const rate = this.taxRate();
+    const net = this.netTotal(tab);
+    if (!rate || net <= 0) return 0;
+    return this.taxInclusive()
+      ? round2(net - net / (1 + rate / 100))
+      : round2((net * rate) / 100);
+  }
+
+  /** What the customer actually pays: tax on top unless prices include it. */
+  orderTotal(tab: OrderTab | undefined): number {
+    const net = this.netTotal(tab);
+    if (!this.taxRate() || this.taxInclusive()) return net;
+    return round2(net + this.taxAmount(tab));
   }
 
   /** picked more units than the product has left */

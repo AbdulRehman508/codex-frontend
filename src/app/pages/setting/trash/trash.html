@@ -1,0 +1,85 @@
+<div class="trash-page">
+
+    <div class="trash-head">
+        <div>
+            <p class="f-16 _fw-600 mb-0">Trash</p>
+            <p class="trash-sub">
+                Deleted products, customers, suppliers, staff, offices and racks can be put back.
+                Sales, purchases and stock moves are reversed instead, which returns the stock and the money.
+            </p>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-field">
+            <label>Search</label>
+            <div class="position-relative">
+                <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="trash-search"
+                    class="_input-icon custom-placeholder" placeholder="Search a deleted record" />
+                <i class="pi pi-search _search-icon f-14"></i>
+                @if (searchTerm) {
+                <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
+                }
+            </div>
+        </div>
+        <div class="filter-field">
+            <label>Kind</label>
+            <ng-select [(ngModel)]="moduleFilter" [items]="moduleList" bindLabel="label" bindValue="value"
+                placeholder="Everything" (change)="onFilterChange()"></ng-select>
+        </div>
+        <button class="_outline-btn filter-reset" (click)="clearFilters()">Reset</button>
+    </div>
+
+    <div class="panel">
+        <div class="table-wrap">
+            <table class="trash-table">
+                <thead>
+                    <tr>
+                        <th>Record</th>
+                        <th>Kind</th>
+                        <th>Deleted</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (loading()) {
+                    <tr><td colspan="4" class="empty">Loading...</td></tr>
+                    } @else if (rows().length === 0) {
+                    <tr><td colspan="4" class="empty">The trash is empty.</td></tr>
+                    } @else {
+                    @for (r of rows(); track r.id) {
+                    <tr>
+                        <td class="record">
+                            {{ r.label }}
+                            @if (r.sub_label) { <small>{{ r.sub_label }}</small> }
+                        </td>
+                        <td><span class="badge">{{ r.module_label }}</span></td>
+                        <td>{{ r.deleted_at | date: 'yyyy-MM-dd HH:mm' }}</td>
+                        <td>
+                            <button class="_outline-btn sm" [disabled]="busyId() === r.id" (click)="restore(r)">
+                                <i class="pi pi-replay"></i> Restore
+                            </button>
+                            <button class="ns-edit-btn danger" [disabled]="busyId() === r.id" (click)="purge(r)"
+                                title="Delete for good">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!loading() && total() > 0) {
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <span class="f-14">Total: {{ total() }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
+                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            </div>
+        </div>
+        }
+    </div>
+</div>

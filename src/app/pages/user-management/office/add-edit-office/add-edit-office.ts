@@ -66,6 +66,12 @@ export class AddEditOffice {
       office_status: ['active'],
       office_address: ['', Validators.required],
       biography: [''],
+      // sales tax, per branch
+      tax_enabled: [false],
+      tax_name: ['GST'],
+      tax_rate: [0],
+      tax_inclusive: [false],
+      tax_number: [''],
       payment_methods: this._formBuilder.array([]),
     });
 
@@ -98,6 +104,11 @@ export class AddEditOffice {
           office_status: office.office_status,
           office_address: office.office_address,
           biography: office.biography ?? '',
+          tax_enabled: office.tax_enabled ?? false,
+          tax_name: office.tax_name || 'GST',
+          tax_rate: office.tax_rate ?? 0,
+          tax_inclusive: office.tax_inclusive ?? false,
+          tax_number: office.tax_number ?? '',
         });
         this.officeLogo.set(office.office_logo); // existing URL, not changed
         this.logoChanged = false;
@@ -195,6 +206,8 @@ export class AddEditOffice {
     if (this.officeForm.invalid) return;
 
     const body: CreateOfficeDto = { ...this.officeForm.value };
+    // a rate only means something while the tax is switched on
+    body.tax_rate = Number(body.tax_rate) || 0;
     // only send logo when a new one was picked; omit to keep existing on edit
     if (this.logoChanged && this.logoBase64) {
       body.office_logo = this.logoBase64;

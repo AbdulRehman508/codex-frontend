@@ -48,6 +48,10 @@ export interface PurchaseLine {
   cost_price: number;
   quantity: number;
   total: number;
+  /** supplier batch / lot number, when the goods carry one */
+  batch_no?: string;
+  /** when this lot expires; feeds the expiry report */
+  expiry_date?: string | null;
 }
 
 export interface Purchase {
@@ -87,7 +91,13 @@ export interface CreatePurchaseDto {
   office_id: string;
   supplier_id: string;
   supplier_invoice_no?: string;
-  lines: { product_id: string; quantity: number; cost_price: number }[];
+  lines: {
+    product_id: string;
+    quantity: number;
+    cost_price: number;
+    batch_no?: string;
+    expiry_date?: string;
+  }[];
   discount?: number;
   paid_amount?: number;
   status?: PurchaseStatus;

@@ -31,16 +31,29 @@
     }
 
     #printArea,
-    #printArea * {
+    #printArea *,
+    #labelSheet,
+    #labelSheet * {
         visibility: visible !important;
     }
 
-    #printArea {
+    #printArea,
+    #labelSheet {
         display: block !important;
         position: absolute;
         left: 0;
         top: 0;
         width: 100%;
+    }
+
+    // the label sheet lays itself out in a grid, not as a block
+    #labelSheet {
+        display: grid !important;
+    }
+
+    // a page with its own printable sheet (day close) keeps the normal flow
+    body.print-page * {
+        visibility: visible !important;
     }
 
     // the thermal slip opts into the narrow roll

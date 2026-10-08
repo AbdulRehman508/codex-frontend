@@ -38,7 +38,14 @@ export interface DashboardOverview {
     status: 'completed' | 'pending' | 'refunded';
     created_at: string | null;
   }[];
-  low_stock: { id: string; name: string; sku: string; quantity: number }[];
+  low_stock: {
+    id: string;
+    name: string;
+    sku: string;
+    quantity: number;
+    /** the product own reorder level, 0 when it uses the shop default */
+    min_stock: number;
+  }[];
 }
 
 export interface DashboardQuery {

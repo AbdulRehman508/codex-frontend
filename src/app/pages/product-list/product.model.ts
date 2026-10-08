@@ -1,5 +1,39 @@
 export type ProductStatus = 'active' | 'inactive';
 
+/** How a product is counted on the shelf. Stock is kept in whole units. */
+export type ProductUnit =
+  | 'pcs'
+  | 'box'
+  | 'carton'
+  | 'pack'
+  | 'dozen'
+  | 'kg'
+  | 'g'
+  | 'litre'
+  | 'ml'
+  | 'metre'
+  | 'foot'
+  | 'bag'
+  | 'roll'
+  | 'set';
+
+export const PRODUCT_UNITS: ProductUnit[] = [
+  'pcs',
+  'box',
+  'carton',
+  'pack',
+  'dozen',
+  'kg',
+  'g',
+  'litre',
+  'ml',
+  'metre',
+  'foot',
+  'bag',
+  'roll',
+  'set',
+];
+
 /**
  * Product joined with its physical location. The API returns the same shape
  * for the list and the detail call, so the edit form can seed the dependent
@@ -16,6 +50,12 @@ export interface Product {
   quantity: number;
   /** latest landed cost from a purchase — set by the purchase module, read-only here */
   cost_price: number;
+  /** reorder level; 0 = fall back to the office-wide low-stock threshold */
+  min_stock: number;
+  /** what one unit of `quantity` is called */
+  unit: ProductUnit;
+  /** units in one supplier pack (carton of 24 => 24) */
+  pack_size: number;
   description: string | null;
   status: ProductStatus;
   rack_location_id: string | null;
@@ -47,6 +87,9 @@ export interface CreateProductDto {
   barcode?: string | null;
   price: number;
   quantity?: number;
+  min_stock?: number;
+  unit?: ProductUnit;
+  pack_size?: number;
   description?: string;
   status?: ProductStatus;
   /** foreign key to a bin; null = unassigned. Never a text location. */

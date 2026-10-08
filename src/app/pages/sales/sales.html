@@ -169,6 +169,7 @@
         </div>
         @if (sale.office_address) { <p>{{ sale.office_address }}</p> }
         @if (sale.office_mobile_no) { <p>{{ sale.office_mobile_no }}</p> }
+        @if (sale.office_tax_number) { <p>{{ sale.tax_name || 'Tax' }} No: {{ sale.office_tax_number }}</p> }
     </div>
 
     <div class="pos-sep"></div>
@@ -205,6 +206,13 @@
         <div><span>Subtotal</span><span>{{ sale.subtotal | number: '1.2-2' }}</span></div>
         @if (sale.discount > 0) {
         <div><span>Discount</span><span>-{{ sale.discount | number: '1.2-2' }}</span></div>
+        }
+        @if (sale.tax_amount) {
+        <!-- an inclusive tax is already inside the total, so it is marked -->
+        <div>
+            <span>{{ sale.tax_name || 'Tax' }} {{ sale.tax_rate }}%{{ sale.tax_inclusive ? ' (incl.)' : '' }}</span>
+            <span>{{ sale.tax_amount | number: '1.2-2' }}</span>
+        </div>
         }
         <div class="pos-grand"><span>TOTAL</span><span>{{ sale.total | number: '1.2-2' }}</span></div>
         @if (sale.borrow_amount > 0) {
