@@ -1,8 +1,8 @@
 <div class="d-flex align-items-center justify-content-between my-3">
-    <p class="f-16 _fw-600 mb-0">{{ pageTitle }}</p>
+    <p class="f-16 _fw-600 mb-0">{{ pageTitle | t }}</p>
     <div class="d-flex gap-2">
-        <button class="_cancel-btn" (click)="closeLocation()">Cancel</button>
-        <button class="_primary-btn" [disabled]="saving()" (click)="saveLocation()">{{ saving() ? 'Saving...' : 'Save' }}</button>
+        <button class="_cancel-btn" (click)="closeLocation()">{{ 'common.cancel' | t }}</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="saveLocation()">{{ saving() ? ('common.saving' | t) : ('common.save' | t) }}</button>
     </div>
 </div>
 
@@ -10,65 +10,65 @@
     <div class="row">
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="name">Rack Name <span class="text-danger">*</span></label>
+                <label for="name">{{ 'location.rackName' | t }} <span class="text-danger">*</span></label>
                 <input type="text" id="name" formControlName="name" placeholder="Rack A"
                     [ngClass]="{ _inputError: (submitted && locationForm.controls['name'].invalid) || fieldError('name') }">
                 @if (submitted && locationForm.controls['name'].invalid) {
-                <small class="text-danger">Rack name is required</small>
+                <small class="text-danger">{{ 'form.rackNameRequired' | t }}</small>
                 }
                 @if (fieldError('name')) { <small class="text-danger">{{ fieldError('name') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="code">Rack Code <span class="text-danger">*</span></label>
+                <label for="code">{{ 'location.rackCode' | t }} <span class="text-danger">*</span></label>
                 <input type="text" id="code" formControlName="code" placeholder="RACK-A"
                     [ngClass]="{ _inputError: (submitted && locationForm.controls['code'].invalid) || fieldError('code') }">
                 @if (submitted && locationForm.controls['code'].hasError('required')) {
-                <small class="text-danger">Rack code is required</small>
+                <small class="text-danger">{{ 'form.rackCodeRequired' | t }}</small>
                 } @else if (submitted && locationForm.controls['code'].hasError('pattern')) {
-                <small class="text-danger">Only letters, digits, - and _ are allowed</small>
+                <small class="text-danger">{{ 'form.rackCodePattern' | t }}</small>
                 }
                 @if (fieldError('code')) { <small class="text-danger">{{ fieldError('code') }}</small> }
-                <small class="d-block text-muted">Must be unique inside the selected office. Location codes are built from it.</small>
+                <small class="d-block text-muted">{{ 'form.rackCodeHint' | t }}</small>
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="status">Status</label>
+                <label for="status">{{ 'common.status' | t }}</label>
                 <ng-select formControlName="status" [items]="statusList" placeholder="Select Status"></ng-select>
             </div>
         </div>
 
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="rows_count">Rows <span class="text-danger">*</span></label>
+                <label for="rows_count">{{ 'location.rows' | t }} <span class="text-danger">*</span></label>
                 <input type="number" min="1" max="100" id="rows_count" formControlName="rows_count"
                     [ngClass]="{ _inputError: (submitted && locationForm.controls['rows_count'].invalid) || fieldError('rows_count') }">
                 @if (submitted && locationForm.controls['rows_count'].invalid) {
-                <small class="text-danger">Enter a number between 1 and 100</small>
+                <small class="text-danger">{{ 'form.between1and100' | t }}</small>
                 }
                 @if (fieldError('rows_count')) { <small class="text-danger">{{ fieldError('rows_count') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="columns_count">Columns per row <span class="text-danger">*</span></label>
+                <label for="columns_count">{{ 'form.columnsPerRow' | t }} <span class="text-danger">*</span></label>
                 <input type="number" min="1" max="100" id="columns_count" formControlName="columns_count"
                     [ngClass]="{ _inputError: (submitted && locationForm.controls['columns_count'].invalid) || fieldError('columns_count') }">
                 @if (submitted && locationForm.controls['columns_count'].invalid) {
-                <small class="text-danger">Enter a number between 1 and 100</small>
+                <small class="text-danger">{{ 'form.between1and100' | t }}</small>
                 }
                 @if (fieldError('columns_count')) { <small class="text-danger">{{ fieldError('columns_count') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="bins_count">Bins per column <span class="text-danger">*</span></label>
+                <label for="bins_count">{{ 'form.binsPerColumn' | t }} <span class="text-danger">*</span></label>
                 <input type="number" min="1" max="100" id="bins_count" formControlName="bins_count"
                     [ngClass]="{ _inputError: (submitted && locationForm.controls['bins_count'].invalid) || fieldError('bins_count') }">
                 @if (submitted && locationForm.controls['bins_count'].invalid) {
-                <small class="text-danger">Enter a number between 1 and 100</small>
+                <small class="text-danger">{{ 'form.between1and100' | t }}</small>
                 }
                 @if (fieldError('bins_count')) { <small class="text-danger">{{ fieldError('bins_count') }}</small> }
             </div>
@@ -76,7 +76,7 @@
 
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="description">Description</label>
+                <label for="description">{{ 'form.description' | t }}</label>
                 <textarea id="description" formControlName="description" cols="20" rows="3"></textarea>
             </div>
         </div>
@@ -85,34 +85,34 @@
 
 <div class="preview-box mt-2">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <p class="f-14 _fw-600 mb-0">Generated Locations Preview</p>
+        <p class="f-14 _fw-600 mb-0">{{ 'form.previewTitle' | t }}</p>
         <span class="badge" [ngClass]="tooManyLocations() ? 'bg-danger' : 'bg-secondary'">
-            {{ totalLocations() }} location(s)
+            {{ totalLocations() }} {{ 'common.locations' | t }}
         </span>
     </div>
 
     @if (tooManyLocations()) {
     <small class="text-danger d-block mt-2">
-        Rows x Columns x Bins is {{ totalLocations() }} — a rack can generate at most {{ maxLocations }} locations.
+        {{ 'location.maxWarn' | t }} {{ totalLocations() }} {{ 'location.maxWarn2' | t }} {{ maxLocations }} {{ 'common.locations' | t }}.
     </small>
     } @else if (!previewRows().length) {
-    <small class="text-muted d-block mt-2">Enter a rack code and the grid size to preview the codes.</small>
+    <small class="text-muted d-block mt-2">{{ 'form.previewEmpty' | t }}</small>
     } @else {
     @if (locationId) {
     <small class="text-warning d-block mt-2">
-        Editing the grid adds new locations. Shrinking removes the ones outside the new grid — blocked when a product still sits there.
+        {{ 'form.previewEditWarn' | t }}
     </small>
     }
     <div class="preview-grid mt-2">
         @for (p of previewRows(); track p.location_code) {
         <div class="preview-chip">
             <span class="preview-code">{{ p.location_code }}</span>
-            <span class="preview-meta">Row {{ p.row_no }} · Col {{ p.column_no }} · Bin {{ p.bin_no }}</span>
+            <span class="preview-meta">{{ 'form.row' | t }} {{ p.row_no }} · {{ 'form.column' | t }} {{ p.column_no }} · {{ 'form.bin' | t }} {{ p.bin_no }}</span>
         </div>
         }
     </div>
     @if (hiddenPreviewCount() > 0) {
-    <small class="text-muted d-block mt-2">+ {{ hiddenPreviewCount() }} more location(s) will be generated.</small>
+    <small class="text-muted d-block mt-2">+ {{ hiddenPreviewCount() }} {{ 'location.moreWillBe' | t }}</small>
     }
     }
 </div>

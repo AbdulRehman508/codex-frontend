@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,12 +18,14 @@ type PermissionKey = 'view' | 'create' | 'edit' | 'delete';
 
 @Component({
   selector: 'app-access',
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslatePipe],
   templateUrl: './access.html',
   styleUrl: './access.scss',
 })
 export class Access {
   private accessApi = inject(AccessApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private rolesApi = inject(RolesApiService);
   private ctx = inject(OfficeContextService);
   private perm = inject(PermissionService);
@@ -49,12 +53,12 @@ export class Access {
   );
 
   // CRUD permission columns rendered in the matrix
-  permissionColumns: { key: PermissionKey; label: string }[] = [
-    { key: 'view', label: 'View' },
-    { key: 'create', label: 'Create' },
-    { key: 'edit', label: 'Edit' },
-    { key: 'delete', label: 'Delete' },
-  ];
+  permissionColumns = computed<{ key: PermissionKey; label: string }[]>(() => [
+    { key: 'view', label: this.i18n.t('access.view') },
+    { key: 'create', label: this.i18n.t('access.create') },
+    { key: 'edit', label: this.i18n.t('access.edit') },
+    { key: 'delete', label: this.i18n.t('access.delete') },
+  ]);
 
   // roles are office-scoped: the header office drives which roles show here
   roleList = signal<Role[]>([]);

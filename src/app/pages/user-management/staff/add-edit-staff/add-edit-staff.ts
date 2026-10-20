@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
 import { commonIcons } from '../../../../core/icon-images/common-icon';
@@ -11,12 +12,12 @@ import { StaffApiService } from '../staff.api';
 import { CreateStaffDto } from '../staff.model';
 import { RolesApiService, Role } from '../../roles.api';
 import { OfficeApiService } from '../../office/office.api';
-import { OfficeListRow } from '../../office/office.model';
+import { OfficePick } from '../../office/office.model';
 import { TokenService } from '../../../../core/services/token.service';
 
 @Component({
   selector: 'app-add-edit-staff',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, InputNumber],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, InputNumber, TranslatePipe],
   templateUrl: './add-edit-staff.html',
   styleUrl: './add-edit-staff.scss',
 })
@@ -34,14 +35,15 @@ export class AddEditStaff {
   commonIcon = commonIcons;
   submitted = false;
   saving = signal(false);
-  pageTitle = 'Add Staff';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'staff.addTitle';
   staffId: string | null = null;
 
   hideShowPassword = false;
   validation_error: string[] = [];
 
   roleList = signal<Role[]>([]);
-  officeList = signal<OfficeListRow[]>([]);
+  officeList = signal<OfficePick[]>([]);
 
   // profile photo state
   profilePhoto = signal<string | null>(null); // URL (edit) or base64 (new) for preview
@@ -78,7 +80,7 @@ export class AddEditStaff {
 
     this._activeRoute.params.subscribe((params) => {
       this.staffId = params['id'] ?? null;
-      this.pageTitle = this.staffId ? 'Edit Staff' : 'Add Staff';
+      this.pageTitle = this.staffId ? 'staff.editTitle' : 'staff.addTitle';
       if (this.staffId) {
         // password optional on edit (empty = keep existing)
         this.staffForm.controls['password'].clearValidators();
@@ -86,6 +88,24 @@ export class AddEditStaff {
         this.loadStaff(this.staffId);
       }
     });
+  }
+
+  /** the offices currently ticked */
+  private pickedOffices(): string[] {
+    return (this.staffForm.controls['office_ids'].value as string[]) ?? [];
+  }
+
+  isOfficePicked(id: string): boolean {
+    return this.pickedOffices().includes(id);
+  }
+
+  /** tick / untick one branch; the role list reloads off the value change */
+  toggleOffice(id: string) {
+    const picked = this.pickedOffices();
+    const next = picked.includes(id) ? picked.filter((o) => o !== id) : [...picked, id];
+    const control = this.staffForm.controls['office_ids'];
+    control.setValue(next);
+    control.markAsDirty();
   }
 
   private loadRoles(officeIds: string[]) {
@@ -98,11 +118,10 @@ export class AddEditStaff {
   private loadOffices() {
     // Admin sees every office; others only their assigned offices, and never
     // the head office — staff there are an admin-only assignment
-    this.officeApi.listOffices({ limit: 1000, sort: 'office_name', order: 'asc' }).subscribe({
-      next: (res) => {
-        const visible = this.token.filterOfficesForUser(res.data);
+    this.officeApi.listMyOffices().subscribe({
+      next: (offices) => {
         this.officeList.set(
-          this.token.isAdmin() ? visible : visible.filter((o) => !o.is_main),
+          this.token.isAdmin() ? offices : offices.filter((o) => !o.is_main),
         );
       },
       error: (err) => this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Failed to load offices' }),
@@ -190,28 +209,40 @@ export class AddEditStaff {
     this._router.navigateByUrl('/user-management/staff');
   }
 
+  /**
+   * Rates whatever is in the field right now. Reading the stored list instead
+   * would call a browser-filled password "Strong", because nothing typed means
+   * the (input) handler never ran.
+   */
   get strengthLevel(): 'Weak' | 'Medium' | 'Strong' {
-    if (this.validation_error?.length === 3 || this.validation_error?.length === 4) return 'Weak';
-    if (this.validation_error?.length === 1 || this.validation_error?.length === 2) return 'Medium';
+    const failed = this.passwordFailures(this.staffForm.controls['password'].value).length;
+    if (failed >= 3) return 'Weak';
+    if (failed >= 1) return 'Medium';
     return 'Strong';
   }
 
   passwordCriteria() {
-    this.validation_error = [];
-    const password = this.staffForm.controls['password'].value;
-    if (password?.length < 12) {
-      this.validation_error.push('Password must be at least 12 characters long');
-    }
-    if (!/[A-Z]/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one uppercase letter');
-    }
-    if (!/\d/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one numeric character');
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one special character');
-    }
+    this.validation_error = this.passwordFailures(this.staffForm.controls['password'].value);
     return this.validation_error;
+  }
+
+  /** the house password policy, as the list of rules this value breaks */
+  private passwordFailures(password: string | null | undefined): string[] {
+    const value = password ?? '';
+    const failures: string[] = [];
+    if (value.length < 12) {
+      failures.push('Password must be at least 12 characters long');
+    }
+    if (!/[A-Z]/.test(value)) {
+      failures.push('Password must contain at least one uppercase letter');
+    }
+    if (!/\d/.test(value)) {
+      failures.push('Password must contain at least one numeric character');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+      failures.push('Password must contain at least one special character');
+    }
+    return failures;
   }
 
   onSelectFileLR(event: Event) {

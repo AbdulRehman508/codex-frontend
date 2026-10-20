@@ -2,10 +2,10 @@
 
     <div class="filter-bar">
         <div class="filter-field">
-            <label>Search</label>
+            <label>{{ 'common.search' | t }}</label>
             <div class="position-relative">
                 <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="supplier-search"
-                    class="_input-icon custom-placeholder" placeholder="Search name / company / mobile" />
+                    class="_input-icon custom-placeholder" [placeholder]="'supplier.searchPlaceholder' | t" />
                 <i class="pi pi-search _search-icon f-14"></i>
                 @if (searchTerm) {
                 <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
@@ -13,17 +13,17 @@
             </div>
         </div>
         <div class="filter-field">
-            <label>Status</label>
-            <ng-select [(ngModel)]="statusFilter" [items]="statusList" placeholder="All statuses"
+            <label>{{ 'common.status' | t }}</label>
+            <ng-select [(ngModel)]="statusFilter" [items]="statusList" [placeholder]="'sales.allStatuses' | t"
                 (change)="onFilterChange()"></ng-select>
         </div>
-        <button class="_outline-btn filter-reset" (click)="clearSearch()">Reset</button>
+        <button class="_outline-btn filter-reset" (click)="clearSearch()">{{ 'common.reset' | t }}</button>
 
         <div class="filter-spacer"></div>
 
         @if (perm.can(module, 'create')) {
         <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/purchase/suppliers/add']"
-            [title]="hasOffice() ? 'Add a supplier' : 'Select an office in the header first'">Add Supplier</button>
+            [title]="hasOffice() ? ('supplier.addOne' | t) : ('common.pickOfficeHeader' | t)">{{ 'purchase.addSupplier' | t }}</button>
         }
     </div>
 
@@ -33,25 +33,25 @@
                 <thead>
                     <tr>
                         <th class="cursor-pointer" (click)="changeSort('name')">
-                            Name <i class="pi" [ngClass]="sort() === 'name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                            {{ 'common.name' | t }} <i class="pi" [ngClass]="sort() === 'name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                         </th>
-                        <th class="cursor-pointer" (click)="changeSort('company')">Company</th>
-                        <th class="cursor-pointer" (click)="changeSort('mobile_no')">Mobile No</th>
-                        <th>Email</th>
+                        <th class="cursor-pointer" (click)="changeSort('company')">{{ 'common.company' | t }}</th>
+                        <th class="cursor-pointer" (click)="changeSort('mobile_no')">{{ 'common.mobile' | t }}</th>
+                        <th>{{ 'common.email' | t }}</th>
                         <th class="cursor-pointer" (click)="changeSort('payable_amount')">
-                            Payable <i class="pi" [ngClass]="sort() === 'payable_amount' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                            {{ 'common.payable' | t }} <i class="pi" [ngClass]="sort() === 'payable_amount' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                         </th>
-                        <th class="cursor-pointer" (click)="changeSort('status')">Status</th>
-                        <th>Action</th>
+                        <th class="cursor-pointer" (click)="changeSort('status')">{{ 'common.status' | t }}</th>
+                        <th>{{ 'common.action' | t }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (loading()) {
-                    <tr><td colspan="7" class="empty">Loading...</td></tr>
+                    <tr><td colspan="7" class="empty">{{ 'common.loading' | t }}</td></tr>
                     } @else if (!hasOffice()) {
-                    <tr><td colspan="7" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
+                    <tr><td colspan="7" class="empty">{{ 'common.pickOfficeFirst' | t }}</td></tr>
                     } @else if (rows().length === 0) {
-                    <tr><td colspan="7" class="empty">No suppliers yet.</td></tr>
+                    <tr><td colspan="7" class="empty">{{ 'purchase.noSuppliers' | t }}</td></tr>
                     } @else {
                     @for (s of rows(); track s.id) {
                     <tr>
@@ -71,13 +71,13 @@
                         <td>
                             <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
                                 [ngClass]="s.status === 'active' ? 'active' : 'inactive'" (click)="toggleStatus(s)"
-                                [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">{{ s.status }}</span>
+                                [title]="perm.can(module, 'edit') ? ('common.clickToToggle' | t) : ''">{{ s.status }}</span>
                         </td>
                         <td>
                             @if (perm.can(module, 'edit')) {
                             @if (s.payable_amount > 0) {
                             <button class="ns-edit-btn pay" [routerLink]="['/purchase/suppliers/edit', s.id]"
-                                title="Record a payment">
+                                [title]="'supplier.recordPaymentShort' | t">
                                 <i class="pi pi-wallet"></i>
                             </button>
                             }
@@ -101,15 +101,15 @@
         @if (!loading() && total() > 0) {
         <div class="d-flex align-items-center justify-content-between mt-3">
             <span class="f-14">
-                Total: {{ total() }}
+                {{ 'common.total' | t }}: {{ total() }}
                 @if (pagePayable() > 0) {
-                <span class="page-payable">· payable on this page {{ pagePayable() | number: '1.2-2' }}</span>
+                <span class="page-payable">· {{ 'supplier.payableOnPage' | t }} {{ pagePayable() | number: '1.2-2' }}</span>
                 }
             </span>
             <div class="d-flex align-items-center gap-2">
-                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
-                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
-                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">{{ 'common.prev' | t }}</button>
+                <span class="f-14">{{ 'common.page' | t }} {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">{{ 'common.next' | t }}</button>
             </div>
         </div>
         }

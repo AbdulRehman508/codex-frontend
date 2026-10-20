@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -13,12 +15,14 @@ import { AuditAction, AuditRow } from './activity.model';
 
 @Component({
   selector: 'app-activity',
-  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule, TranslatePipe],
   templateUrl: './activity.html',
   styleUrl: './activity.scss',
 })
 export class Activity {
   private api = inject(ActivityApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private ctx = inject(OfficeContextService);
   private toast = inject(MessageService);
   private search$ = new Subject<string>();
@@ -55,28 +59,28 @@ export class Activity {
   private dateFrom = '';
   private dateTo = '';
 
-  actionList: { label: string; value: AuditAction }[] = [
-    { label: 'Created', value: 'create' },
-    { label: 'Updated', value: 'update' },
-    { label: 'Deleted', value: 'delete' },
-    { label: 'Logged in', value: 'login' },
-  ];
+  actionList = computed(() => [
+    { label: this.i18n.t('activity.created'), value: 'create' },
+    { label: this.i18n.t('activity.updated'), value: 'update' },
+    { label: this.i18n.t('activity.deleted'), value: 'delete' },
+    { label: this.i18n.t('activity.loggedIn'), value: 'login' },
+  ]);
 
   // the access-catalog keys the interceptor records against
-  moduleList = [
-    { label: 'Products', value: 'products' },
-    { label: 'Sales', value: 'sales' },
-    { label: 'Purchase', value: 'purchase' },
-    { label: 'Supplier', value: 'supplier' },
-    { label: 'Stock', value: 'stock' },
-    { label: 'Customer', value: 'customer' },
-    { label: 'Office', value: 'office' },
-    { label: 'Staff', value: 'staff' },
-    { label: 'Role', value: 'role' },
-    { label: 'Access Control', value: 'access_control' },
-    { label: 'Location', value: 'location' },
-    { label: 'Sign in', value: 'auth' },
-  ];
+  moduleList = computed(() => [
+    { label: this.i18n.t('common.products'), value: 'products' },
+    { label: this.i18n.t('nav.sales'), value: 'sales' },
+    { label: this.i18n.t('nav.purchase'), value: 'purchase' },
+    { label: this.i18n.t('common.supplier'), value: 'supplier' },
+    { label: this.i18n.t('nav.stock'), value: 'stock' },
+    { label: this.i18n.t('common.customer'), value: 'customer' },
+    { label: this.i18n.t('form.office'), value: 'office' },
+    { label: this.i18n.t('user.staff'), value: 'staff' },
+    { label: this.i18n.t('form.role'), value: 'role' },
+    { label: this.i18n.t('setting.accessControl'), value: 'access_control' },
+    { label: this.i18n.t('common.location'), value: 'location' },
+    { label: this.i18n.t('activity.signIn'), value: 'auth' },
+  ]);
 
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
 
@@ -157,11 +161,11 @@ export class Activity {
   }
 
   moduleLabel(key: string): string {
-    return this.moduleList.find((m) => m.value === key)?.label ?? key;
+    return this.moduleList().find((m) => m.value === key)?.label ?? key;
   }
 
   actionLabel(value: string): string {
-    return this.actionList.find((a) => a.value === value)?.label ?? value;
+    return this.actionList().find((a) => a.value === value)?.label ?? value;
   }
 
   /** what the row is about: the record's own name, else the path */

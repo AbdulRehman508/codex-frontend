@@ -1,4 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { Component, computed, inject, signal } from '@angular/core';
+import { TranslationService } from '../../../../core/i18n/translation.service';
 import { ReactiveFormsModule, FormArray, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
 import { commonIcons } from '../../../../core/icon-images/common-icon';
 import { CommonModule } from '@angular/common';
@@ -18,7 +20,7 @@ const MAX_PAYMENT_METHODS = 10;
 
 @Component({
   selector: 'app-add-edit-office',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, TranslatePipe],
   templateUrl: './add-edit-office.html',
   styleUrl: './add-edit-office.scss',
 })
@@ -28,6 +30,8 @@ export class AddEditOffice {
   private _activeRoute = inject(ActivatedRoute);
   private _formBuilder = inject(FormBuilder);
   private api = inject(OfficeApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private toast = inject(MessageService);
   private qr = inject(QrService);
 
@@ -39,11 +43,14 @@ export class AddEditOffice {
   commonIcon = commonIcons;
   submitted = false;
   saving = signal(false);
-  pageTitle = 'Add Office';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'office.addTitle';
   officeId: string | null = null;
 
-  membershipList: any[] = membershipList;
-  membershipType: any[] = membershipType;
+  // the shared constants hold keys; the labels are built here so the
+  // dropdowns follow the language switch
+  membershipList = computed(() => membershipList.map((m) => ({ ...m, label: this.i18n.t(m.label) })));
+  membershipType = computed(() => membershipType.map((m) => ({ ...m, label: this.i18n.t(m.label) })));
 
   // logo state
   officeLogo = signal<string | null>(null); // URL (edit) or base64 (new) for preview
@@ -82,7 +89,7 @@ export class AddEditOffice {
 
     this._activeRoute.params.subscribe((params) => {
       this.officeId = params['id'] ?? null;
-      this.pageTitle = this.officeId ? 'Edit Office' : 'Add Office';
+      this.pageTitle = this.officeId ? 'office.editTitle' : 'office.addTitle';
       if (this.officeId) {
         this.loadOffice(this.officeId);
       }

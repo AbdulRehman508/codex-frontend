@@ -1,8 +1,8 @@
 <div class="top-box">
-    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <button class="_outline-btn" (click)="clearSearch()">{{ 'common.reset' | t }}</button>
     <div class="position-relative">
         <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="task-search"
-            class="_input-icon w-200 custom-placeholder" placeholder="Search" />
+            class="_input-icon w-200 custom-placeholder" [placeholder]="'common.search' | t" />
         <i class="pi pi-search _search-icon f-14"></i>
         @if (searchByKeyword) {
         <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
@@ -14,7 +14,7 @@
     </div>
     }
     @if (perm.can(module, 'create')) {
-    <button class="_outline-btn" [routerLink]="['/setting/role/add']">Add New</button>
+    <button class="_outline-btn" [routerLink]="['/setting/role/add']">{{ 'common.addNew' | t }}</button>
     }
 </div>
 
@@ -32,18 +32,18 @@
                         ID <i class="pi" [ngClass]="sort() === 'id' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('role')">
-                        Role Name <i class="pi" [ngClass]="sort() === 'role' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'role.name' | t }} <i class="pi" [ngClass]="sort() === 'role' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
-                    <th scope="col">Description</th>
-                    <th scope="col">Office</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">{{ 'form.description' | t }}</th>
+                    <th scope="col">{{ 'form.office' | t }}</th>
+                    <th scope="col">{{ 'common.action' | t }}</th>
                 </tr>
             </thead>
             <tbody>
                 @if (loading()) {
-                <tr><td colspan="6"><p>Loading...</p></td></tr>
+                <tr><td colspan="6"><p>{{ 'common.loading' | t }}</p></td></tr>
                 } @else if (rows().length === 0) {
-                <tr><td colspan="6"><p>Record not available</p></td></tr>
+                <tr><td colspan="6"><p>{{ 'common.noRecords' | t }}</p></td></tr>
                 } @else {
                 @for (row of rows(); track row.id) {
                 <tr>
@@ -77,11 +77,11 @@
 
     @if (!loading() && total() > 0) {
     <div class="d-flex align-items-center justify-content-between mt-3">
-        <span class="f-14">Total: {{ total() }}</span>
+        <span class="f-14">{{ 'common.total' | t }}: {{ total() }}</span>
         <div class="d-flex align-items-center gap-2">
-            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
-            <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
-            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">{{ 'common.prev' | t }}</button>
+            <span class="f-14">{{ 'common.page' | t }} {{ page() }} / {{ totalPages() }}</span>
+            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">{{ 'common.next' | t }}</button>
         </div>
     </div>
     }

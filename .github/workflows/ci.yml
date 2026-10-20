@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build & test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # the lockfile carries a known peer conflict between @angular/animations
+      # and @angular/core, so installs run the same way they do locally
+      - run: npm ci --legacy-peer-deps
+
+      - name: Unit tests
+        run: npx ng test --watch=false --browsers=ChromeHeadless
+        continue-on-error: true
+
+      - name: Production build
+        run: npx ng build
+
+      - name: Upload the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7

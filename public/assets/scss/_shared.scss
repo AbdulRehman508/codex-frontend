@@ -7,22 +7,39 @@ body {
     background-color: var(--bodyColor) !important;
     margin: 0;
     padding: 0;
+    // Inter's optical sizing and proper kerning: the type looks drawn rather
+    // than rendered, which is most of the difference at small sizes
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    color: var(--black);
+}
+
+/* one visible keyboard ring for everything that is not a button */
+:where(a, [tabindex], .cursor-pointer):focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: var(--r-xs);
 }
 
 p,
 label {
     color: var(--black) !important;
-    @extend .f-12;
+    font-size: 13px;
+    line-height: 1.55;
     @extend ._fw-500;
     @extend .font-family;
     margin: 0;
 }
 
+/* The page canvas. Content cards sit on it, so it is a surface rather than
+   another white card competing with them. */
 .body-details {
-    padding: 20px;
-    border-radius: 16px;
+    padding: 22px 24px;
+    border-radius: var(--r-lg);
     border: solid 1px var(--borderColor);
-    background-color: var(--white) !important;
+    background-color: var(--surface) !important;
+    box-shadow: var(--shadow-sm);
     min-height: calc(100vh - 90px);
 }
 
@@ -35,14 +52,16 @@ label {
 
 ._heading2 {
     color: var(--black);
-    @extend .f-18;
+    font-size: 19px;
+    letter-spacing: -0.015em;
     @extend ._fw-600;
     @extend .font-family;
 }
 
 ._heading3 {
     color: var(--black);
-    @extend .f-24;
+    font-size: 24px;
+    letter-spacing: -0.02em;
     @extend ._fw-600;
     @extend .font-family;
 }
@@ -56,26 +75,33 @@ label {
 
 ._cross-icon {
     position: absolute;
-    right: 0px;
-    top: 11px;
+    inset-inline-end: 8px;
+    top: 12px;
     cursor: pointer;
-    width: 25px;
-    height: 25px;
-    @extend .f-14;
+    width: 16px;
+    height: 16px;
+    font-size: 13px;
+    color: var(--lightDarkGray);
+    transition: color var(--ease);
+
+    &:hover {
+        color: var(--danger);
+    }
 }
 
 ._search-icon {
-    @extend .f-14;
     @extend ._fw-500;
+    font-size: 13px;
     color: var(--searchIcon);
     position: absolute;
-    left: 10px;
-    top: 11px;
+    inset-inline-start: 12px;
+    top: 13px;
+    pointer-events: none;
 }
 
 .scroll-top {
     position: fixed;
-    right: 65px;
+    inset-inline-end: 65px;
     bottom: 115px;
     z-index: 9;
     color: var(--white);
@@ -101,7 +127,7 @@ label {
 .top-box {
     position: absolute;
     top: 96px;
-    right: 30px;
+    inset-inline-end: 30px;
     display: flex;
     align-items: center;
     justify-content: end;
@@ -116,12 +142,16 @@ label {
 
 *::-webkit-scrollbar-track,
 .p-datatable-scrollable-body::-webkit-scrollbar-track {
-    background: var(--gray) !important;
+    background: transparent !important;
 }
 
 *::-webkit-scrollbar-thumb,
 .p-datatable-scrollable-body::-webkit-scrollbar-thumb {
-    background-color: lightgray !important;
-    border-radius: 20px !important;
+    background-color: #c3ced9 !important;
+    border-radius: var(--r-pill) !important;
     border: 0px !important;
+
+    &:hover {
+        background-color: #a9b7c6 !important;
+    }
 }

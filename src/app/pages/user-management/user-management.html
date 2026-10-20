@@ -1,4 +1,4 @@
-<p class="_heading2">User Management</p>
+<p class="_heading2">{{ 'nav.userManagement' | t }}</p>
 
 <div class="d-flex align-items-start mt-4 gap-3">
     <div class="user-menu">
@@ -8,7 +8,7 @@
                 [routerLinkActiveOptions]="{ exact: item?.isExact ?? false }">
                 <a [routerLink]="item.url" class="d-flex align-items-center gap-2">
                     <img [src]="item.icon" />
-                    <p class="hover-content">{{ item.label }}</p>
+                    <p class="hover-content">{{ item.label | t }}</p>
                 </a>
             </li>
             }

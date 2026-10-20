@@ -87,12 +87,72 @@ src/app/
   effect that fetched it.
 - **Office scoping.** `OfficeContextService` holds the selected branch and
   remembers it on the user record, so the same office returns after a new login.
+  The picker itself reads `GET profile/offices` — the offices module is
+  admin-only, so a manager has no access to the list endpoint, but still needs
+  the names of the branches they work in. That call answers every live office
+  for an admin and the assigned ones for anyone else.
 - **Permissions.** `PermissionService` drives menus and route guards, and the
   API enforces the same matrix independently — the UI is convenience, not
   security.
+- **The session is a cookie, not a variable.** Login leaves an httpOnly cookie
+  the browser attaches to every call (`withCredentials`); nothing here can read
+  the token, so an injected script cannot steal it. localStorage keeps only the
+  user object the UI renders from.
+
+## Languages
+
+English and Urdu, switched from the header. Urdu flips the page to
+right-to-left (`dir="rtl"` on `<html>`), swaps in a Noto Sans Arabic face and
+keeps money, dates and codes left-to-right, so "1,250.00" never renders
+backwards. The choice is remembered per browser.
+
+Strings live in `core/i18n/translations.ts` as flat keys, used through the `t`
+pipe: `{{ 'nav.sales' | t }}`. A key missing from Urdu falls back to English,
+so a screen that has not been translated yet still reads properly.
+
+Covered: every screen — navigation, header, login, the dashboard, the lists,
+the POS panel, the add/edit forms, reports, day close, the activity log and the
+trash. Dropdown options and stat tiles are built in TypeScript, so those lists
+are `computed()` over the translation service rather than plain arrays; that is
+what makes them re-render on the language switch. Toast text that comes back
+from the API is still English.
+
+**Layout mirrors itself from `dir`.** Components spend logical properties
+(`padding-inline-start`, `inset-inline-end`, `border-inline-start`) instead of
+left/right, so Urdu moves the rail, the drawers and the icons without a second
+stylesheet. A physical `left`/`right` in a component is a bug unless it is a
+centring `left: 50%`.
 
 ## Theme
 
-Brand colours live in `public/assets/scss/_colors.scss` (Tailwind teal, matched
-to the logo). `--primary` and its tints, plus the chart colours, are defined
-once there; the PrimeNG preset in `app.config.ts` points at the same scale.
+Every visual decision is a token in `public/assets/scss/_colors.scss`. Components
+spend tokens, they do not invent values, so changing a token moves the whole app.
+
+| Group | Tokens | What they are for |
+|---|---|---|
+| Brand | `--primary`, `--primary-hover/active/soft`, `--secondary` | Tailwind teal, matched to the logo. The PrimeNG preset in `app.config.ts` points at the same scale, with `darkModeSelector: false` — the app has one theme, and PrimeNG otherwise follows the OS and turns its widgets black on a dark machine. |
+| Chart | `--chart-1`, `--chart-2` | data marks only — the UI teal is too muted for bars |
+| Surfaces | `--surface`, `--surface-2`, `--surface-3`, `--border-soft` | three layers, so a card on the page and a panel inside it do not dissolve into one white rectangle |
+| Elevation | `--shadow-xs/sm/md/lg`, `--shadow-primary` | two-part shadows: a tight contact shadow plus a wider ambient one. A single 4% blur reads as nothing. |
+| Shape | `--r-xs/sm/md/lg/pill` | one radius vocabulary |
+| Motion | `--ease`, `--ring` | one duration for every hover and press; one keyboard focus ring |
+
+House rules the screens follow:
+
+- **Controls are 36–38px tall with 12–13px labels.** The old 11px text on a 31px
+  box read as a link rather than a control, which is most of why the UI felt thin.
+- **Table heads are a tinted uppercase band**; rows divide on `--border-soft` and
+  wash teal on hover.
+- **Charts follow fixed mark specs** — bars capped at 24px with a 4px rounded
+  data-end, a 2px surface gap between neighbours, a hairline grid, and a hover
+  band wider than the mark.
+- **Everything focusable answers the keyboard with `--ring`.**
+- **Every control is the same height, including ng-select in "multiple" mode.**
+  The stock theme pads a multi-select for chips even when it holds none, which
+  made the office picker 49px tall beside a 38px single select with its
+  placeholder pinned to the top. `_form.scss` flattens that and lets the box
+  grow only once chips are in it.
+- **Toasts and the confirm dialog share one card language** (`_toast.scss`): white
+  surface, severity on an edge accent and an icon chip, words in ink. A toast
+  draws its remaining life as a bar along the bottom — the 4s animation matches
+  the `life` set on `<p-toast>` in `app.html`, so change both together.

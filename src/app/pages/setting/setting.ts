@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Component, computed, inject } from '@angular/core';
 import { commonIcons } from '../../core/icon-images/common-icon';
 import { CommonModule } from '@angular/common';
@@ -16,7 +17,7 @@ interface TabItem {
 
 @Component({
   selector: 'app-setting',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './setting.html',
   styleUrl: './setting.scss',
 })
@@ -27,10 +28,10 @@ export class Setting {
   ImageIcon = commonIcons;
 
   private allTabs: TabItem[] = [
-    { label: 'Access Control', icon: this.ImageIcon.lock_icon, url: '/setting/access', module: 'access_control' },
-    { label: 'Role', icon: this.ImageIcon.role_icon, url: '/setting/role', module: 'role' },
-    { label: 'Activity Log', icon: this.ImageIcon.find_icon, url: '/setting/activity', module: 'activity', adminOnly: true },
-    { label: 'Trash', icon: this.ImageIcon.delete_icon, url: '/setting/trash', module: 'trash', adminOnly: true },
+    { label: 'setting.accessControl', icon: this.ImageIcon.lock_icon, url: '/setting/access', module: 'access_control' },
+    { label: 'setting.role', icon: this.ImageIcon.role_icon, url: '/setting/role', module: 'role' },
+    { label: 'setting.activityLog', icon: this.ImageIcon.find_icon, url: '/setting/activity', module: 'activity', adminOnly: true },
+    { label: 'setting.trash', icon: this.ImageIcon.delete_icon, url: '/setting/trash', module: 'trash', adminOnly: true },
   ];
 
   // only the tabs the current user may view (admins see all)

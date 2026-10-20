@@ -2,13 +2,25 @@
     <img src="{{ImageIcon.logo}}" alt="">
     <div class="d-flex align-items-center gap-2">
         <div class="w-200px">
-            <ng-select [items]="officeList" bindLabel="office_name" bindValue="id"
-                [ngModel]="selectedOffice" (ngModelChange)="onOfficeChange($event)"
-                placeholder="Select Office" [clearable]="false">
+            <ng-select [items]="officeList()" bindLabel="office_name" bindValue="id"
+                [ngModel]="selectedOffice()" (ngModelChange)="onOfficeChange($event)"
+                [placeholder]="'common.selectOffice' | t" [clearable]="false">
             </ng-select>
         </div>
+
+        <!-- English / اردو. Two buttons rather than a dropdown: one tap, and
+             each label is written in its own script so it needs no reading. -->
+        <div class="lang-switch" role="group" [attr.aria-label]="'common.language' | t">
+            @for (option of i18n.languages; track option.code) {
+            <button type="button" class="lang-btn" [class.active]="i18n.lang() === option.code"
+                [attr.aria-pressed]="i18n.lang() === option.code" (click)="switchLang(option.code)">
+                {{ option.label }}
+            </button>
+            }
+        </div>
+
         <div class="login-user">
-            <p>Welcome, {{ welcomeName }}</p>
+            <p>{{ 'common.welcome' | t }}, {{ welcomeName }}</p>
             <p class="edge">{{ initials }}</p>
             <i class="pi pi-angle-down cursor-pointer" (click)="menu.toggle($event)"></i>
             <p-menu #menu [popup]="true" [model]="menuItems"></p-menu>

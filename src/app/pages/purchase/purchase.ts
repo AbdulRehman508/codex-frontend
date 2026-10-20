@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
@@ -13,7 +14,7 @@ interface TabItem {
 
 @Component({
   selector: 'app-purchase',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './purchase.html',
   styleUrl: './purchase.scss',
 })
@@ -22,8 +23,8 @@ export class PurchaseSection {
   private router = inject(Router);
 
   private allTabs: TabItem[] = [
-    { label: 'Purchases', icon: 'pi pi-shopping-bag', url: '/purchase/list', module: 'purchase' },
-    { label: 'Suppliers', icon: 'pi pi-truck', url: '/purchase/suppliers', module: 'supplier' },
+    { label: 'purchase.tabPurchases', icon: 'pi pi-shopping-bag', url: '/purchase/list', module: 'purchase' },
+    { label: 'purchase.tabSuppliers', icon: 'pi pi-truck', url: '/purchase/suppliers', module: 'supplier' },
   ];
 
   // only the tabs the current user may view (admins see all)

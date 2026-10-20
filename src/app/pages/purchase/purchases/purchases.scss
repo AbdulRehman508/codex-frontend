@@ -9,11 +9,12 @@
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 12px;
-    background: var(--white);
+    gap: 12px 14px;
+    background: var(--surface);
     border: 1px solid var(--borderColor);
-    border-radius: 12px;
-    padding: 12px 16px;
+    border-radius: var(--r-md);
+    box-shadow: var(--shadow-xs);
+    padding: 14px 16px;
 }
 
 .filter-field {
@@ -24,6 +25,9 @@
 
     label {
         font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         color: var(--lightDarkGray);
     }
 
@@ -39,7 +43,7 @@
 /* the range picker renders its own input — match the other filter controls */
 :host ::ng-deep .filter-field p-datepicker .p-datepicker-input {
     border: 1px solid var(--borderColor);
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     padding: 7px 10px;
     font-size: 13px;
     outline: none;
@@ -80,27 +84,38 @@
 }
 
 .stat-card {
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--borderColor);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 18px;
     display: flex;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--ease), box-shadow var(--ease),
+        border-color var(--ease);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: #d9e1ea;
+    }
 }
 
 .stat-icon {
     width: 52px;
     height: 52px;
-    border-radius: 14px;
+    border-radius: var(--r-md);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 22px;
     flex-shrink: 0;
 
-    &.primary { background: rgba(var(--primary-rgb), 0.12); color: var(--primary); }
+    &.primary {
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.16), rgba(var(--primary-rgb), 0.07));
+        color: var(--primary);
+    }
     &.info    { background: rgba(245, 114, 0, 0.12);  color: var(--info); }
     &.green   { background: rgba(78, 197, 66, 0.14);  color: var(--green); }
     &.danger  { background: rgba(205, 24, 24, 0.10);  color: var(--danger); }
@@ -127,11 +142,11 @@
 
 /* ---- Panel + table ---- */
 .panel {
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--borderColor);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+    box-shadow: var(--shadow-sm);
 }
 
 .table-wrap {
@@ -143,20 +158,28 @@
     border-collapse: collapse;
 
     th {
+        // a tinted, uppercase header band: the eye finds the columns without
+        // a heavy rule under them
         text-align: left;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
         color: var(--lightDarkGray);
-        padding: 10px 12px;
+        background: var(--surface-2);
+        padding: 11px 14px;
         border-bottom: 1px solid var(--borderColor);
         white-space: nowrap;
+
+        &:first-child { border-start-start-radius: var(--r-sm); }
+        &:last-child { border-start-end-radius: var(--r-sm); }
     }
 
     td {
-        padding: 14px 12px;
+        padding: 13px 14px;
         font-size: 13px;
         color: var(--darkGray);
-        border-bottom: 1px solid var(--lightGrayBG);
+        border-bottom: 1px solid var(--border-soft);
         white-space: nowrap;
     }
 
@@ -164,8 +187,13 @@
         border-bottom: none;
     }
 
+    tbody tr {
+        transition: background-color var(--ease);
+    }
+
+    // a teal wash rather than grey: the row you are on belongs to the brand
     tbody tr:hover {
-        background: var(--lightGrayBG);
+        background: rgba(var(--primary-rgb), 0.04);
     }
 }
 
@@ -182,13 +210,14 @@
 .empty {
     text-align: center;
     color: var(--lightDarkGray);
-    padding: 30px;
+    font-size: 13px;
+    padding: 44px 30px;
 }
 
 .ns-edit-btn {
     width: 30px;
     height: 30px;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     border: 1px solid var(--borderColor);
     background: var(--white);
     color: var(--primary);
@@ -197,7 +226,7 @@
     align-items: center;
     justify-content: center;
     font-size: 13px;
-    margin-right: 6px;
+    margin-inline-end: 6px;
     transition: background 150ms ease, border-color 150ms ease;
 
     &:hover { background: var(--secondary); border-color: var(--primary); }

@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -13,12 +15,14 @@ import { TrashModule as TrashKind, TrashRow } from './trash.model';
 
 @Component({
   selector: 'app-trash',
-  imports: [CommonModule, FormsModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, TranslatePipe],
   templateUrl: './trash.html',
   styleUrl: './trash.scss',
 })
 export class Trash {
   private api = inject(TrashApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private ctx = inject(OfficeContextService);
   private confirm = inject(ConfirmService);
   private toast = inject(MessageService);
@@ -50,14 +54,14 @@ export class Trash {
   searchTerm = '';
   moduleFilter: TrashKind | null = null;
 
-  moduleList: { label: string; value: TrashKind }[] = [
-    { label: 'Products', value: 'products' },
-    { label: 'Customers', value: 'customer' },
-    { label: 'Suppliers', value: 'supplier' },
-    { label: 'Staff', value: 'staff' },
-    { label: 'Offices', value: 'office' },
-    { label: 'Racks', value: 'location' },
-  ];
+  moduleList = computed(() => [
+    { label: this.i18n.t('common.products'), value: 'products' },
+    { label: this.i18n.t('trash.customers'), value: 'customer' },
+    { label: this.i18n.t('trash.suppliers'), value: 'supplier' },
+    { label: this.i18n.t('user.staff'), value: 'staff' },
+    { label: this.i18n.t('trash.offices'), value: 'office' },
+    { label: this.i18n.t('trash.racks'), value: 'location' },
+  ]);
 
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
 

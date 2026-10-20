@@ -7,8 +7,10 @@ import { catchError, throwError } from 'rxjs';
 import { TokenService } from '../services/token.service';
 
 /**
- * Attaches Bearer token to every outgoing request when a token exists.
- * On 401, clears the token and redirects to login.
+ * Sends the session cookie with every call and handles the two answers the
+ * whole app shares: 401 means the session is gone, 403 means the role does
+ * not allow it. The token itself is an httpOnly cookie, so nothing here ever
+ * touches it.
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // localStorage only exists in browser; skip on server (SSR).
@@ -19,17 +21,21 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const tokenService = inject(TokenService);
   const router = inject(Router);
   const toast = inject(MessageService);
-  const token = tokenService.getToken();
 
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+  // withCredentials is what makes the browser attach the session cookie
+  const authReq = req.clone({ withCredentials: true });
 
   return next(authReq).pipe(
     catchError((err) => {
       if (err?.status === 401) {
         tokenService.clearSession();
         router.navigateByUrl('/login');
+        // the API says "token missing", which means nothing to a shopkeeper.
+        // Rewriting it here fixes every screen at once, because each one
+        // toasts whatever `error.message` holds.
+        if (err?.error) {
+          err.error.message = 'Your session has ended. Please sign in again.';
+        }
       }
       // the server enforces the permission matrix too, so a stale screen can
       // still hit a wall — say so plainly instead of failing silently

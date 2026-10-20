@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -8,7 +9,7 @@ import { AuthApiService } from '../auth.api';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, TranslatePipe],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.scss',
 })
@@ -32,28 +33,36 @@ export class ResetPassword {
     });
   }
 
+  /** rates what is in the field now, not what was typed into it */
   get strengthLevel(): 'Weak' | 'Medium' | 'Strong' {
-    if (this.validation_error?.length === 3 || this.validation_error?.length === 4) return 'Weak';
-    if (this.validation_error?.length === 1 || this.validation_error?.length === 2) return 'Medium';
+    const failed = this.passwordFailures(this.resetForm.controls['password'].value).length;
+    if (failed >= 3) return 'Weak';
+    if (failed >= 1) return 'Medium';
     return 'Strong';
   }
 
   passwordCriteria() {
-    this.validation_error = [];
-    const password = this.resetForm.controls['password'].value;
-    if (password?.length < 12) {
-      this.validation_error.push('Password must be at least 12 characters long');
-    }
-    if (!/[A-Z]/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one uppercase letter');
-    }
-    if (!/\d/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one numeric character');
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password || '')) {
-      this.validation_error.push('Password must contain at least one special character');
-    }
+    this.validation_error = this.passwordFailures(this.resetForm.controls['password'].value);
     return this.validation_error;
+  }
+
+  /** the house password policy, as the list of rules this value breaks */
+  private passwordFailures(password: string | null | undefined): string[] {
+    const value = password ?? '';
+    const failures: string[] = [];
+    if (value.length < 12) {
+      failures.push('Password must be at least 12 characters long');
+    }
+    if (!/[A-Z]/.test(value)) {
+      failures.push('Password must contain at least one uppercase letter');
+    }
+    if (!/\d/.test(value)) {
+      failures.push('Password must contain at least one numeric character');
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+      failures.push('Password must contain at least one special character');
+    }
+    return failures;
   }
 
   submit() {

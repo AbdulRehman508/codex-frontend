@@ -13,13 +13,14 @@ export const officeList = [
 ];
 
 
+// labels are translation keys; add-edit-office pipes them
 export const membershipList = [
-    { label: 'Gold', value: 'gold' },
-    { label: 'Premium', value: 'premium' },
-    { label: 'Silver', value: 'silver' },
+    { label: 'office.gold', value: 'gold' },
+    { label: 'office.premium', value: 'premium' },
+    { label: 'office.silver', value: 'silver' },
 ];
 
 export const membershipType = [
-    { label: 'Monthly', value: 'monthly' },
-    { label: 'Yearly', value: 'yearly' },
+    { label: 'office.monthly', value: 'monthly' },
+    { label: 'office.yearly', value: 'yearly' },
 ];

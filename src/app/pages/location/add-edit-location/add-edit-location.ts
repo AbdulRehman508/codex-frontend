@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import {
@@ -31,7 +32,7 @@ interface PreviewRow {
 
 @Component({
   selector: 'app-add-edit-location',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, TranslatePipe],
   templateUrl: './add-edit-location.html',
   styleUrl: './add-edit-location.scss',
 })
@@ -47,7 +48,8 @@ export class AddEditLocation {
   locationForm: FormGroup = new FormGroup({});
   submitted = false;
   saving = signal(false);
-  pageTitle = 'Add Location';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'location.addTitle';
   locationId: string | null = null;
   statusList: RackStatus[] = ['active', 'inactive'];
 
@@ -111,7 +113,7 @@ export class AddEditLocation {
 
     this._activeRoute.params.subscribe((params) => {
       this.locationId = params['id'] ?? null;
-      this.pageTitle = this.locationId ? 'Edit Location' : 'Add Location';
+      this.pageTitle = this.locationId ? 'location.editTitle' : 'location.addTitle';
       if (this.locationId) {
         this.loadLocation(this.locationId);
       }

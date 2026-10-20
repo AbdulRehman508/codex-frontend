@@ -1,5 +1,7 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Output, Input, ViewChild, inject, signal } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output, Input, ViewChild, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageService } from 'primeng/api';
@@ -64,12 +66,14 @@ function round2(n: number): number {
 
 @Component({
   selector: 'app-new-sale',
-  imports: [CommonModule, FormsModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, TranslatePipe],
   templateUrl: './new-sale.html',
   styleUrl: './new-sale.scss',
 })
 export class NewSale {
   private api = inject(SalesApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private productApi = inject(ProductApiService);
   private customerApi = inject(CustomerApiService);
   private officeApi = inject(OfficeApiService);
@@ -141,10 +145,10 @@ export class NewSale {
     });
   }
 
-  paymentOptions: { label: string; value: PaymentMethod }[] = [
-    { label: 'Cash', value: 'cash' },
-    { label: 'Online', value: 'online' },
-  ];
+  paymentOptions = computed<{ label: string; value: PaymentMethod }[]>(() => [
+    { label: this.i18n.t('common.cash'), value: 'cash' },
+    { label: this.i18n.t('common.online'), value: 'online' },
+  ]);
 
   constructor() {
     this.search$

@@ -3,15 +3,15 @@
     <!-- Header -->
     <div class="pf-head">
         <div>
-            <h3>{{ pageTitle }}</h3>
+            <h3>{{ pageTitle | t }}</h3>
             @if (purchaseNo()) {
-            <p class="pf-sub">Bill <strong>{{ purchaseNo() }}</strong></p>
+            <p class="pf-sub">{{ 'purchaseForm.bill' | t }} <strong>{{ purchaseNo() }}</strong></p>
             } @else {
-            <p class="pf-sub">Received stock is added to the branch inventory on save.</p>
+            <p class="pf-sub">{{ 'purchaseForm.stockHint' | t }}</p>
             }
         </div>
         <div class="d-flex gap-2">
-            <button class="_cancel-btn" (click)="cancel()">Cancel</button>
+            <button class="_cancel-btn" (click)="cancel()">{{ 'common.cancel' | t }}</button>
             <button class="_primary-btn" [disabled]="saving() || loading()" (click)="save()">
                 {{ saving() ? 'Saving...' : 'Save Purchase' }}
             </button>
@@ -19,7 +19,7 @@
     </div>
 
     @if (!hasOffice()) {
-    <div class="pf-notice">Pick an office from the "Select Office" dropdown in the top bar first.</div>
+    <div class="pf-notice">{{ 'common.pickOfficeFirst' | t }}</div>
     }
 
     <!-- Supplier / bill header -->
@@ -27,9 +27,9 @@
         <div class="row">
             <div class="col-sm-4">
                 <div class="form-group">
-                    <label>Supplier <span class="text-danger">*</span></label>
+                    <label>{{ 'common.supplier' | t }} <span class="text-danger">*</span></label>
                     <ng-select [(ngModel)]="supplierId" [items]="suppliers()" bindLabel="name" bindValue="id"
-                        placeholder="Select supplier" [class._inputError]="!!fieldError('supplier_id')">
+                        [placeholder]="'purchaseForm.selectSupplier' | t" [class._inputError]="!!fieldError('supplier_id')">
                         <ng-template ng-option-tmp let-item="item">
                             <div class="pf-supplier-opt">
                                 <span>{{ item.name }}</span>
@@ -39,23 +39,23 @@
                     </ng-select>
                     @if (fieldError('supplier_id')) { <small class="text-danger">{{ fieldError('supplier_id') }}</small> }
                     <small class="d-block text-muted">
-                        Missing one? <a routerLink="/purchase/suppliers/add">Add a supplier</a>
+                        {{ 'purchaseForm.missingOne' | t }} <a routerLink="/purchase/suppliers/add">{{ 'supplier.addOne' | t }}</a>
                     </small>
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="form-group">
-                    <label>Supplier Invoice No</label>
+                    <label>{{ 'purchaseForm.supplierInvoice' | t }}</label>
                     <input type="text" [(ngModel)]="supplierInvoiceNo" name="supplier-invoice"
-                        placeholder="As printed on their bill" />
+                        [placeholder]="'purchaseForm.asPrinted' | t" />
                 </div>
             </div>
             <div class="col-sm-4">
                 <div class="form-group">
-                    <label>Status</label>
-                    <ng-select [(ngModel)]="status" [items]="statusList" bindLabel="label" bindValue="value"
+                    <label>{{ 'common.status' | t }}</label>
+                    <ng-select [(ngModel)]="status" [items]="statusList()" bindLabel="label" bindValue="value"
                         [clearable]="false" placeholder="Status"></ng-select>
-                    <small class="d-block text-muted">Only "Received" moves stock and the payable.</small>
+                    <small class="d-block text-muted">{{ 'purchaseForm.receivedHint' | t }}</small>
                 </div>
             </div>
         </div>
@@ -64,37 +64,37 @@
     <!-- Items -->
     <div class="pf-card">
         <div class="pf-items-head">
-            <p class="pf-card-title">Items</p>
+            <p class="pf-card-title">{{ 'common.items' | t }}</p>
             <label class="pf-batch-toggle" title="For goods that carry a batch number or a use-by date">
                 <input type="checkbox" class="form-check-input" [(ngModel)]="showBatchFields" name="show-batch" />
-                <span>Track batch &amp; expiry</span>
+                <span>{{ 'purchaseForm.trackBatch' | t }}</span>
             </label>
         </div>
 
         <!-- quick add: type, pick, qty, cost, Enter -->
         <div class="pf-quick">
             <div class="pf-quick-prod pf-typeahead">
-                <label>Product</label>
+                <label>{{ 'common.product' | t }}</label>
                 <input #productInput type="text" [(ngModel)]="quick.product" name="quick-prod" autocomplete="off"
                     placeholder="Type a product name" (input)="onProductInput(quick.product)"
                     (focus)="onProductInput(quick.product)" (keydown)="onProductKeydown($event)"
                     (blur)="onProductBlur()" />
                 @if (quick.product_id) {
-                <span class="pf-picked" title="Product linked"><i class="pi pi-check-circle"></i> linked</span>
+                <span class="pf-picked" [title]="'purchaseForm.productLinked' | t"><i class="pi pi-check-circle"></i> {{ 'purchaseForm.linked' | t }}</span>
                 }
 
                 @if (suggestOpen()) {
                 <div class="pf-suggest">
                     @if (searching()) {
-                    <div class="pf-suggest-empty">Searching...</div>
+                    <div class="pf-suggest-empty">{{ 'common.searching' | t }}</div>
                     } @else if (suggestions().length === 0) {
-                    <div class="pf-suggest-empty">No matching product</div>
+                    <div class="pf-suggest-empty">{{ 'pos.noMatch' | t }}</div>
                     } @else {
                     @for (p of suggestions(); track p.id; let si = $index) {
                     <div class="pf-suggest-item" [class.active]="activeSuggestion() === si" (mousedown)="pickProduct(p)"
                         (mouseenter)="activeSuggestion.set(si)">
                         <span class="pf-suggest-name">{{ p.name }}</span>
-                        <span class="pf-suggest-meta">{{ p.quantity }} in stock</span>
+                        <span class="pf-suggest-meta">{{ p.quantity }} {{ 'pos.inStock' | t }}</span>
                     </div>
                     }
                     }
@@ -124,7 +124,7 @@
             }
 
             <button type="button" class="_primary-btn pf-quick-add" (click)="addQuickLine()">
-                <i class="pi pi-plus"></i> Add
+                <i class="pi pi-plus"></i> {{ 'pos.add' | t }}
             </button>
         </div>
 
@@ -134,14 +134,14 @@
 
         <div class="pf-lines">
             <div class="pf-lines-head" [class.with-batch]="showBatchFields">
-                <span class="col-prod">Product</span>
+                <span class="col-prod">{{ 'common.product' | t }}</span>
                 @if (showBatchFields) {
-                <span class="col-batch">Batch</span>
-                <span class="col-batch">Expires</span>
+                <span class="col-batch">{{ 'purchaseForm.batch' | t }}</span>
+                <span class="col-batch">{{ 'purchaseForm.expires' | t }}</span>
                 }
-                <span class="col-num">Qty</span>
-                <span class="col-num">Cost</span>
-                <span class="col-total">Line Total</span>
+                <span class="col-num">{{ 'common.qty' | t }}</span>
+                <span class="col-num">{{ 'common.cost' | t }}</span>
+                <span class="col-total">{{ 'purchaseForm.lineTotal' | t }}</span>
                 <span class="col-act"></span>
             </div>
 
@@ -166,7 +166,7 @@
                 <i class="pi pi-trash col-act pf-line-del" (click)="removeLine(i)" title="Remove"></i>
             </div>
             } @empty {
-            <p class="pf-line-empty">No items yet — add one from the row above.</p>
+            <p class="pf-line-empty">{{ 'purchaseForm.noItems' | t }}</p>
             }
         </div>
     </div>
@@ -175,43 +175,43 @@
     <div class="pf-bottom">
         <div class="pf-card pf-notes">
             <div class="form-group mb-0">
-                <label>Notes</label>
+                <label>{{ 'common.notes' | t }}</label>
                 <textarea rows="5" [(ngModel)]="notes" name="notes"
-                    placeholder="Anything worth remembering about this delivery"></textarea>
+                    [placeholder]="'purchaseForm.deliveryNote' | t"></textarea>
             </div>
         </div>
 
         <div class="pf-card pf-totals">
             <div class="pf-total-row">
-                <span>Subtotal</span>
+                <span>{{ 'common.subtotal' | t }}</span>
                 <strong>{{ subtotal() | number: '1.2-2' }}</strong>
             </div>
             <div class="pf-total-row">
-                <label for="discount">Discount</label>
+                <label for="discount">{{ 'common.discount' | t }}</label>
                 <input id="discount" type="number" min="0" step="0.01" [(ngModel)]="discount" name="discount"
                     [class.invalid]="discountTooBig()" />
             </div>
             @if (discountTooBig()) {
-            <p class="pf-err">Discount is more than the subtotal.</p>
+            <p class="pf-err">{{ 'purchaseForm.discountTooBig' | t }}</p>
             }
             <div class="pf-total-row grand">
-                <span>Total</span>
+                <span>{{ 'common.total' | t }}</span>
                 <strong>{{ total() | number: '1.2-2' }}</strong>
             </div>
             <div class="pf-total-row">
-                <label for="paid">Paid now</label>
+                <label for="paid">{{ 'purchaseForm.paidNow' | t }}</label>
                 <div class="pf-paid-input" [class.invalid]="overPaid()">
                     <input id="paid" type="number" min="0" step="0.01" [ngModel]="paid"
                         (ngModelChange)="onPaidChange($event)" name="paid" placeholder="0.00" />
-                    <button type="button" (click)="payFull()" title="Pay the bill in full">Full</button>
-                    <button type="button" (click)="payNothing()" title="Pay nothing now — all on credit">None</button>
+                    <button type="button" (click)="payFull()" title="Pay the bill in full">{{ 'purchaseForm.full' | t }}</button>
+                    <button type="button" (click)="payNothing()" title="Pay nothing now — all on credit">{{ 'purchaseForm.none' | t }}</button>
                 </div>
             </div>
             @if (overPaid()) {
-            <p class="pf-err">Paid is more than the total.</p>
+            <p class="pf-err">{{ 'purchaseForm.paidTooBig' | t }}</p>
             }
             <div class="pf-total-row payable">
-                <span>Payable to supplier</span>
+                <span>{{ 'purchaseForm.payableToSupplier' | t }}</span>
                 <strong>{{ due() | number: '1.2-2' }}</strong>
             </div>
             @if (fieldError('paid_amount')) { <p class="pf-err">{{ fieldError('paid_amount') }}</p> }

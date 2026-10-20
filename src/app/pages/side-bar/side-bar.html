@@ -6,7 +6,7 @@
                 [routerLinkActiveOptions]="{ exact: item?.isExact ?? false }">
                 <a [routerLink]="item.url" class="d-flex align-items-center">
                     <img [src]="item.icon" />
-                    <p class="hover-content">{{ item.label }}</p>
+                    <p class="hover-content">{{ item.label | t }}</p>
                 </a>
             </li>
             }

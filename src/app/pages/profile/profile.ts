@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
 import { commonIcons } from '../../core/icon-images/common-icon';
@@ -10,7 +11,7 @@ import { TokenService } from '../../core/services/token.service';
 
 @Component({
   selector: 'app-profile',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, TranslatePipe],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
@@ -22,7 +23,8 @@ export class Profile {
   private toast = inject(MessageService);
 
   commonIcon = commonIcons;
-  pageTitle = 'My Profile';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'profile.title';
   submitted = false;
   saving = signal(false);
   loading = signal(true);

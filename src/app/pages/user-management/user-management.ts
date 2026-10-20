@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
@@ -16,7 +17,7 @@ interface TabItem {
 
 @Component({
   selector: 'app-user-management',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './user-management.html',
   styleUrl: './user-management.scss',
 })
@@ -27,9 +28,9 @@ export class UserManagement {
   ImageIcon = commonIcons;
 
   private allTabs: TabItem[] = [
-    { label: 'Customer', icon: this.ImageIcon.customer_icon, url: '/user-management/customer', module: 'customer' },
-    { label: 'Office', icon: this.ImageIcon.office_icon, url: '/user-management/office', module: 'office', adminOnly: true },
-    { label: 'Staff', icon: this.ImageIcon.staff_icon, url: '/user-management/staff', module: 'staff' },
+    { label: 'user.customer', icon: this.ImageIcon.customer_icon, url: '/user-management/customer', module: 'customer' },
+    { label: 'user.office', icon: this.ImageIcon.office_icon, url: '/user-management/office', module: 'office', adminOnly: true },
+    { label: 'user.staff', icon: this.ImageIcon.staff_icon, url: '/user-management/staff', module: 'staff' },
   ];
 
   // only the tabs the current user may view (admins see all)

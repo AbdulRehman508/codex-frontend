@@ -30,23 +30,23 @@
         <div class="ns-form-row">
             <!-- customer typeahead: pick a saved one, or just type a name for the bill -->
             <div class="form-group ns-typeahead">
-                <label>Customer</label>
+                <label>{{ 'common.customer' | t }}</label>
                 <input type="text" [(ngModel)]="tab.customer" name="customer-{{ tab.id }}"
-                    placeholder="Walk-in" autocomplete="off"
+                    [placeholder]="'pos.walkIn' | t" autocomplete="off"
                     (input)="onCustomerInput(tab.customer)" (focus)="onCustomerInput(tab.customer)"
                     (blur)="onCustomerBlur()" />
                 @if (tab.customerId) {
                 <span class="ns-picked" title="Saved customer linked">
-                    <i class="pi pi-check-circle"></i> saved customer
+                    <i class="pi pi-check-circle"></i> {{ 'pos.savedCustomer' | t }}
                 </span>
                 }
 
                 @if (customerSuggestOpen()) {
                 <div class="ns-suggest">
                     @if (customerSearching()) {
-                    <div class="ns-suggest-empty">Searching...</div>
+                    <div class="ns-suggest-empty">{{ 'common.searching' | t }}</div>
                     } @else if (customerSuggestions().length === 0) {
-                    <div class="ns-suggest-empty">No saved customer — the typed name goes on the bill</div>
+                    <div class="ns-suggest-empty">{{ 'pos.noSavedCustomer' | t }}</div>
                     } @else {
                     @for (c of customerSuggestions(); track c.id) {
                     <div class="ns-suggest-item" (mousedown)="pickCustomer(c)">
@@ -62,9 +62,9 @@
                 }
             </div>
             <div class="form-group">
-                <label>Payment</label>
-                <ng-select [(ngModel)]="tab.payment" [items]="paymentOptions" bindLabel="label" bindValue="value"
-                    [clearable]="false" [searchable]="false" placeholder="Select Payment"
+                <label>{{ 'common.payment' | t }}</label>
+                <ng-select [(ngModel)]="tab.payment" [items]="paymentOptions()" bindLabel="label" bindValue="value"
+                    [clearable]="false" [searchable]="false" [placeholder]="'pos.selectPayment' | t"
                     name="payment-{{ tab.id }}">
                 </ng-select>
             </div>
@@ -74,29 +74,29 @@
             <label class="ns-check">
                 <input type="checkbox" class="form-check-input" [(ngModel)]="tab.borrow"
                     name="borrow-{{ tab.id }}" (change)="onBorrowToggle()" />
-                <span>Borrow</span>
+                <span>{{ 'common.borrow' | t }}</span>
             </label>
             @if (tab.borrow) {
             <div class="form-group ns-mobile">
-                <label>Mobile No @if (!tab.customerId) { <span class="text-danger">*</span> }</label>
+                <label>{{ 'common.mobile' | t }} @if (!tab.customerId) { <span class="text-danger">*</span> }</label>
                 <input type="text" [(ngModel)]="tab.customerMobile" name="cmobile-{{ tab.id }}"
                     placeholder="03001234567" [readonly]="!!tab.customerId" />
                 <small class="ns-hint">
                     {{ tab.customerId
-                        ? 'Billed to the picked customer.'
-                        : 'Saved as a customer in this office.' }}
+                        ? ('pos.billedToPicked' | t)
+                        : ('pos.savedAsCustomer' | t) }}
                 </small>
             </div>
             }
             <!-- picked customer already owes money: always show it, borrow ticked or not -->
             @if (tab.customerId && tab.previousBorrow > 0) {
             <div class="form-group ns-mobile">
-                <label>Previous Borrow</label>
+                <label>{{ 'pos.previousBorrow' | t }}</label>
                 <input type="text" [value]="tab.previousBorrow | number: '1.2-2'" readonly
                     class="ns-owed" name="prevborrow-{{ tab.id }}" />
                 @if (tab.borrow && borrowAmount(tab) > 0) {
                 <small class="ns-hint">
-                    After this sale: <strong>{{ balanceAfter(tab) | number: '1.2-2' }}</strong>
+                    {{ 'pos.afterThisSale' | t }} <strong>{{ balanceAfter(tab) | number: '1.2-2' }}</strong>
                 </small>
                 }
             </div>
@@ -106,32 +106,32 @@
         <!-- quick add: type, pick, qty, Enter — no clicking "add" first -->
         <div class="ns-quick">
             <div class="ns-quick-prod ns-typeahead">
-                <label>Product</label>
-                @if (scanning()) { <span class="ns-scanning"><i class="pi pi-spin pi-spinner"></i> looking up…</span> }
+                <label>{{ 'common.product' | t }}</label>
+                @if (scanning()) { <span class="ns-scanning"><i class="pi pi-spin pi-spinner"></i> {{ 'pos.lookingUp' | t }}</span> }
                 <input #productInput type="text" [(ngModel)]="quick.product" name="quick-prod-{{ tab.id }}"
-                    placeholder="Scan barcode or type a product name" autocomplete="off"
+                    [placeholder]="'pos.scanOrType' | t" autocomplete="off"
                     [class.ns-has-badge]="!!quick.product_id"
                     (input)="onProductInput(quick.product)" (focus)="onProductInput(quick.product)"
                     (keydown)="onProductKeydown($event)" (blur)="onProductBlur()" />
                 @if (quick.product_id) {
                 <span class="ns-picked" title="Product linked">
-                    <i class="pi pi-check-circle"></i> {{ quick.available }} in stock
+                    <i class="pi pi-check-circle"></i> {{ quick.available }} {{ 'pos.inStock' | t }}
                 </span>
                 }
 
                 @if (suggestOpen()) {
                 <div class="ns-suggest">
                     @if (searching()) {
-                    <div class="ns-suggest-empty">Searching...</div>
+                    <div class="ns-suggest-empty">{{ 'common.searching' | t }}</div>
                     } @else if (suggestions().length === 0) {
-                    <div class="ns-suggest-empty">No matching product</div>
+                    <div class="ns-suggest-empty">{{ 'pos.noMatch' | t }}</div>
                     } @else {
                     @for (p of suggestions(); track p.id; let si = $index) {
                     <div class="ns-suggest-item" [class.active]="activeSuggestion() === si"
                         (mousedown)="pickProduct(p)" (mouseenter)="activeSuggestion.set(si)">
                         <span class="ns-suggest-name">{{ p.name }}</span>
                         <span class="ns-suggest-meta">
-                            {{ p.price | number: '1.2-2' }} · {{ p.quantity }} in stock
+                            {{ p.price | number: '1.2-2' }} · {{ p.quantity }} {{ 'pos.inStock' | t }}
                         </span>
                     </div>
                     }
@@ -141,22 +141,22 @@
             </div>
 
             <div class="ns-quick-qty">
-                <label>Qty</label>
+                <label>{{ 'common.qty' | t }}</label>
                 <input #qtyInput type="number" min="1" [(ngModel)]="quick.qty" name="quick-qty-{{ tab.id }}"
                     (keydown)="onQtyKeydown($event)" />
             </div>
 
             <button type="button" class="_primary-btn ns-quick-add" (click)="addQuickLine()">
-                <i class="pi pi-plus"></i> Add
+                <i class="pi pi-plus"></i> {{ 'pos.add' | t }}
             </button>
         </div>
 
         <div class="ns-lines">
             <div class="ns-lines-head">
-                <span class="col-prod">Product</span>
-                <span class="col-qty">Qty</span>
-                <span class="col-price">Price</span>
-                <span class="col-total">Total</span>
+                <span class="col-prod">{{ 'common.product' | t }}</span>
+                <span class="col-qty">{{ 'common.qty' | t }}</span>
+                <span class="col-price">{{ 'common.price' | t }}</span>
+                <span class="col-total">{{ 'common.total' | t }}</span>
                 <span class="col-act"></span>
             </div>
 
@@ -172,10 +172,10 @@
                 <i class="pi pi-trash col-act ns-line-del" (click)="removeLine(i)"></i>
             </div>
             @if (overStock(line)) {
-            <p class="ns-line-warn">Only {{ line.available }} of "{{ line.product }}" left in stock.</p>
+            <p class="ns-line-warn">{{ 'pos.only' | t }} {{ line.available }} — "{{ line.product }}" {{ 'pos.leftInStock' | t }}</p>
             }
             } @empty {
-            <p class="ns-line-empty">No items yet — add one from the row above.</p>
+            <p class="ns-line-empty">{{ 'pos.noItems' | t }}</p>
             }
         </div>
     </div>
@@ -185,33 +185,33 @@
         @if (taxRate() > 0) {
         <!-- only a taxed branch sees the breakdown -->
         <div class="ns-tax">
-            <span>{{ taxInclusive() ? 'Net' : 'Subtotal' }}</span>
+            <span>{{ (taxInclusive() ? 'pos.net' : 'common.subtotal') | t }}</span>
             <strong>{{ (taxInclusive() ? netTotal(tab) - taxAmount(tab) : netTotal(tab)) | number:'1.2-2' }}</strong>
-            <span>{{ taxName() }} {{ taxRate() }}%{{ taxInclusive() ? ' (incl.)' : '' }}</span>
+            <span>{{ taxName() }} {{ taxRate() }}%{{ taxInclusive() ? ' ' + ('pos.inclusive' | t) : '' }}</span>
             <strong>{{ taxAmount(tab) | number:'1.2-2' }}</strong>
         </div>
         }
         <div class="ns-total">
-            <span>Total</span>
+            <span>{{ 'common.total' | t }}</span>
             <strong>{{ orderTotal(tab) | number:'1.2-2' }}</strong>
         </div>
         @if (tab.borrow) {
         <div class="ns-split">
             <div class="ns-split-field">
-                <label>Payable Amount</label>
+                <label>{{ 'pos.payableAmount' | t }}</label>
                 <input type="number" min="0" step="0.01" [(ngModel)]="tab.paid"
                     name="paid-{{ tab.id }}" [class.ns-over]="overPaid(tab)" />
             </div>
             <div class="ns-split-field">
-                <label>Borrow Amount</label>
+                <label>{{ 'pos.borrowAmount' | t }}</label>
                 <input type="number" [value]="borrowAmount(tab)" readonly class="ns-readonly" />
             </div>
         </div>
         }
         <div class="ns-actions">
-            <button class="_outline-btn" (click)="closeTab(tab.id)">Cancel</button>
+            <button class="_outline-btn" (click)="closeTab(tab.id)">{{ 'common.cancel' | t }}</button>
             <button class="_primary-btn" [disabled]="saving()" (click)="saveOrder()">
-                {{ saving() ? 'Saving...' : 'Save Order' }}
+                {{ (saving() ? 'common.saving' : 'pos.saveOrder') | t }}
             </button>
         </div>
     </div>

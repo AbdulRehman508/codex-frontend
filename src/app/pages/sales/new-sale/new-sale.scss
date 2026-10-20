@@ -9,7 +9,7 @@
 .ns-panel {
     position: fixed;
     top: 0;
-    right: 0;
+    inset-inline-end: 0;
     height: 100vh;
     width: 1150px;
     max-width: 95vw;
@@ -28,6 +28,18 @@
 
 @keyframes ns-slide {
     from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* in Urdu the panel is pinned to the left, so it has to arrive from there,
+   and the drop that separates it from the page changes sides with it */
+:host-context([dir='rtl']) .ns-panel {
+    box-shadow: 8px 0 30px rgba(26, 47, 69, 0.18);
+    animation-name: ns-slide-rtl;
+}
+
+@keyframes ns-slide-rtl {
+    from { transform: translateX(-100%); }
     to { transform: translateX(0); }
 }
 
@@ -145,7 +157,7 @@
         input,
         select {
             border: 1px solid var(--borderColor);
-            border-radius: 8px;
+            border-radius: var(--r-sm);
             padding: 9px 12px;
             font-size: 13px;
             outline: none;
@@ -187,7 +199,7 @@
 
     input {
         border: 1px solid var(--borderColor);
-        border-radius: 8px;
+        border-radius: var(--r-sm);
         padding: 8px 10px;
         font-size: 13px;
         outline: none;
@@ -221,7 +233,7 @@
     border: 1px dashed var(--borderColor);
     background: transparent;
     color: var(--primary);
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     padding: 8px 14px;
     font-size: 13px;
     cursor: pointer;
@@ -280,13 +292,13 @@
     position: absolute;
     z-index: 20;
     top: calc(100% + 2px);
-    left: 0;
-    right: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
     max-height: 240px;
     overflow-y: auto;
     background: #fff;
     border: 1px solid var(--borderColor);
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     box-shadow: 0 8px 20px rgba(0, 0, 0, .12);
 }
 
@@ -350,7 +362,7 @@
 
     input {
         border: 1px solid var(--borderColor);
-        border-radius: 8px;
+        border-radius: var(--r-sm);
         padding: 8px 10px;
         font-size: 13px;
         outline: none;
@@ -372,8 +384,8 @@
 .ns-split {
     display: flex;
     gap: 12px;
-    margin-left: auto;
-    margin-right: 16px;
+    margin-inline-start: auto;
+    margin-inline-end: 16px;
 }
 
 .ns-split-field {
@@ -383,13 +395,16 @@
 
     label {
         font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
         color: var(--lightDarkGray);
     }
 
     input {
         width: 130px;
         border: 1px solid var(--borderColor);
-        border-radius: 8px;
+        border-radius: var(--r-sm);
         padding: 6px 10px;
         font-size: 13px;
         outline: none;
@@ -408,7 +423,7 @@
 .ns-line {
     .ns-picked {
         position: absolute;
-        right: 10px;
+        inset-inline-end: 10px;
         top: 50%;
         transform: translateY(-50%);
         margin-top: 0;
@@ -421,7 +436,7 @@
 
     input.ns-bound {
         // keep the typed name clear of the badge
-        padding-right: 100px;
+        padding-inline-end: 100px;
     }
 }
 
@@ -441,7 +456,7 @@
     padding: 12px;
     margin-bottom: 14px;
     border: 1px solid var(--borderColor);
-    border-radius: 10px;
+    border-radius: var(--r-sm);
     background: var(--lightGrayBG);
 
     label {
@@ -453,7 +468,7 @@
 
     input {
         border: 1px solid var(--borderColor);
-        border-radius: 8px;
+        border-radius: var(--r-sm);
         padding: 8px 10px;
         font-size: 13px;
         outline: none;
@@ -509,7 +524,7 @@
 
     .ns-picked {
         position: absolute;
-        right: 10px;
+        inset-inline-end: 10px;
         // the input is the bottom element of the field; sit centred on it
         bottom: 9px;
         margin-top: 0;
@@ -522,12 +537,12 @@
 
     // keep the typed name clear of the badge
     input.ns-has-badge {
-        padding-right: 100px;
+        padding-inline-end: 100px;
     }
 }
 
 .ns-scanning {
-    margin-left: 8px;
+    margin-inline-start: 8px;
     font-size: 11px;
     color: var(--primary);
 }

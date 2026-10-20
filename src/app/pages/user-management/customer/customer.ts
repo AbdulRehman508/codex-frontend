@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +21,7 @@ import {
 
 @Component({
   selector: 'app-customer',
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslatePipe],
   templateUrl: './customer.html',
   styleUrl: './customer.scss',
 })

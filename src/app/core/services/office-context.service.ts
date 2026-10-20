@@ -78,7 +78,7 @@ export class OfficeContextService {
 
   /** Persist the pick on the user record; best-effort, never blocks the UI. */
   private remember(id: string | null) {
-    if (!this.token.getToken()) return;
+    if (!this.token.isSignedIn()) return;
     this.api.put('profile/last-office', { office_id: id }).subscribe({
       next: () => this.token.setLastOfficeId(id),
       error: () => {

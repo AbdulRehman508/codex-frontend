@@ -1,13 +1,13 @@
 .password-icon {
     position: absolute;
     top: 32px;
-    right: 15px;
+    inset-inline-end: 15px;
     cursor: pointer;
 }
 
 .strength-bar {
     height: 8px;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     margin-top: 5px;
 }
 
@@ -32,7 +32,7 @@
 .password-icon {
     position: absolute;
     top: 36px;
-    right: 12px;
+    inset-inline-end: 12px;
     cursor: pointer;
     font-size: 12px;
 }
@@ -106,7 +106,7 @@
 .avatar-remove {
     position: absolute;
     top: -2px;
-    left: 86px;
+    inset-inline-start: 86px;
     width: 26px;
     height: 26px;
     border-radius: 50%;

@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -42,7 +43,7 @@ const ONLINE_COLOR = 'var(--chart-2)';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -56,11 +57,12 @@ export class Dashboard {
   readonly onlineColor = ONLINE_COLOR;
   private readonly tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  // label/note on a tile is a translation key; the template pipes it
   periods: { key: Period; label: string }[] = [
-    { key: 'today', label: 'Today' },
-    { key: '7d', label: 'Last 7 days' },
-    { key: '30d', label: 'Last 30 days' },
-    { key: '90d', label: 'Last 90 days' },
+    { key: 'today', label: 'dashboard.today' },
+    { key: '7d', label: 'dashboard.last7' },
+    { key: '30d', label: 'dashboard.last30' },
+    { key: '90d', label: 'dashboard.last90' },
   ];
 
   period = signal<Period>('7d');
@@ -135,30 +137,30 @@ export class Dashboard {
     if (!d) return [];
     const k = d.kpis;
     return [
-      this.tile('Total Sales', k.revenue, 'pi pi-dollar', 'primary', true, true),
-      this.tile('Orders', k.orders, 'pi pi-shopping-cart', 'info', true, false),
-      this.tile('New Customers', k.new_customers, 'pi pi-users', 'green', true, false),
-      this.tile('Refunds', k.refunds, 'pi pi-undo', 'danger', false, true),
-      this.tile('Purchases', k.purchases, 'pi pi-shopping-bag', 'info', false, true),
+      this.tile('dashboard.totalSales', k.revenue, 'pi pi-dollar', 'primary', true, true),
+      this.tile('dashboard.orders', k.orders, 'pi pi-shopping-cart', 'info', true, false),
+      this.tile('dashboard.newCustomers', k.new_customers, 'pi pi-users', 'green', true, false),
+      this.tile('dashboard.refunds', k.refunds, 'pi pi-undo', 'danger', false, true),
+      this.tile('dashboard.purchases', k.purchases, 'pi pi-shopping-bag', 'info', false, true),
       {
-        label: 'Outstanding Borrow',
+        label: 'dashboard.outstandingBorrow',
         value: compact(k.outstanding_borrow),
         title: money(k.outstanding_borrow),
         icon: 'pi pi-wallet',
         tone: 'info',
         delta: null,
         upIsGood: false,
-        note: 'owed to you right now',
+        note: 'dashboard.owedToYou',
       },
       {
-        label: 'Supplier Payable',
+        label: 'dashboard.supplierPayable',
         value: compact(k.outstanding_payable),
         title: money(k.outstanding_payable),
         icon: 'pi pi-truck',
         tone: 'danger',
         delta: null,
         upIsGood: false,
-        note: 'you owe right now',
+        note: 'dashboard.youOwe',
       },
     ];
   });
@@ -189,7 +191,7 @@ export class Dashboard {
   }
 
   comparisonLabel = computed(() =>
-    this.period() === 'today' ? 'vs yesterday' : 'vs previous period',
+    this.period() === 'today' ? 'dashboard.vsYesterday' : 'dashboard.vsPrevious',
   );
 
   // ---------- sales trend ----------

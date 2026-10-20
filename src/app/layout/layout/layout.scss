@@ -2,6 +2,12 @@
     padding-top: 70px;
 }
 
+/* The rail is fixed, so it takes no space in the flow — the content keeps
+   room for it by hand. Logical padding, because in Urdu the rail moves to
+   the right and this gap has to follow it. */
 .content-wrapper {
-    padding: 10px 10px 10px 70px;
+    padding: 10px;
+    padding-inline-start: 70px;
+    // w-100 plus a hard 100vw child is how the page used to scroll sideways
+    min-width: 0;
 }

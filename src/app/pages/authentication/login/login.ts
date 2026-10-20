@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import {
@@ -18,7 +19,7 @@ import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, ForgotPassword],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ForgotPassword, TranslatePipe],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
@@ -56,7 +57,8 @@ export class Login implements OnInit {
     this.loading.set(true);
     this.authApi.login(this.loginForm.value).subscribe({
       next: (data) => {
-        this.token.setToken(data.token);
+        // the session itself arrives as an httpOnly cookie; only the user
+        // object, which carries nothing secret, is kept here for the UI
         this.token.setUser(data.user);
         // land on the office this user last worked in
         this.ctx.syncFromUser();

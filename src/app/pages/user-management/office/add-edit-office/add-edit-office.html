@@ -1,4 +1,4 @@
-<p class="f-16 _fw-600">{{pageTitle}}</p>
+<p class="f-16 _fw-600">{{ pageTitle | t }}</p>
 
 <div class="d-flex align-items-end justify-content-between my-3">
     <div class="avatar-wrap">
@@ -22,13 +22,13 @@
         </button>
         }
         <div class="avatar-meta">
-            <p class="avatar-name">Office Logo</p>
-            <p class="avatar-hint">PNG, JPG, WEBP or GIF. Max 2 MB. Click image to {{ officeLogo() ? 'change' : 'upload' }}.</p>
+            <p class="avatar-name">{{ 'office.logo' | t }}</p>
+            <p class="avatar-hint">{{ 'form.photoHint' | t }} {{ (officeLogo() ? 'form.photoChange' : 'form.photoUpload') | t }}.</p>
         </div>
     </div>
     <div class="d-flex gap-2">
-        <button class="_cancel-btn" (click)="closeCustomer()">Cancel</button>
-        <button class="_primary-btn" [disabled]="saving()" (click)="createCustomer()">{{ saving() ? 'Saving...' : 'Save' }}</button>
+        <button class="_cancel-btn" (click)="closeCustomer()">{{ 'common.cancel' | t }}</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="createCustomer()">{{ saving() ? ('common.saving' | t) : ('common.save' | t) }}</button>
     </div>
 </div>
 
@@ -36,7 +36,7 @@
     <div class="row">
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="office_name">Office Name</label>
+                <label for="office_name">{{ 'office.name' | t }}</label>
                 <input type="text" id="office_name" formControlName="office_name"
                     [ngClass]="{ _inputError: (submitted && officeForm.controls['office_name'].invalid) || fieldError('office_name') }">
                 @if (fieldError('office_name')) { <small class="text-danger">{{ fieldError('office_name') }}</small> }
@@ -44,7 +44,7 @@
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="office_email">Office Email</label>
+                <label for="office_email">{{ 'office.email' | t }}</label>
                 <input type="text" id="office_email" formControlName="office_email"
                     [ngClass]="{ _inputError: (submitted && officeForm.controls['office_email'].invalid) || fieldError('office_email') }">
                 @if (fieldError('office_email')) { <small class="text-danger">{{ fieldError('office_email') }}</small> }
@@ -52,7 +52,7 @@
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="office_mobile_no">Office Mobile No.</label>
+                <label for="office_mobile_no">{{ 'office.mobile' | t }}</label>
                 <input type="text" id="office_mobile_no" formControlName="office_mobile_no"
                     [ngClass]="{ _inputError: (submitted && officeForm.controls['office_mobile_no'].invalid) || fieldError('office_mobile_no') }">
                 @if (fieldError('office_mobile_no')) { <small class="text-danger">{{ fieldError('office_mobile_no') }}</small> }
@@ -61,7 +61,7 @@
         <!-- <div class="col-sm-4">
             <div class="form-group">
                 <label for="membership_level">Membership Level</label>
-                <ng-select formControlName="membership_level" [items]="membershipList" bindLabel="label"
+                <ng-select formControlName="membership_level" [items]="membershipList()" bindLabel="label"
                     bindValue="value" placeholder="Select Membership Level"
                     [ngClass]="{ _inputError: submitted && officeForm.controls['membership_level'].invalid }">
                 </ng-select>
@@ -70,7 +70,7 @@
         <div class="col-sm-4">
             <div class="form-group">
                 <label for="membership_type">Membership Type</label>
-                <ng-select formControlName="membership_type" [items]="membershipType" bindLabel="label"
+                <ng-select formControlName="membership_type" [items]="membershipType()" bindLabel="label"
                     bindValue="value" placeholder="Select Membership Type"
                     [ngClass]="{ _inputError: submitted && officeForm.controls['membership_type'].invalid }">
                 </ng-select>
@@ -78,31 +78,31 @@
         </div> -->
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="licence_no">Licence Number</label>
+                <label for="licence_no">{{ 'office.licence' | t }}</label>
                 <input type="text" id="licence_no" formControlName="licence_no">
             </div>
         </div>
         <div class="col-sm-3">
             <div class="form-group">
-                <label for="office_status">Status</label>
+                <label for="office_status">{{ 'common.status' | t }}</label>
                 <ng-select formControlName="office_status" [items]="['active','inactive']" placeholder="Select Status"></ng-select>
             </div>
         </div>
         <div class="col-sm-1">
             <div class="form-group d-flex align-items-center gap-2 mt-4">
-                <label for="approved">Approved</label>
+                <label for="approved">{{ 'office.approved' | t }}</label>
                 <input class="form-check-input" type="checkbox" formControlName="approved">
             </div>
         </div>
         <div class="col-sm-2">
             <div class="form-group d-flex align-items-center gap-2 mt-4">
-                <label for="is_main" title="Only admins can assign staff to the head office">Main Office</label>
+                <label for="is_main" title="Only admins can assign staff to the head office">{{ 'office.mainOffice' | t }}</label>
                 <input class="form-check-input" type="checkbox" formControlName="is_main">
             </div>
         </div>
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="office_address">Office Address</label>
+                <label for="office_address">{{ 'office.address' | t }}</label>
                 <input type="text" id="office_address" formControlName="office_address"
                     [ngClass]="{ _inputError: (submitted && officeForm.controls['office_address'].invalid) || fieldError('office_address') }">
                 @if (fieldError('office_address')) { <small class="text-danger">{{ fieldError('office_address') }}</small> }
@@ -110,7 +110,7 @@
         </div>
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="biography">Biography</label>
+                <label for="biography">{{ 'form.biography' | t }}</label>
                 <textarea formControlName="biography" cols="20" rows="5"></textarea>
             </div>
         </div>
@@ -120,8 +120,8 @@
     <div class="pay-section">
         <div class="pay-head">
             <div>
-                <p class="pay-title">Sales Tax</p>
-                <p class="pay-sub">Applied to new bills from this branch and printed on the receipt.</p>
+                <p class="pay-title">{{ 'office.salesTax' | t }}</p>
+                <p class="pay-sub">{{ 'office.salesTaxHint' | t }}</p>
             </div>
             <label class="tax-switch">
                 <input type="checkbox" class="form-check-input" formControlName="tax_enabled" />
@@ -133,14 +133,14 @@
         <div class="row">
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label for="tax_name">Label on the bill</label>
+                    <label for="tax_name">{{ 'office.labelOnBill' | t }}</label>
                     <input type="text" id="tax_name" formControlName="tax_name" placeholder="GST" />
                     @if (fieldError('tax_name')) { <small class="text-danger">{{ fieldError('tax_name') }}</small> }
                 </div>
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label for="tax_rate">Rate %</label>
+                    <label for="tax_rate">{{ 'office.ratePct' | t }}</label>
                     <input type="number" id="tax_rate" min="0" max="100" step="0.01" formControlName="tax_rate"
                         [ngClass]="{ _inputError: fieldError('tax_rate') }" />
                     @if (fieldError('tax_rate')) { <small class="text-danger">{{ fieldError('tax_rate') }}</small> }
@@ -148,13 +148,13 @@
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label for="tax_number">Registration No</label>
+                    <label for="tax_number">{{ 'office.registrationNo' | t }}</label>
                     <input type="text" id="tax_number" formControlName="tax_number" placeholder="Optional" />
                 </div>
             </div>
             <div class="col-sm-3">
                 <div class="form-group">
-                    <label>Prices</label>
+                    <label>{{ 'office.prices' | t }}</label>
                     <label class="tax-switch mt-1">
                         <input type="checkbox" class="form-check-input" formControlName="tax_inclusive" />
                         <span>{{ officeForm.get('tax_inclusive')?.value ? 'Already include tax' : 'Tax added on top' }}</span>
@@ -169,17 +169,17 @@
     <div class="pay-section">
         <div class="pay-head">
             <div>
-                <p class="pay-title">Online Payment Methods</p>
-                <p class="pay-sub">Printed as QR codes at the bottom of every online-payment bill.</p>
+                <p class="pay-title">{{ 'office.onlineMethods' | t }}</p>
+                <p class="pay-sub">{{ 'office.onlineMethodsHint' | t }}</p>
             </div>
             <button type="button" class="_outline-btn" (click)="addPaymentMethod()"
                 [disabled]="paymentMethods.length >= maxPaymentMethods">
-                <i class="pi pi-plus"></i> Add Method
+                <i class="pi pi-plus"></i> {{ 'office.addMethod' | t }}
             </button>
         </div>
 
         @if (!paymentMethods.length) {
-        <p class="pay-empty">No online payment method yet. Add JazzCash, Easypaisa, a bank account…</p>
+        <p class="pay-empty">{{ 'office.noMethods' | t }}</p>
         }
 
         <div formArrayName="payment_methods" class="pay-list">
@@ -187,19 +187,19 @@
             <div class="pay-card" [formGroupName]="i">
                 <div class="pay-fields">
                     <div class="form-group">
-                        <label>Provider</label>
+                        <label>{{ 'office.provider' | t }}</label>
                         <ng-select formControlName="provider" [items]="providers" [addTag]="true"
-                            addTagText="Use" placeholder="Select or type"
+                            addTagText="Use" [placeholder]="'office.selectOrType' | t"
                             [ngClass]="{ _inputError: submitted && row.get('provider')?.invalid }">
                         </ng-select>
                     </div>
                     <div class="form-group">
-                        <label>Account Title</label>
+                        <label>{{ 'office.accountTitle' | t }}</label>
                         <input type="text" formControlName="account_title" placeholder="Pak Loam Store"
                             [ngClass]="{ _inputError: submitted && row.get('account_title')?.invalid }">
                     </div>
                     <div class="form-group">
-                        <label>Account / Wallet No / IBAN</label>
+                        <label>{{ 'office.accountNo' | t }}</label>
                         <input type="text" formControlName="account_number" placeholder="03001234567"
                             [ngClass]="{ _inputError: submitted && row.get('account_number')?.invalid }">
                     </div>
@@ -210,30 +210,30 @@
                         @if (qrPreviews()[i]; as src) {
                         <img [src]="src" alt="Payment QR" />
                         } @else {
-                        <span class="pay-qr-empty"><i class="pi pi-qrcode"></i><br>Fill details</span>
+                        <span class="pay-qr-empty"><i class="pi pi-qrcode"></i><br>{{ 'office.fillDetails' | t }}</span>
                         }
                     </div>
                     @if (hasUploadedQr(i)) {
-                    <span class="pay-qr-kind ok"><i class="pi pi-check-circle"></i> Official QR</span>
+                    <span class="pay-qr-kind ok"><i class="pi pi-check-circle"></i> {{ 'office.officialQr' | t }}</span>
                     } @else {
                     <!-- wallet scanners reject anything that isn't a Raast/EMVCo code -->
                     <span class="pay-qr-kind warn" title="Wallet apps cannot scan a generated code">
-                        <i class="pi pi-exclamation-triangle"></i> Camera only
+                        <i class="pi pi-exclamation-triangle"></i> {{ 'office.cameraOnly' | t }}
                     </span>
                     }
                     <div class="pay-qr-actions">
                         <button type="button" class="link" (click)="qrInput.click()">
-                            {{ hasUploadedQr(i) ? 'Replace' : 'Upload official' }}
+                            {{ (hasUploadedQr(i) ? 'office.replaceQr' : 'office.uploadOfficial') | t }}
                         </button>
                         @if (hasUploadedQr(i)) {
-                        <button type="button" class="link muted" (click)="removeQr(i)">Remove</button>
+                        <button type="button" class="link muted" (click)="removeQr(i)">{{ 'office.remove' | t }}</button>
                         }
                     </div>
                     <input #qrInput type="file" class="d-none" accept=".png,.jpg,.jpeg,.webp"
                         (change)="onPickQr(i, $event)" />
                 </div>
 
-                <button type="button" class="pay-remove" (click)="removePaymentMethod(i)" title="Remove method">
+                <button type="button" class="pay-remove" (click)="removePaymentMethod(i)" [title]="'office.removeMethod' | t">
                     <i class="pi pi-trash"></i>
                 </button>
             </div>
@@ -243,11 +243,8 @@
         @if (paymentMethods.length) {
         <p class="pay-note warn">
             <i class="pi pi-exclamation-triangle"></i>
-            <strong>Wallet apps can't scan a generated QR.</strong>
-            A generated code only shows the account details to a phone camera — Easypaisa, JazzCash and
-            bank apps reject it, because they only read Raast/EMVCo codes carrying a merchant ID issued
-            by the provider. For scan-and-pay inside the wallet, open your provider's merchant app or
-            portal, save your merchant QR as an image, and upload it here.
+            <strong>{{ 'office.qrWarnTitle' | t }}</strong>
+            {{ 'office.qrWarnBody' | t }}
         </p>
         }
     </div>

@@ -1,8 +1,8 @@
 <div class="top-box">
-    <button class="_outline-btn" (click)="resetAccess()">Reset</button>
+    <button class="_outline-btn" (click)="resetAccess()">{{ 'common.reset' | t }}</button>
     <div class="position-relative">
         <input type="text" [ngModel]="searchByKeyword()" (ngModelChange)="searchByKeyword.set($event)"
-            name="module-search" class="_input-icon w-200 custom-placeholder" placeholder="Search module" />
+            name="module-search" class="_input-icon w-200 custom-placeholder" [placeholder]="'access.searchModule' | t" />
         <i class="pi pi-search _search-icon f-14"></i>
         @if (searchByKeyword()) {
         <i class="pi pi-times _cross-icon f-14" (click)="clearSearch()"></i>
@@ -16,7 +16,7 @@
     </div>
     @if (canEdit()) {
     <button class="_primary-btn" (click)="saveAccess()" [disabled]="saving() || selectedRoleId() === null">
-        {{ saving() ? 'Saving...' : 'Save' }}
+        {{ saving() ? ('common.saving' | t) : ('common.save' | t) }}
     </button>
     }
 </div>
@@ -31,8 +31,8 @@
                         <input class="form-check-input mt-1" type="checkbox" [checked]="isAllChecked()"
                             [disabled]="!canEdit()" (change)="toggleAll($any($event.target).checked)" title="Select all">
                     </th>
-                    <th scope="col">Module</th>
-                    @for (col of permissionColumns; track col.key) {
+                    <th scope="col">{{ 'access.module' | t }}</th>
+                    @for (col of permissionColumns(); track col.key) {
                     <th scope="col" class="text-center">
                         <div class="d-flex flex-column align-items-center gap-1">
                             <span>{{ col.label }}</span>
@@ -48,14 +48,14 @@
             <tbody>
                 @if (loading()) {
                 <tr>
-                    <td [attr.colspan]="permissionColumns.length + 2">
-                        <p>Loading...</p>
+                    <td [attr.colspan]="permissionColumns().length + 2">
+                        <p>{{ 'common.loading' | t }}</p>
                     </td>
                 </tr>
                 } @else if (!hasOffice()) {
                 <tr>
-                    <td [attr.colspan]="permissionColumns.length + 2">
-                        <p>Select an office to manage access</p>
+                    <td [attr.colspan]="permissionColumns().length + 2">
+                        <p>{{ 'access.pickOffice' | t }}</p>
                     </td>
                 </tr>
                 } @else {
@@ -68,7 +68,7 @@
                                 (change)="toggleGroup(section.group, $any($event.target).checked)"
                                 [title]="'Full access ' + section.group">
                         </td>
-                        <td class="fw-semibold" [attr.colspan]="permissionColumns.length + 1">
+                        <td class="fw-semibold" [attr.colspan]="permissionColumns().length + 1">
                             {{ section.group }}
                         </td>
                     </tr>
@@ -81,7 +81,7 @@
                                 (change)="toggleRow(p.module, $any($event.target).checked)" title="Full access">
                         </td>
                         <td [class.ps-4]="section.group">{{ p.module_label }}</td>
-                        @for (col of permissionColumns; track col.key) {
+                        @for (col of permissionColumns(); track col.key) {
                         <td class="text-center">
                             <input class="form-check-input" type="checkbox" [checked]="p[col.key]"
                                 [disabled]="!canEdit()" (change)="togglePermission(p.module, col.key)">
@@ -91,8 +91,8 @@
                     }
                 } @empty {
                 <tr>
-                    <td [attr.colspan]="permissionColumns.length + 2">
-                        <p>Record no available</p>
+                    <td [attr.colspan]="permissionColumns().length + 2">
+                        <p>{{ 'common.noRecords' | t }}</p>
                     </td>
                 </tr>
                 }

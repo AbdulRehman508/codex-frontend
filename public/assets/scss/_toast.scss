@@ -1,0 +1,343 @@
+@use "colors" as *;
+@use "font" as *;
+
+/* ---- Toasts ----
+   A notice is read in passing, so it has to say three things at a glance:
+   what happened (the icon), how it went (the accent), and the detail. The
+   stock toast flooded the whole card with a pale tint and leaned on red text;
+   this keeps the surface white, puts the colour on an accent bar and an icon
+   chip, and leaves the words in ink so they stay readable. */
+
+.p-toast {
+  width: 380px;
+  max-width: calc(100vw - 32px);
+  z-index: 1200;
+}
+
+.p-toast .p-toast-message {
+  position: relative;
+  overflow: hidden;
+  margin: 0 0 12px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--borderColor);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  // the accent lives on the edge, not across the whole card
+  border-inline-start: 4px solid var(--lightDarkGray);
+  animation: toast-in 260ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.p-toast .p-toast-message-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: none;
+}
+
+/* the icon sits in a tinted chip, which is where the severity colour belongs */
+.p-toast .p-toast-message-icon {
+  flex: 0 0 auto;
+  // PrimeNG renders either a font icon or an inline SVG here; the padding and
+  // border-box keep the glyph inside the chip in both cases
+  box-sizing: border-box;
+  width: 30px;
+  height: 30px;
+  padding: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-pill);
+  font-size: 14px;
+}
+
+.p-toast .p-toast-message-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.p-toast .p-toast-summary {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--black);
+}
+
+.p-toast .p-toast-detail {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--fullGray);
+  // a long validation message wraps instead of stretching the card
+  overflow-wrap: anywhere;
+}
+
+.p-toast .p-toast-close-icon {
+  width: 13px;
+  height: 13px;
+  font-size: 13px;
+}
+
+.p-toast .p-toast-close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  margin: -2px -4px 0 0;
+  border: none;
+  background: transparent;
+  border-radius: var(--r-xs);
+  color: var(--lightDarkGray);
+  cursor: pointer;
+  transition: background-color var(--ease), color var(--ease);
+
+  &:hover {
+    background: var(--surface-2);
+    color: var(--black);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+}
+
+/* the life of the toast, drawn as a thin bar along the bottom edge.
+   Matches the 4s life set on <p-toast> in app.html — change both together. */
+.p-toast .p-toast-message::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: currentColor;
+  opacity: 0.35;
+  transform-origin: left center;
+  animation: toast-life 4s linear forwards;
+}
+
+[dir='rtl'] .p-toast .p-toast-message::after {
+  transform-origin: right center;
+}
+
+/* ---- severities ---- */
+.p-toast .p-toast-message-success {
+  border-inline-start-color: #2f9e25;
+  color: #2f9e25;
+
+  .p-toast-message-icon {
+    background: rgba(78, 197, 66, 0.16);
+    color: #2f9e25;
+  }
+}
+
+.p-toast .p-toast-message-error {
+  border-inline-start-color: var(--danger);
+  color: var(--danger);
+
+  .p-toast-message-icon {
+    background: rgba(205, 24, 24, 0.12);
+    color: var(--danger);
+  }
+}
+
+.p-toast .p-toast-message-warn {
+  border-inline-start-color: var(--info);
+  color: var(--info);
+
+  .p-toast-message-icon {
+    background: rgba(245, 114, 0, 0.14);
+    color: var(--info);
+  }
+}
+
+.p-toast .p-toast-message-info {
+  border-inline-start-color: var(--primary);
+  color: var(--primary);
+
+  .p-toast-message-icon {
+    background: rgba(var(--primary-rgb), 0.12);
+    color: var(--primary);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+[dir='rtl'] .p-toast .p-toast-message {
+  animation-name: toast-in-rtl;
+}
+
+@keyframes toast-in-rtl {
+  from {
+    opacity: 0;
+    transform: translateX(-14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-life {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* a phone gets the full width, pinned under the header */
+@media (max-width: 640px) {
+  .p-toast {
+    width: calc(100vw - 24px);
+  }
+}
+
+/* someone who asked for less motion gets the toast without the slide */
+@media (prefers-reduced-motion: reduce) {
+  .p-toast .p-toast-message {
+    animation: none;
+  }
+
+  .p-toast .p-toast-message::after {
+    animation: none;
+    opacity: 0.2;
+  }
+}
+
+/* ---- Confirm dialog ----
+   The same card language as a toast, because it answers the same kind of
+   moment: something is about to happen and the shopkeeper has to agree to it. */
+
+.p-dialog-mask {
+  background: rgba(16, 36, 58, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+.p-confirmdialog {
+  border-radius: var(--r-lg);
+  border: 1px solid var(--borderColor);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+
+  .p-dialog-header {
+    padding: 18px 20px 4px;
+    border: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--black);
+  }
+
+  .p-dialog-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 20px 20px;
+    border: none;
+    background: transparent;
+  }
+
+  // the warning icon gets the same chip treatment as a toast
+  .p-confirmdialog-icon {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r-pill);
+    background: rgba(245, 114, 0, 0.14);
+    color: var(--info);
+    font-size: 15px;
+  }
+
+  .p-confirmdialog-message {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--fullGray) !important;
+  }
+
+  .p-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0 20px 20px;
+    border: none;
+    background: transparent;
+  }
+
+  // PrimeNG's own buttons, dressed as the app's
+  .p-button {
+    min-height: 36px;
+    padding: 8px 16px;
+    border-radius: var(--r-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background-color var(--ease), border-color var(--ease),
+      color var(--ease), box-shadow var(--ease);
+  }
+
+  .p-confirmdialog-reject-button {
+    background: var(--surface-2);
+    border-color: transparent;
+    color: var(--fullGray);
+
+    &:hover {
+      background: #e9eef3;
+      color: var(--black);
+    }
+  }
+
+  .p-confirmdialog-accept-button {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+    box-shadow: var(--shadow-primary);
+
+    &:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    // a destructive confirm never wears the brand colour
+    &.p-button-danger {
+      background: var(--danger);
+      border-color: var(--danger);
+      box-shadow: 0 2px 6px rgba(205, 24, 24, 0.24);
+
+      &:hover {
+        background: #b31414;
+        border-color: #b31414;
+      }
+    }
+  }
+}
+
+/* a delete dialog: the icon chip turns red, so the colour matches the stakes */
+.p-confirmdialog:has(.p-confirmdialog-accept-button.p-button-danger) .p-confirmdialog-icon {
+  background: rgba(205, 24, 24, 0.12);
+  color: var(--danger);
+}

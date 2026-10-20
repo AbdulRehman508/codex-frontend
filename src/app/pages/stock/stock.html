@@ -1,14 +1,14 @@
 <div class="stock-section">
     <div class="section-head">
         <div>
-            <h2>Stock</h2>
-            <p>Corrections, shelf counts and stock moving between your branches.</p>
+            <h2>{{ 'stock.title' | t }}</h2>
+            <p>{{ 'stock.subtitle' | t }}</p>
         </div>
         <div class="section-tabs">
             @for (tab of tabs(); track tab.label) {
             <a [routerLink]="tab.url" routerLinkActive="active" class="section-tab">
                 <i [class]="tab.icon"></i>
-                <span>{{ tab.label }}</span>
+                <span>{{ tab.label | t }}</span>
             </a>
             }
         </div>

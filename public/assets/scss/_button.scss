@@ -1,76 +1,119 @@
 @use 'font' as *;
 
+/* A button a thumb can hit and an eye can find: 36px tall, 12px type, one
+   shared radius. The old 11px label on a 31px box read as a link, not a
+   control, which is most of why the UI felt flimsy. */
 @mixin button {
-  @extend ._fw-500;
-  border-radius: 8px;
-  padding: 7px 16px;
-  font-size: 11px
+  @extend ._fw-600;
+  @extend .font-family;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 8px 16px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--ease), border-color var(--ease),
+    color var(--ease), box-shadow var(--ease), transform var(--ease);
+
+  i {
+    font-size: 12px;
+  }
+
+  /* every control answers the keyboard with the same ring */
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+  }
+
+  /* a press you can feel */
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
 }
 
 ._danger-btn {
   @include button;
   background-color: var(--danger);
   color: var(--white) !important;
-  border: none;
+  border: 1px solid var(--danger);
+  box-shadow: 0 2px 6px rgba(205, 24, 24, 0.24);
+
+  &:hover:not(:disabled) {
+    background-color: #b31414;
+    border-color: #b31414;
+  }
 }
 
 ._primary-btn {
   @include button;
   background-color: var(--primary);
-  border: solid 1px var(--primary);
+  border: 1px solid var(--primary);
   color: var(--white);
-  transition: background-color 150ms ease, border-color 150ms ease;
+  box-shadow: var(--shadow-primary);
 
   &:hover:not(:disabled) {
     background-color: var(--primary-hover);
     border-color: var(--primary-hover);
+    box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.32);
   }
 
   &:active:not(:disabled) {
     background-color: var(--primary-active);
     border-color: var(--primary-active);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+    box-shadow: var(--shadow-xs);
   }
 }
 
+/* the quiet sibling: a real border, ink text, and it tints on hover rather
+   than swapping colour entirely */
 ._outline-btn {
   @include button;
-  border: solid 1px var(--primary);
-  background-color: var(--white);
-  color: var(--black);
-  transition: background-color 150ms ease, color 150ms ease;
+  border: 1px solid var(--borderColor);
+  background-color: var(--surface);
+  color: var(--darkGray);
+  box-shadow: var(--shadow-xs);
 
   &:hover:not(:disabled) {
-    background-color: var(--secondary);
+    background-color: var(--primary-soft);
+    border-color: rgba(var(--primary-rgb), 0.35);
     color: var(--primary);
-  }
-
-  &:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
   }
 }
 
 ._cancel-btn {
   @include button;
-  border: solid 1px var(--borderColor);
-  background-color: var(--white);
-  color: var(--black);
+  border: 1px solid transparent;
+  background-color: var(--surface-2);
+  color: var(--fullGray);
+
+  &:hover:not(:disabled) {
+    background-color: #e9eef3;
+    color: var(--black);
+  }
 }
 
 ._addNew {
   width: 36px;
   height: 36px;
   padding: 5px;
-  border-radius: 50px;
+  border-radius: var(--r-pill);
   background-color: var(--primary);
   color: var(--white);
   border: 1px solid var(--primary);
-  transition: background-color 150ms ease;
+  box-shadow: var(--shadow-primary);
+  transition: background-color var(--ease), box-shadow var(--ease);
 
   &:hover {
     background-color: var(--primary-hover);
@@ -81,21 +124,35 @@
 ._circle-btn {
   width: 36px;
   height: 36px;
-  background-color: var(--lightGrayBG) !important;
+  background-color: var(--surface-2) !important;
+  border: 1px solid var(--borderColor);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: background-color var(--ease), border-color var(--ease);
+
+  &:hover {
+    background-color: var(--primary-soft) !important;
+    border-color: rgba(var(--primary-rgb), 0.3);
+  }
 }
 
 .upload-btn {
   width: 40px;
   height: 40px;
   background-color: var(--secondary);
-  border-radius: 50px;
-  box-shadow: 0 0 2px var(--lightDarkGray);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--primary);
+  transition: transform var(--ease), box-shadow var(--ease);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
 }

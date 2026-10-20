@@ -8,6 +8,7 @@ import {
   CreateOfficeDto,
   Office,
   OfficeListQuery,
+  OfficePick,
   PaginatedOffices,
   UpdateOfficeDto,
 } from './office.model';
@@ -25,6 +26,17 @@ export class OfficeApiService {
   listOffices(params: OfficeListQuery = {}): Observable<PaginatedOffices> {
     return this.api
       .getAll<ApiSuccess<PaginatedOffices>>(this.endpoint, params)
+      .pipe(map((res) => res.data));
+  }
+
+  /**
+   * The branches the signed-in user may work in: every office for an admin,
+   * the assigned ones for anyone else. Pickers use this rather than the
+   * admin-only list endpoint, which answers 403 for a manager.
+   */
+  listMyOffices(): Observable<OfficePick[]> {
+    return this.api
+      .getAll<ApiSuccess<OfficePick[]>>('profile/offices')
       .pipe(map((res) => res.data));
   }
 

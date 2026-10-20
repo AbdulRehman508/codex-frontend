@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { commonIcons } from '../../../core/icon-images/common-icon';
 import { OfficeContextService } from '../../../core/services/office-context.service';
@@ -17,7 +18,7 @@ import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-staff',
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslatePipe],
   templateUrl: './staff.html',
   styleUrl: './staff.scss',
 })

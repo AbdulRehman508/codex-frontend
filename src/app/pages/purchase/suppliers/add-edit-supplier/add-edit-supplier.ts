@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import {
@@ -22,7 +23,7 @@ function round2(n: number): number {
 
 @Component({
   selector: 'app-add-edit-supplier',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, TranslatePipe],
   templateUrl: './add-edit-supplier.html',
   styleUrl: './add-edit-supplier.scss',
 })
@@ -37,7 +38,8 @@ export class AddEditSupplier {
   supplierForm: FormGroup = new FormGroup({});
   submitted = false;
   saving = signal(false);
-  pageTitle = 'Add Supplier';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'supplier.addTitle';
   supplierId: string | null = null;
   statusList: SupplierStatus[] = ['active', 'inactive'];
 
@@ -81,7 +83,7 @@ export class AddEditSupplier {
 
     this.route.params.subscribe((params) => {
       this.supplierId = params['id'] ?? null;
-      this.pageTitle = this.supplierId ? 'Edit Supplier' : 'Add Supplier';
+      this.pageTitle = this.supplierId ? 'supplier.editTitle' : 'supplier.addTitle';
       if (this.supplierId) this.loadSupplier(this.supplierId);
     });
   }

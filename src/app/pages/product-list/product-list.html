@@ -1,12 +1,12 @@
 <!-- in-flow toolbar: the shared .top-box is absolute and would sit under the
      table card on pages that have no heading band above it -->
 <div class="page-toolbar">
-    <p class="_heading2 mb-0">Product</p>
+    <p class="_heading2 mb-0">{{ 'product.title' | t }}</p>
     <div class="toolbar-actions">
-    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <button class="_outline-btn" (click)="clearSearch()">{{ 'common.reset' | t }}</button>
     <div class="position-relative">
         <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="product-search"
-            class="_input-icon w-200 custom-placeholder" placeholder="Search name / sku" />
+            class="_input-icon w-200 custom-placeholder" [placeholder]="'product.searchPlaceholder' | t" />
         <i class="pi pi-search _search-icon f-14"></i>
         @if (searchByKeyword) {
         <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
@@ -14,7 +14,7 @@
     </div>
     <div class="position-relative w-200">
         <ng-select [(ngModel)]="searchByRack" [items]="rackList()" bindLabel="name" bindValue="id"
-            placeholder="Select Rack" (change)="onRackFilterChange()">
+            [placeholder]="'product.selectRack' | t" (change)="onRackFilterChange()">
         </ng-select>
     </div>
     @if (perm.can(module, 'delete')) {
@@ -22,12 +22,12 @@
         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="18px" />
     </div>
     }
-    <button class="_outline-btn" (click)="openLabels()" title="Print shelf labels for the ticked products">
-        <i class="pi pi-tags"></i> Labels
+    <button class="_outline-btn" (click)="openLabels()" [title]="'product.printLabels' | t">
+        <i class="pi pi-tags"></i> {{ 'product.labels' | t }}
     </button>
     @if (perm.can(module, 'create')) {
     <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/product/add']"
-        [title]="hasOffice() ? 'Add a product' : 'Select an office in the header first'">Add New</button>
+        [title]="hasOffice() ? ('product.addOne' | t) : ('common.pickOfficeHeader' | t)">{{ 'common.addNew' | t }}</button>
     }
     </div>
 </div>
@@ -43,27 +43,27 @@
                             (change)="checkAll()">
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('name')">
-                        Product Name <i class="pi" [ngClass]="sort() === 'name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'product.name' | t }} <i class="pi" [ngClass]="sort() === 'name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('price')">
-                        Price <i class="pi" [ngClass]="sort() === 'price' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'common.price' | t }} <i class="pi" [ngClass]="sort() === 'price' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('quantity')">
-                        Quantity <i class="pi" [ngClass]="sort() === 'quantity' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'common.quantity' | t }} <i class="pi" [ngClass]="sort() === 'quantity' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('status')">
-                        Status <i class="pi" [ngClass]="sort() === 'status' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'common.status' | t }} <i class="pi" [ngClass]="sort() === 'status' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
-                    <th scope="col">Action</th>
+                    <th scope="col">{{ 'common.action' | t }}</th>
                 </tr>
             </thead>
             <tbody>
                 @if (loading()) {
-                <tr><td colspan="6"><p>Loading...</p></td></tr>
+                <tr><td colspan="6"><p>{{ 'common.loading' | t }}</p></td></tr>
                 } @else if (!hasOffice()) {
-                <tr><td colspan="6"><p>Pick an office from the "Select Office" dropdown in the top bar to see and add products.</p></td></tr>
+                <tr><td colspan="6"><p>{{ 'product.pickOffice' | t }}</p></td></tr>
                 } @else if (rows().length === 0) {
-                <tr><td colspan="6"><p>Record not available</p></td></tr>
+                <tr><td colspan="6"><p>{{ 'common.noRecords' | t }}</p></td></tr>
                 } @else {
                 @for (row of rows(); track row.id) {
                 <tr>
@@ -81,18 +81,18 @@
                     <td>
                         <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
                             [ngClass]="row.status === 'active' ? 'bg-success' : 'bg-secondary'"
-                            (click)="toggleStatus(row)" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">
+                            (click)="toggleStatus(row)" [title]="perm.can(module, 'edit') ? ('common.clickToToggle' | t) : ''">
                             {{ row.status }}
                         </span>
                     </td>
                     <td>
                         @if (perm.can(module, 'edit')) {
                         <img [src]="commonIcon.edit_icon" class="cursor-pointer me-2" width="16px"
-                            [routerLink]="['/product/edit', row.id]" title="Edit" />
+                            [routerLink]="['/product/edit', row.id]" [title]="'common.edit' | t" />
                         }
                         @if (perm.can(module, 'delete')) {
                         <img [src]="commonIcon.delete_icon" class="cursor-pointer" width="16px"
-                            (click)="deleteOne(row)" title="Delete" />
+                            (click)="deleteOne(row)" [title]="'common.delete' | t" />
                         }
                     </td>
                 </tr>
@@ -104,11 +104,11 @@
 
     @if (!loading() && total() > 0) {
     <div class="d-flex align-items-center justify-content-between mt-3">
-        <span class="f-14">Total: {{ total() }}</span>
+        <span class="f-14">{{ 'common.total' | t }}: {{ total() }}</span>
         <div class="d-flex align-items-center gap-2">
-            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
-            <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
-            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">{{ 'common.prev' | t }}</button>
+            <span class="f-14">{{ 'common.page' | t }} {{ page() }} / {{ totalPages() }}</span>
+            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">{{ 'common.next' | t }}</button>
         </div>
     </div>
     }
@@ -117,35 +117,35 @@
 <!-- Shelf labels: the dialog is screen-only, the sheet below it is what prints -->
 @if (labelDialogOpen()) {
 <div class="lb-backdrop no-print" (click)="closeLabels()"></div>
-<div class="lb-dialog no-print" role="dialog" aria-label="Print shelf labels">
+<div class="lb-dialog no-print" role="dialog" [attr.aria-label]="'product.printLabels' | t">
     <div class="lb-head">
         <div>
-            <h3>Shelf Labels</h3>
-            <p>Barcodes come from each product's barcode, or its SKU when there is none.</p>
+            <h3>{{ 'product.shelfLabels' | t }}</h3>
+            <p>{{ 'product.labelsHint' | t }}</p>
         </div>
-        <button class="lb-close" (click)="closeLabels()" title="Close"><i class="pi pi-times"></i></button>
+        <button class="lb-close" (click)="closeLabels()" [title]="'common.close' | t"><i class="pi pi-times"></i></button>
     </div>
 
     <div class="lb-body">
         @if (buildingLabels()) {
-        <p class="lb-empty">Building labels...</p>
+        <p class="lb-empty">{{ 'product.building' | t }}</p>
         } @else if (!labels().length) {
-        <p class="lb-empty">Nothing to print.</p>
+        <p class="lb-empty">{{ 'product.nothingToPrint' | t }}</p>
         } @else {
         <div class="lb-controls">
             <div class="lb-field">
-                <label for="lb-copies">Copies each</label>
+                <label for="lb-copies">{{ 'product.copiesEach' | t }}</label>
                 <input id="lb-copies" type="number" min="1" max="50" [(ngModel)]="labelCopies" name="lb-copies" />
             </div>
             <label class="lb-toggle">
                 <input type="checkbox" class="form-check-input" [(ngModel)]="labelShowName" name="lb-name" />
-                <span>Product name</span>
+                <span>{{ 'product.name' | t }}</span>
             </label>
             <label class="lb-toggle">
                 <input type="checkbox" class="form-check-input" [(ngModel)]="labelShowPrice" name="lb-price" />
-                <span>Price</span>
+                <span>{{ 'common.price' | t }}</span>
             </label>
-            <span class="lb-count">{{ labelSheet().length }} label(s)</span>
+            <span class="lb-count">{{ labelSheet().length }} {{ 'product.labelCount' | t }}</span>
         </div>
 
         <div class="lb-preview">
@@ -165,9 +165,9 @@
     </div>
 
     <div class="lb-foot">
-        <button class="_cancel-btn" (click)="closeLabels()">Close</button>
+        <button class="_cancel-btn" (click)="closeLabels()">{{ 'common.close' | t }}</button>
         <button class="_primary-btn" [disabled]="!labels().length" (click)="printLabels()">
-            <i class="pi pi-print"></i> Print
+            <i class="pi pi-print"></i> {{ 'common.print' | t }}
         </button>
     </div>
 </div>

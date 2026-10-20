@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -26,7 +27,7 @@ import {
 
 @Component({
   selector: 'app-suppliers',
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslatePipe],
   templateUrl: './suppliers.html',
   styleUrl: './suppliers.scss',
 })
