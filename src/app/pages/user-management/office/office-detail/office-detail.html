@@ -1,15 +1,15 @@
 <div class="d-flex align-items-center justify-content-between my-3">
-    <p class="f-16 _fw-600 mb-0">Office Detail</p>
+    <p class="f-16 _fw-600 mb-0">{{ 'office.detail' | t }}</p>
     <div class="d-flex gap-2">
-        <button class="_cancel-btn" (click)="back()">Back</button>
+        <button class="_cancel-btn" (click)="back()">{{ 'common.back' | t }}</button>
         @if (office() && perm.can(module, 'edit')) {
-        <button class="_primary-btn" [routerLink]="['/user-management/office/edit', office()!.id]">Edit</button>
+        <button class="_primary-btn" [routerLink]="['/user-management/office/edit', office()!.id]">{{ 'common.edit' | t }}</button>
         }
     </div>
 </div>
 
 @if (loading()) {
-<p>Loading...</p>
+<p>{{ 'common.loading' | t }}</p>
 } @else if (office(); as o) {
 <div class="row">
     <div class="col-sm-3">
@@ -23,31 +23,31 @@
     </div>
     <div class="col-sm-9">
         <div class="row">
-            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Office Name</label><p class="mb-0">{{ o.office_name }}</p></div>
-            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Email</label><p class="mb-0">{{ o.office_email }}</p></div>
-            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Mobile No</label><p class="mb-0">{{ o.office_mobile_no }}</p></div>
-            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Licence No</label><p class="mb-0">{{ o.licence_no || '-' }}</p></div>
-            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Membership Level</label><p class="mb-0">{{ o.membership_level }}</p></div>
-            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">Membership Type</label><p class="mb-0">{{ o.membership_type }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">{{ 'office.name' | t }}</label><p class="mb-0">{{ o.office_name }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">{{ 'common.email' | t }}</label><p class="mb-0">{{ o.office_email }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">{{ 'common.mobile' | t }}</label><p class="mb-0">{{ o.office_mobile_no }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">{{ 'office.licenceNo' | t }}</label><p class="mb-0">{{ o.licence_no || '-' }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">{{ 'office.membershipLevel' | t }}</label><p class="mb-0">{{ o.membership_level }}</p></div>
+            <div class="col-sm-6 mb-3"><label class="f-12 text-muted">{{ 'office.membershipType' | t }}</label><p class="mb-0">{{ o.membership_type }}</p></div>
 
             <div class="col-sm-6 mb-3">
-                <label class="f-12 text-muted d-block">Status</label>
+                <label class="f-12 text-muted d-block">{{ 'common.status' | t }}</label>
                 <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
                     [ngClass]="o.office_status === 'active' ? 'bg-success' : 'bg-secondary'"
                     (click)="toggleStatus()" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">{{ o.office_status }}</span>
             </div>
             <div class="col-sm-6 mb-3">
-                <label class="f-12 text-muted d-block">Approved</label>
+                <label class="f-12 text-muted d-block">{{ 'office.approved' | t }}</label>
                 <span class="badge" [class.cursor-pointer]="perm.can(module, 'edit')"
                     [ngClass]="o.approved ? 'bg-success' : 'bg-warning'"
                     (click)="toggleApproved()" [title]="perm.can(module, 'edit') ? 'Click to toggle' : ''">{{ o.approved ? 'Yes' : 'No' }}</span>
             </div>
 
-            <div class="col-sm-12 mb-3"><label class="f-12 text-muted">Address</label><p class="mb-0">{{ o.office_address }}</p></div>
-            <div class="col-sm-12 mb-3"><label class="f-12 text-muted">Biography</label><p class="mb-0">{{ o.biography || '-' }}</p></div>
+            <div class="col-sm-12 mb-3"><label class="f-12 text-muted">{{ 'common.address' | t }}</label><p class="mb-0">{{ o.office_address }}</p></div>
+            <div class="col-sm-12 mb-3"><label class="f-12 text-muted">{{ 'form.biography' | t }}</label><p class="mb-0">{{ o.biography || '-' }}</p></div>
         </div>
     </div>
 </div>
 } @else {
-<p>Office not found.</p>
+<p>{{ 'office.notFound' | t }}</p>
 }

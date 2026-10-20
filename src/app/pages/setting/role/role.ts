@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { commonIcons } from '../../../core/icon-images/common-icon';
 import { RouterModule } from '@angular/router';
@@ -15,7 +16,7 @@ import { PermissionService } from '../../../core/services/permission.service';
 
 @Component({
   selector: 'app-role',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslatePipe],
   templateUrl: './role.html',
   styleUrl: './role.scss',
 })

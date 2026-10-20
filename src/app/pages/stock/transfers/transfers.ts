@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -23,7 +25,7 @@ import { TokenService } from '../../../core/services/token.service';
 import { ProductApiService } from '../../product-list/product.api';
 import { ProductListRow } from '../../product-list/product.model';
 import { OfficeApiService } from '../../user-management/office/office.api';
-import { OfficeListRow } from '../../user-management/office/office.model';
+import { OfficePick } from '../../user-management/office/office.model';
 import { StockApiService } from '../stock.api';
 import {
   CreateTransferDto,
@@ -51,12 +53,14 @@ interface TransferStat {
 
 @Component({
   selector: 'app-stock-transfers',
-  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule, TranslatePipe],
   templateUrl: './transfers.html',
   styleUrl: './transfers.scss',
 })
 export class StockTransfers {
   private api = inject(StockApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private productApi = inject(ProductApiService);
   private officeApi = inject(OfficeApiService);
   private ctx = inject(OfficeContextService);
@@ -133,10 +137,10 @@ export class StockTransfers {
   private dateFrom = '';
   private dateTo = '';
 
-  directionList: { label: string; value: 'in' | 'out' }[] = [
-    { label: 'Sent out', value: 'out' },
-    { label: 'Received', value: 'in' },
-  ];
+  directionList = computed(() => [
+    { label: this.i18n.t('stock.sentOut'), value: 'out' },
+    { label: this.i18n.t('purchase.received'), value: 'in' },
+  ]);
 
   sort = signal<TransferListQuery['sort']>('created_at');
   order = signal<'asc' | 'desc'>('desc');
@@ -147,7 +151,7 @@ export class StockTransfers {
   toOfficeId: string | null = null;
   note = '';
   draft = signal<DraftLine[]>([]);
-  offices = signal<OfficeListRow[]>([]);
+  offices = signal<OfficePick[]>([]);
 
   productTerm = '';
   picked = signal<ProductListRow | null>(null);
@@ -173,8 +177,8 @@ export class StockTransfers {
   );
 
   stats = computed<TransferStat[]>(() => [
-    { label: 'Transfers', value: String(this.statTransfers()), icon: 'pi pi-arrow-right-arrow-left', tone: 'primary' },
-    { label: 'Units Moved', value: this.statUnits().toLocaleString('en-US'), icon: 'pi pi-box', tone: 'info' },
+    { label: this.i18n.t('stock.transfers'), value: String(this.statTransfers()), icon: 'pi pi-arrow-right-arrow-left', tone: 'primary' },
+    { label: this.i18n.t('stock.unitsMoved'), value: this.statUnits().toLocaleString('en-US'), icon: 'pi pi-box', tone: 'info' },
   ]);
 
   ngOnInit() {
@@ -191,8 +195,8 @@ export class StockTransfers {
 
   /** destination dropdown: every office this user is allowed to see */
   private loadOffices() {
-    this.officeApi.listOffices({ limit: 200, sort: 'office_name', order: 'asc' }).subscribe({
-      next: (res) => this.offices.set(this.token.filterOfficesForUser(res.data)),
+    this.officeApi.listMyOffices().subscribe({
+      next: (offices) => this.offices.set(offices),
       // the dialog warns when the list is empty; the grid still works
       error: () => this.offices.set([]),
     });

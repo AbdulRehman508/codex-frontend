@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
@@ -12,7 +13,7 @@ interface TabItem {
 
 @Component({
   selector: 'app-stock',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './stock.html',
   styleUrl: './stock.scss',
 })
@@ -24,8 +25,8 @@ export class Stock {
   readonly module = 'stock';
 
   private allTabs: TabItem[] = [
-    { label: 'Adjustments', icon: 'pi pi-sliders-h', url: '/stock/adjustments' },
-    { label: 'Transfers', icon: 'pi pi-arrow-right-arrow-left', url: '/stock/transfers' },
+    { label: 'stock.tabAdjustments', icon: 'pi pi-sliders-h', url: '/stock/adjustments' },
+    { label: 'stock.tabTransfers', icon: 'pi pi-arrow-right-arrow-left', url: '/stock/transfers' },
   ];
 
   tabs = computed(() => (this.perm.can(this.module) ? this.allTabs : []));

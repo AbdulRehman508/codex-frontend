@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -35,12 +37,14 @@ interface PurchaseStat {
 
 @Component({
   selector: 'app-purchases',
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, DatePickerModule, TranslatePipe],
   templateUrl: './purchases.html',
   styleUrl: './purchases.scss',
 })
 export class Purchases {
   private api = inject(PurchaseApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private ctx = inject(OfficeContextService);
   private confirm = inject(ConfirmService);
   private toast = inject(MessageService);
@@ -93,11 +97,11 @@ export class Purchases {
   private dateFrom = '';
   private dateTo = '';
 
-  statusList: { label: string; value: PurchaseStatus }[] = [
-    { label: 'Received', value: 'received' },
-    { label: 'Ordered', value: 'ordered' },
-    { label: 'Cancelled', value: 'cancelled' },
-  ];
+  statusList = computed(() => [
+    { label: this.i18n.t('purchase.received'), value: 'received' },
+    { label: this.i18n.t('purchase.ordered'), value: 'ordered' },
+    { label: this.i18n.t('purchase.cancelled'), value: 'cancelled' },
+  ]);
   suppliers = signal<SupplierListRow[]>([]);
 
   sort = signal<PurchaseListQuery['sort']>('created_at');
@@ -107,10 +111,10 @@ export class Purchases {
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
 
   stats = computed<PurchaseStat[]>(() => [
-    { label: 'Purchases', value: String(this.statPurchases()), icon: 'pi pi-shopping-bag', tone: 'primary' },
-    { label: 'Purchase Value', value: this.money(this.statTotal()), icon: 'pi pi-dollar', tone: 'info' },
-    { label: 'Paid', value: this.money(this.statPaid()), icon: 'pi pi-check-circle', tone: 'green' },
-    { label: 'Payable', value: this.money(this.statDue()), icon: 'pi pi-wallet', tone: 'danger' },
+    { label: this.i18n.t('purchase.tabPurchases'), value: String(this.statPurchases()), icon: 'pi pi-shopping-bag', tone: 'primary' },
+    { label: this.i18n.t('purchase.value'), value: this.money(this.statTotal()), icon: 'pi pi-dollar', tone: 'info' },
+    { label: this.i18n.t('common.paid'), value: this.money(this.statPaid()), icon: 'pi pi-check-circle', tone: 'green' },
+    { label: this.i18n.t('common.payable'), value: this.money(this.statDue()), icon: 'pi pi-wallet', tone: 'danger' },
   ]);
 
   ngOnInit() {

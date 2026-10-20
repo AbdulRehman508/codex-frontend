@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -9,12 +10,12 @@ import { StaffApiService } from '../staff.api';
 import { Staff } from '../staff.model';
 import { RolesApiService, Role } from '../../roles.api';
 import { OfficeApiService } from '../../office/office.api';
-import { OfficeListRow } from '../../office/office.model';
+import { OfficePick } from '../../office/office.model';
 import { PermissionService } from '../../../../core/services/permission.service';
 
 @Component({
   selector: 'app-staff-detail',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './staff-detail.html',
   styleUrl: './staff-detail.scss',
 })
@@ -35,7 +36,7 @@ export class StaffDetail {
   loading = signal(true);
 
   private roles = signal<Role[]>([]);
-  private offices = signal<OfficeListRow[]>([]);
+  private offices = signal<OfficePick[]>([]);
 
   roleName = computed(() => this.roles().find((r) => r.id === this.staff()?.role_id)?.role ?? '-');
   officeName = computed(() => {
@@ -55,12 +56,12 @@ export class StaffDetail {
     forkJoin({
       staff: this.api.getStaff(id),
       roles: this.rolesApi.listRoles(),
-      offices: this.officeApi.listOffices({ limit: 1000 }),
+      offices: this.officeApi.listMyOffices(),
     }).subscribe({
       next: ({ staff, roles, offices }) => {
         this.staff.set(staff);
         this.roles.set(roles);
-        this.offices.set(offices.data);
+        this.offices.set(offices);
         this.loading.set(false);
       },
       error: (err) => {

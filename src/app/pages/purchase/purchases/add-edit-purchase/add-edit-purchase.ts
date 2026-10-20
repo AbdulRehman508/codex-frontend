@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -70,12 +72,14 @@ function round2(n: number): number {
 
 @Component({
   selector: 'app-add-edit-purchase',
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, TranslatePipe],
   templateUrl: './add-edit-purchase.html',
   styleUrl: './add-edit-purchase.scss',
 })
 export class AddEditPurchase {
   private api = inject(PurchaseApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private productApi = inject(ProductApiService);
   private ctx = inject(OfficeContextService);
   private toast = inject(MessageService);
@@ -84,7 +88,8 @@ export class AddEditPurchase {
   private search$ = new Subject<string>();
 
   purchaseId: string | null = null;
-  pageTitle = 'New Purchase';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'purchaseForm.addTitle';
   purchaseNo = signal<string>('');
   saving = signal(false);
   loading = signal(false);
@@ -100,11 +105,11 @@ export class AddEditPurchase {
   private paidTouched = false;
 
   suppliers = signal<SupplierListRow[]>([]);
-  statusList: { label: string; value: PurchaseStatus }[] = [
-    { label: 'Received (stock in)', value: 'received' },
-    { label: 'Ordered (no stock yet)', value: 'ordered' },
-    { label: 'Cancelled', value: 'cancelled' },
-  ];
+  statusList = computed(() => [
+    { label: this.i18n.t('purchase.receivedStockIn'), value: 'received' },
+    { label: this.i18n.t('purchase.orderedNoStock'), value: 'ordered' },
+    { label: this.i18n.t('purchase.cancelled'), value: 'cancelled' },
+  ]);
 
   // ---- lines + quick add ----
   lines = signal<FormLine[]>([]);
@@ -171,7 +176,7 @@ export class AddEditPurchase {
     this.loadSuppliers();
     this.route.params.subscribe((params) => {
       this.purchaseId = params['id'] ?? null;
-      this.pageTitle = this.purchaseId ? 'Edit Purchase' : 'New Purchase';
+      this.pageTitle = this.purchaseId ? 'purchaseForm.editTitle' : 'purchaseForm.addTitle';
       if (this.purchaseId) this.loadPurchase(this.purchaseId);
     });
   }

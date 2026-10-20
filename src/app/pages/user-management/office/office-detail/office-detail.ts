@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -10,7 +11,7 @@ import { PermissionService } from '../../../../core/services/permission.service'
 
 @Component({
   selector: 'app-office-detail',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './office-detail.html',
   styleUrl: './office-detail.scss',
 })

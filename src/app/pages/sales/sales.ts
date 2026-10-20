@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../core/i18n/translate.pipe';
+import { TranslationService } from '../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -58,12 +60,14 @@ interface SaleStat {
 
 @Component({
   selector: 'app-sales',
-  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule, NewSale],
+  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule, NewSale, TranslatePipe],
   templateUrl: './sales.html',
   styleUrl: './sales.scss',
 })
 export class Sales {
   private api = inject(SalesApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private ctx = inject(OfficeContextService);
   private confirm = inject(ConfirmService);
   private toast = inject(MessageService);
@@ -117,10 +121,10 @@ export class Sales {
   private dateFrom = '';
   private dateTo = '';
   statusList: SaleStatus[] = ['completed', 'pending', 'refunded'];
-  paymentList: { label: string; value: PaymentMethod }[] = [
-    { label: 'Cash', value: 'cash' },
-    { label: 'Online', value: 'online' },
-  ];
+  paymentList = computed(() => [
+    { label: this.i18n.t('common.cash'), value: 'cash' },
+    { label: this.i18n.t('common.online'), value: 'online' },
+  ]);
   sort = signal<SaleListQuery['sort']>('created_at');
   order = signal<'asc' | 'desc'>('desc');
   showNewSale = signal(false);
@@ -135,16 +139,16 @@ export class Sales {
 
   stats = computed<SaleStat[]>(() => [
     {
-      label: this.isToday() ? "Today's Sales" : 'Filtered Sales',
+      label: this.i18n.t(this.isToday() ? 'sales.todaysSales' : 'sales.filteredSales'),
       value: this.money(this.todayTotal()),
       icon: 'pi pi-dollar',
       tone: 'primary',
     },
-    { label: 'Transactions', value: String(this.transactions()), icon: 'pi pi-receipt', tone: 'info' },
-    { label: 'Avg. Order', value: this.money(this.averageOrder()), icon: 'pi pi-chart-line', tone: 'green' },
-    { label: 'Borrow Amount', value: this.money(this.borrowTotal()), icon: 'pi pi-wallet', tone: 'info' },
+    { label: this.i18n.t('sales.transactions'), value: String(this.transactions()), icon: 'pi pi-receipt', tone: 'info' },
+    { label: this.i18n.t('sales.avgOrder'), value: this.money(this.averageOrder()), icon: 'pi pi-chart-line', tone: 'green' },
+    { label: this.i18n.t('sales.borrowAmount'), value: this.money(this.borrowTotal()), icon: 'pi pi-wallet', tone: 'info' },
     {
-      label: 'Cash / Online',
+      label: this.i18n.t('sales.cashOnline'),
       value: `${this.money(this.cashTotal())} / ${this.money(this.onlineTotal())}`,
       icon: 'pi pi-credit-card',
       tone: 'green',

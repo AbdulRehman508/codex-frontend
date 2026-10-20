@@ -1,12 +1,12 @@
 <div class="sf-head">
     <div>
-        <p class="f-16 _fw-600 mb-0">{{ pageTitle }}</p>
-        <p class="sf-sub">Suppliers are saved against the office picked in the header.</p>
+        <p class="f-16 _fw-600 mb-0">{{ pageTitle | t }}</p>
+        <p class="sf-sub">{{ 'supplier.officeHint' | t }}</p>
     </div>
     <div class="d-flex gap-2">
-        <button class="_cancel-btn" (click)="close()">Cancel</button>
+        <button class="_cancel-btn" (click)="close()">{{ 'common.cancel' | t }}</button>
         <button class="_primary-btn" [disabled]="saving()" (click)="saveSupplier()">
-            {{ saving() ? 'Saving...' : 'Save' }}
+            {{ saving() ? ('common.saving' | t) : ('common.save' | t) }}
         </button>
     </div>
 </div>
@@ -15,18 +15,18 @@
     <div class="row">
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="name">Name <span class="text-danger">*</span></label>
+                <label for="name">{{ 'common.name' | t }} <span class="text-danger">*</span></label>
                 <input type="text" id="name" formControlName="name"
                     [ngClass]="{ _inputError: (submitted && supplierForm.controls['name'].invalid) || fieldError('name') }">
                 @if (submitted && supplierForm.controls['name'].invalid) {
-                <small class="text-danger">Name is required</small>
+                <small class="text-danger">{{ 'form.nameRequired' | t }}</small>
                 }
                 @if (fieldError('name')) { <small class="text-danger">{{ fieldError('name') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="company">Company</label>
+                <label for="company">{{ 'common.company' | t }}</label>
                 <input type="text" id="company" formControlName="company"
                     [ngClass]="{ _inputError: fieldError('company') }">
                 @if (fieldError('company')) { <small class="text-danger">{{ fieldError('company') }}</small> }
@@ -34,31 +34,31 @@
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="mobile_no">Mobile No <span class="text-danger">*</span></label>
+                <label for="mobile_no">{{ 'common.mobile' | t }} <span class="text-danger">*</span></label>
                 <input type="text" id="mobile_no" formControlName="mobile_no"
                     [ngClass]="{ _inputError: (submitted && supplierForm.controls['mobile_no'].invalid) || fieldError('mobile_no') }">
                 @if (submitted && supplierForm.controls['mobile_no'].invalid) {
-                <small class="text-danger">Mobile no is required</small>
+                <small class="text-danger">{{ 'form.mobileRequired' | t }}</small>
                 }
                 @if (fieldError('mobile_no')) { <small class="text-danger">{{ fieldError('mobile_no') }}</small> }
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="email">Email</label>
+                <label for="email">{{ 'common.email' | t }}</label>
                 <input type="text" id="email" formControlName="email"
                     [ngClass]="{ _inputError: (submitted && supplierForm.controls['email'].invalid) || fieldError('email') }">
                 @if (submitted && supplierForm.controls['email'].hasError('email')) {
-                <small class="text-danger">Enter a valid email or leave it blank</small>
+                <small class="text-danger">{{ 'form.emailInvalid' | t }}</small>
                 }
                 @if (fieldError('email')) { <small class="text-danger">{{ fieldError('email') }}</small> }
-                <small class="d-block text-muted">Optional</small>
+                <small class="d-block text-muted">{{ 'common.optional' | t }}</small>
             </div>
         </div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="status">Status</label>
-                <ng-select formControlName="status" [items]="statusList" placeholder="Select Status"></ng-select>
+                <label for="status">{{ 'common.status' | t }}</label>
+                <ng-select formControlName="status" [items]="statusList" [placeholder]="'form.selectStatus' | t"></ng-select>
             </div>
         </div>
 
@@ -69,33 +69,33 @@
                 <div class="payable-card-head">
                     <span class="payable-card-icon"><i class="pi pi-wallet"></i></span>
                     <div>
-                        <p class="payable-card-title">Outstanding Payable</p>
-                        <p class="payable-card-sub">Record a payment made to this supplier</p>
+                        <p class="payable-card-title">{{ 'supplier.outstandingPayable' | t }}</p>
+                        <p class="payable-card-sub">{{ 'supplier.recordPayment' | t }}</p>
                     </div>
                 </div>
 
                 <div class="payable-calc">
                     <div class="payable-stat">
-                        <span class="payable-stat-label">Payable</span>
+                        <span class="payable-stat-label">{{ 'common.payable' | t }}</span>
                         <span class="payable-stat-value owed">{{ payableAmount() | number: '1.2-2' }}</span>
                     </div>
 
                     <span class="payable-op">−</span>
 
                     <div class="payable-pay">
-                        <label for="pay_amount" class="payable-stat-label">Pay now</label>
+                        <label for="pay_amount" class="payable-stat-label">{{ 'customer.payNow' | t }}</label>
                         <div class="payable-pay-input" [class.invalid]="overPaying() || fieldError('amount')">
                             <input type="number" id="pay_amount" min="0" step="0.01" placeholder="0.00"
                                 [ngModel]="payAmount()" (ngModelChange)="payAmount.set($event)"
                                 [ngModelOptions]="{ standalone: true }" />
-                            <button type="button" class="payable-full" (click)="payFull()">Pay full</button>
+                            <button type="button" class="payable-full" (click)="payFull()">{{ 'customer.payFull' | t }}</button>
                         </div>
                     </div>
 
                     <span class="payable-op">=</span>
 
                     <div class="payable-stat">
-                        <span class="payable-stat-label">Remaining</span>
+                        <span class="payable-stat-label">{{ 'customer.remaining' | t }}</span>
                         <span class="payable-stat-value" [class.cleared]="remainingPayable() === 0">
                             {{ remainingPayable() | number: '1.2-2' }}
                         </span>
@@ -107,13 +107,13 @@
                 </div>
                 <div class="payable-foot">
                     @if (overPaying()) {
-                    <span class="payable-error">Can't pay more than {{ payableAmount() | number: '1.2-2' }}</span>
+                    <span class="payable-error">{{ 'form.cantPayMore' | t }} {{ payableAmount() | number: '1.2-2' }}</span>
                     } @else if (fieldError('amount')) {
                     <span class="payable-error">{{ fieldError('amount') }}</span>
                     } @else if (remainingPayable() === 0) {
-                    <span class="payable-done"><i class="pi pi-check-circle"></i> Balance fully cleared</span>
+                    <span class="payable-done"><i class="pi pi-check-circle"></i> {{ 'customer.cleared' | t }}</span>
                     } @else {
-                    <span class="payable-hint">{{ clearedPct() | number: '1.0-0' }}% cleared with this payment</span>
+                    <span class="payable-hint">{{ clearedPct() | number: '1.0-0' }}% {{ 'form.clearedWithPayment2' | t }}</span>
                     }
                 </div>
             </div>
@@ -122,13 +122,13 @@
 
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="address">Address</label>
+                <label for="address">{{ 'common.address' | t }}</label>
                 <input type="text" id="address" formControlName="address">
             </div>
         </div>
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="notes">Notes</label>
+                <label for="notes">{{ 'common.notes' | t }}</label>
                 <textarea formControlName="notes" cols="20" rows="4"></textarea>
             </div>
         </div>

@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="dash-head">
         <div>
-            <h2>Welcome back{{ firstName ? ', ' + firstName : '' }} 👋</h2>
-            <p>Here's what's happening in your shop.</p>
+            <h2>{{ 'dashboard.welcome' | t }}{{ firstName ? ', ' + firstName : '' }} 👋</h2>
+            <p>{{ 'dashboard.subtitle' | t }}</p>
         </div>
     </div>
 
@@ -13,7 +13,7 @@
         @for (p of periods; track p.key) {
         <button type="button" class="period-chip" role="tab" [class.active]="period() === p.key"
             [attr.aria-selected]="period() === p.key" (click)="setPeriod(p.key)">
-            {{ p.label }}
+            {{ p.label | t }}
         </button>
         }
     </div>
@@ -21,11 +21,11 @@
     @if (!hasOffice()) {
     <div class="panel empty-panel">
         <i class="pi pi-building"></i>
-        <p>Pick an office from the "Select Office" dropdown in the top bar to see its numbers.</p>
+        <p>{{ 'common.pickOfficeFirst' | t }}</p>
     </div>
     } @else if (!data()) {
     <div class="panel empty-panel">
-        <p>{{ loading() ? 'Loading dashboard...' : 'No data yet.' }}</p>
+        <p>{{ (loading() ? 'dashboard.loading' : 'dashboard.noData') | t }}</p>
     </div>
     } @else {
     <!-- refetch keeps the previous frame, dimmed, instead of flashing a skeleton -->
@@ -39,20 +39,21 @@
                     <i [class]="s.icon"></i>
                 </div>
                 <div class="stat-body">
-                    <p class="stat-label">{{ s.label }}</p>
+                    <p class="stat-label">{{ s.label | t }}</p>
                     <h3 class="stat-value" [title]="s.title">{{ s.value }}</h3>
                     @if (s.note) {
-                    <span class="stat-note">{{ s.note }}</span>
+                    <span class="stat-note">{{ s.note | t }}</span>
                     } @else if (s.delta === null) {
                     <!-- previous window was 0: a % change would be infinite -->
-                    <span class="stat-delta flat">no earlier data to compare</span>
+                    <span class="stat-delta flat">{{ 'dashboard.noCompare' | t }}</span>
                     } @else {
                     <span class="stat-delta" [ngClass]="deltaTone(s)">
                         @if (s.delta !== 0) {
                         <i class="pi" [ngClass]="s.delta > 0 ? 'pi-arrow-up-right' : 'pi-arrow-down-right'"></i>
                         }
-                        {{ s.delta > 0 ? '+' : '' }}{{ s.delta }}%
-                        <span class="stat-vs">{{ comparisonLabel() }}</span>
+                        <!-- the sign has to stay in front of the number, Urdu or not -->
+                        <span class="num">{{ s.delta > 0 ? '+' : '' }}{{ s.delta }}%</span>
+                        <span class="stat-vs">{{ comparisonLabel() | t }}</span>
                     </span>
                     }
                 </div>
@@ -67,12 +68,12 @@
             <div class="panel sales-panel">
                 <div class="panel-head">
                     <div>
-                        <h4>Sales Overview</h4>
-                        <span class="panel-sub">{{ money(periodTotal()) }} in total</span>
+                        <h4>{{ 'dashboard.salesOverview' | t }}</h4>
+                        <span class="panel-sub">{{ money(periodTotal()) }} {{ 'dashboard.inTotal' | t }}</span>
                     </div>
                     <button type="button" class="link-btn" (click)="showTable.set(!showTable())">
                         <i class="pi" [ngClass]="showTable() ? 'pi-chart-bar' : 'pi-table'"></i>
-                        {{ showTable() ? 'Chart' : 'Table' }}
+                        {{ (showTable() ? 'dashboard.chart' : 'dashboard.table') | t }}
                     </button>
                 </div>
 
@@ -104,7 +105,8 @@
                         </div>
 
                         @if (hovered(); as h) {
-                        <div class="chart-tip" [style.left.%]="tooltipLeft()">
+                        <!-- inline-start, so the tip follows the hovered bar in Urdu too -->
+                        <div class="chart-tip" [style.inset-inline-start.%]="tooltipLeft()">
                             <strong>{{ money(h.revenue) }}</strong>
                             <span>{{ h.orders }} {{ h.orders === 1 ? 'order' : 'orders' }}</span>
                             <span class="tip-title">{{ h.title }}</span>
@@ -112,7 +114,7 @@
                         }
 
                         @if (!hasSales()) {
-                        <div class="chart-empty">No sales in this period</div>
+                        <div class="chart-empty">{{ 'dashboard.noSales' | t }}</div>
                         }
                     </div>
 
@@ -128,9 +130,9 @@
                     <table class="orders-table">
                         <thead>
                             <tr>
-                                <th>Period</th>
-                                <th class="num">Orders</th>
-                                <th class="num">Sales</th>
+                                <th>{{ 'dashboard.period' | t }}</th>
+                                <th class="num">{{ 'dashboard.orders' | t }}</th>
+                                <th class="num">{{ 'dashboard.sales' | t }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -151,8 +153,8 @@
             <div class="panel mix-panel">
                 <div class="panel-head">
                     <div>
-                        <h4>Payment Mix</h4>
-                        <span class="panel-sub">Share of sales by payment</span>
+                        <h4>{{ 'dashboard.paymentMix' | t }}</h4>
+                        <span class="panel-sub">{{ 'dashboard.mixSub' | t }}</span>
                     </div>
                 </div>
 
@@ -171,19 +173,19 @@
                 <ul class="legend">
                     <li>
                         <span class="swatch" [style.background]="cashColor"></span>
-                        <span class="legend-name">Cash</span>
+                        <span class="legend-name">{{ 'common.cash' | t }}</span>
                         <span class="legend-val">{{ money(mix().cash) }}</span>
                         <span class="legend-pct">{{ mix().cashPct | number: '1.0-0' }}%</span>
                     </li>
                     <li>
                         <span class="swatch" [style.background]="onlineColor"></span>
-                        <span class="legend-name">Online</span>
+                        <span class="legend-name">{{ 'common.online' | t }}</span>
                         <span class="legend-val">{{ money(mix().online) }}</span>
                         <span class="legend-pct">{{ mix().onlinePct | number: '1.0-0' }}%</span>
                     </li>
                 </ul>
                 } @else {
-                <p class="panel-empty">No sales in this period</p>
+                <p class="panel-empty">{{ 'dashboard.noSales' | t }}</p>
                 }
             </div>
         </div>
@@ -194,19 +196,19 @@
             <!-- Recent orders -->
             <div class="panel orders-panel">
                 <div class="panel-head">
-                    <h4>Recent Orders</h4>
-                    <a class="view-all" routerLink="/sales">View all</a>
+                    <h4>{{ 'dashboard.recentOrders' | t }}</h4>
+                    <a class="view-all" routerLink="/sales">{{ 'dashboard.viewAll' | t }}</a>
                 </div>
                 @if (data()!.recent_orders.length) {
                 <div class="table-wrap">
                     <table class="orders-table">
                         <thead>
                             <tr>
-                                <th>Invoice</th>
-                                <th>Customer</th>
-                                <th class="num">Items</th>
-                                <th class="num">Total</th>
-                                <th>Status</th>
+                                <th>{{ 'common.invoice' | t }}</th>
+                                <th>{{ 'common.customer' | t }}</th>
+                                <th class="num">{{ 'common.items' | t }}</th>
+                                <th class="num">{{ 'common.total' | t }}</th>
+                                <th>{{ 'common.status' | t }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -223,7 +225,7 @@
                     </table>
                 </div>
                 } @else {
-                <p class="panel-empty">No orders in this period</p>
+                <p class="panel-empty">{{ 'dashboard.noOrders' | t }}</p>
                 }
             </div>
 
@@ -231,8 +233,8 @@
             <div class="panel products-panel">
                 <div class="panel-head">
                     <div>
-                        <h4>Top Products</h4>
-                        <span class="panel-sub">By sales in this period</span>
+                        <h4>{{ 'dashboard.topProducts' | t }}</h4>
+                        <span class="panel-sub">{{ 'dashboard.bySales' | t }}</span>
                     </div>
                 </div>
                 @if (topProducts().length) {
@@ -248,13 +250,13 @@
                             <div class="product-track">
                                 <div class="product-fill" [style.width.%]="p.pct"></div>
                             </div>
-                            <span class="product-sold">{{ p.quantity }} sold</span>
+                            <span class="product-sold">{{ p.quantity }} {{ 'dashboard.sold' | t }}</span>
                         </div>
                     </li>
                     }
                 </ul>
                 } @else {
-                <p class="panel-empty">No products sold in this period</p>
+                <p class="panel-empty">{{ 'dashboard.noProducts' | t }}</p>
                 }
             </div>
         </div>
@@ -263,10 +265,10 @@
         <div class="panel stock-panel">
             <div class="panel-head">
                 <div>
-                    <h4>Low Stock</h4>
-                    <span class="panel-sub">Active products with 5 or fewer left, right now</span>
+                    <h4>{{ 'dashboard.lowStock' | t }}</h4>
+                    <span class="panel-sub">{{ 'dashboard.lowStockSub' | t }}</span>
                 </div>
-                <a class="view-all" routerLink="/product">Products</a>
+                <a class="view-all" routerLink="/product">{{ 'common.products' | t }}</a>
             </div>
             @if (data()!.low_stock.length) {
             <div class="stock-grid">
@@ -275,19 +277,19 @@
                     <div class="stock-info">
                         <p class="product-name" [title]="s.name">{{ s.name }}</p>
                         <span class="product-sold">
-                            {{ s.sku }}@if (s.min_stock > 0) { · reorder at {{ s.min_stock }} }
+                            {{ s.sku }}@if (s.min_stock > 0) { · {{ 'dashboard.reorderAt' | t }} {{ s.min_stock }} }
                         </span>
                     </div>
                     <!-- status carries a text label, never colour alone -->
                     <span class="stock-badge" [class.out]="s.quantity === 0">
                         <i class="pi" [ngClass]="s.quantity === 0 ? 'pi-times-circle' : 'pi-exclamation-triangle'"></i>
-                        {{ s.quantity === 0 ? 'Out of stock' : s.quantity + ' left' }}
+                        {{ s.quantity === 0 ? ('dashboard.outOfStock' | t) : s.quantity + ' ' + ('dashboard.left' | t) }}
                     </span>
                 </div>
                 }
             </div>
             } @else {
-            <p class="panel-empty ok"><i class="pi pi-check-circle"></i> Every product is well stocked</p>
+            <p class="panel-empty ok"><i class="pi pi-check-circle"></i> {{ 'dashboard.wellStocked' | t }}</p>
             }
         </div>
     </div>

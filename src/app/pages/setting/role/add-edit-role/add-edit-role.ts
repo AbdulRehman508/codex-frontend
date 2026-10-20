@@ -1,4 +1,5 @@
 
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule, FormGroup } from '@angular/forms';
 import { commonIcons } from '../../../../core/icon-images/common-icon';
@@ -10,13 +11,13 @@ import { MessageService } from 'primeng/api';
 import { RoleApiService } from '../role.api';
 import { CreateRoleDto } from '../role.model';
 import { OfficeApiService } from '../../../user-management/office/office.api';
-import { OfficeListRow } from '../../../user-management/office/office.model';
+import { OfficePick } from '../../../user-management/office/office.model';
 import { TokenService } from '../../../../core/services/token.service';
 import { OfficeContextService } from '../../../../core/services/office-context.service';
 
 @Component({
   selector: 'app-add-edit-role',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, TranslatePipe],
   templateUrl: './add-edit-role.html',
   styleUrl: './add-edit-role.scss',
 })
@@ -34,10 +35,11 @@ export class AddEditRole {
   commonIcon = commonIcons;
   submitted = false;
   saving = signal(false);
-  pageTitle = 'Add Role';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'role.addTitle';
   roleId: number | null = null;
 
-  officeList = signal<OfficeListRow[]>([]);
+  officeList = signal<OfficePick[]>([]);
 
   // server-side field errors: { field: ['msg', ...] }
   serverErrors = signal<Record<string, string[]>>({});
@@ -54,7 +56,7 @@ export class AddEditRole {
     this._activeRoute.params.subscribe((params) => {
       const id = params['id'];
       this.roleId = id ? Number(id) : null;
-      this.pageTitle = this.roleId ? 'Edit Role' : 'Add Role';
+      this.pageTitle = this.roleId ? 'role.editTitle' : 'role.addTitle';
       if (this.roleId) {
         this.loadRole(this.roleId);
       } else {
@@ -65,8 +67,8 @@ export class AddEditRole {
   }
 
   private loadOffices() {
-    this.officeApi.listOffices({ limit: 1000, sort: 'office_name', order: 'asc' }).subscribe({
-      next: (res) => this.officeList.set(this.token.filterOfficesForUser(res.data)),
+    this.officeApi.listMyOffices().subscribe({
+      next: (offices) => this.officeList.set(offices),
       error: (err) => this.toast.add({ severity: 'error', summary: 'Error', detail: err?.error?.message ?? 'Failed to load offices' }),
     });
   }

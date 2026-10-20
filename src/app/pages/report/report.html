@@ -2,28 +2,28 @@
 
     <div class="rep-head">
         <div>
-            <h2>Reports</h2>
-            <p>Sales, margin, stock, receivables and payables for the selected office.</p>
+            <h2>{{ 'report.title' | t }}</h2>
+            <p>{{ 'report.subtitle' | t }}</p>
         </div>
         <div class="rep-actions">
             <button type="button" class="_outline-btn" routerLink="/report/day-close">
-                <i class="pi pi-calculator"></i> Day Close
+                <i class="pi pi-calculator"></i> {{ 'report.dayClose' | t }}
             </button>
             <button type="button" class="_outline-btn" [disabled]="busy() || !hasOffice()" (click)="exportCsv()">
-                <i class="pi pi-download"></i> Export CSV
+                <i class="pi pi-download"></i> {{ 'common.export' | t }}
             </button>
             <button type="button" class="_primary-btn" [disabled]="busy() || !hasOffice()" (click)="print()">
-                <i class="pi pi-print"></i> Print
+                <i class="pi pi-print"></i> {{ 'common.print' | t }}
             </button>
         </div>
     </div>
 
     <!-- which report -->
     <div class="rep-tabs" role="tablist">
-        @for (t of tabs; track t.key) {
-        <button type="button" class="rep-tab" role="tab" [class.active]="tab().key === t.key"
-            [attr.aria-selected]="tab().key === t.key" (click)="selectTab(t)">
-            <i [class]="t.icon"></i> {{ t.label }}
+        @for (item of tabs; track item.key) {
+        <button type="button" class="rep-tab" role="tab" [class.active]="tab().key === item.key"
+            [attr.aria-selected]="tab().key === item.key" (click)="selectTab(item)">
+            <i [class]="item.icon"></i> {{ item.label | t }}
         </button>
         }
     </div>
@@ -32,14 +32,14 @@
     <div class="rep-filters">
         @if (tab().periodic) {
         <div class="rep-field date-range">
-            <label>Date Range</label>
+            <label>{{ 'common.dateRange' | t }}</label>
             <p-datepicker [(ngModel)]="dateRange" name="rep-range" selectionMode="range" dateFormat="dd-mm-yy"
-                placeholder="All time" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
+                [placeholder]="'report.allTime' | t" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
                 appendTo="body" (onSelect)="onDateRangeChange()" (onClear)="onDateRangeChange()">
             </p-datepicker>
         </div>
         <div class="rep-presets">
-            <button type="button" (click)="setPreset(1)">Today</button>
+            <button type="button" (click)="setPreset(1)">{{ 'dashboard.today' | t }}</button>
             <button type="button" (click)="setPreset(7)">7d</button>
             <button type="button" (click)="setPreset(30)">30d</button>
             <button type="button" (click)="setPreset(90)">90d</button>
@@ -47,7 +47,7 @@
         }
 
         <div class="rep-field">
-            <label>Search</label>
+            <label>{{ 'common.search' | t }}</label>
             <div class="position-relative">
                 <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="rep-search"
                     class="_input-icon custom-placeholder"
@@ -63,45 +63,45 @@
 
         @if (tab().key === 'sales') {
         <div class="rep-field">
-            <label>Status</label>
+            <label>{{ 'common.status' | t }}</label>
             <ng-select [(ngModel)]="statusFilter" [items]="statusList" placeholder="All"
                 (change)="onFilterChange()"></ng-select>
         </div>
         <div class="rep-field">
-            <label>Payment</label>
+            <label>{{ 'common.payment' | t }}</label>
             <ng-select [(ngModel)]="paymentFilter" [items]="paymentList" bindLabel="label" bindValue="value"
                 placeholder="All" (change)="onFilterChange()"></ng-select>
         </div>
         <label class="rep-check">
             <input type="checkbox" class="form-check-input" [(ngModel)]="borrowOnly" (change)="onFilterChange()" />
-            <span>Credit bills only</span>
+            <span>{{ 'report.creditOnly' | t }}</span>
         </label>
         }
 
         @if (tab().key === 'stock') {
         <label class="rep-check">
             <input type="checkbox" class="form-check-input" [(ngModel)]="lowOnly" (change)="onFilterChange()" />
-            <span>Low stock only</span>
+            <span>{{ 'report.lowStockOnly' | t }}</span>
         </label>
         }
 
         @if (tab().key === 'expiry') {
         <div class="rep-field">
-            <label>Expiring within (days)</label>
+            <label>{{ 'report.expiringWithin' | t }}</label>
             <input type="number" min="0" max="365" [(ngModel)]="withinDays" name="within-days"
                 (change)="onFilterChange()" class="rep-num" />
         </div>
         <label class="rep-check">
             <input type="checkbox" class="form-check-input" [(ngModel)]="expiredOnly" (change)="onFilterChange()" />
-            <span>Already expired only</span>
+            <span>{{ 'report.expiredOnly' | t }}</span>
         </label>
         }
 
-        <button type="button" class="_outline-btn rep-reset" (click)="clearFilters()">Reset</button>
+        <button type="button" class="_outline-btn rep-reset" (click)="clearFilters()">{{ 'common.reset' | t }}</button>
     </div>
 
     @if (!tab().periodic) {
-    <p class="rep-note"><i class="pi pi-info-circle"></i> Stock is a snapshot of right now, so a date range does not apply.</p>
+    <p class="rep-note"><i class="pi pi-info-circle"></i> {{ 'report.stockSnapshot' | t }}</p>
     }
     @if (tab().note) {
     <p class="rep-note"><i class="pi pi-info-circle"></i> {{ tab().note }}</p>
@@ -110,7 +110,7 @@
     @if (!hasOffice()) {
     <div class="panel rep-empty">
         <i class="pi pi-building"></i>
-        <p>Pick an office from the "Select Office" dropdown in the top bar.</p>
+        <p>{{ 'common.pickOfficeFirst' | t }}</p>
     </div>
     } @else {
     <div class="rep-body" [class.refetching]="loading()">
@@ -119,7 +119,7 @@
         <div class="tile-grid">
             @for (tile of tab().tiles; track tile.key) {
             <div class="tile" [ngClass]="tile.tone ?? ''">
-                <p class="tile-label">{{ tile.label }}</p>
+                <p class="tile-label">{{ tile.label | t }}</p>
                 <p class="tile-value">{{ tileValue(tile) }}</p>
             </div>
             }
@@ -132,7 +132,7 @@
                         <tr>
                             @for (col of tab().columns; track col.key) {
                             <th [class.num]="col.right" [class.cursor-pointer]="col.sort" (click)="changeSort(col)">
-                                {{ col.label }}
+                                {{ col.label | t }}
                                 @if (col.sort) {
                                 <i class="pi"
                                     [ngClass]="sort() === col.sort ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
@@ -143,9 +143,9 @@
                     </thead>
                     <tbody>
                         @if (loading() && !rows().length) {
-                        <tr><td [attr.colspan]="tab().columns.length" class="empty">Loading...</td></tr>
+                        <tr><td [attr.colspan]="tab().columns.length" class="empty">{{ 'common.loading' | t }}</td></tr>
                         } @else if (!rows().length) {
-                        <tr><td [attr.colspan]="tab().columns.length" class="empty">No rows for these filters.</td></tr>
+                        <tr><td [attr.colspan]="tab().columns.length" class="empty">{{ 'report.noRows' | t }}</td></tr>
                         } @else {
                         @for (row of rows(); track $index) {
                         <tr>
@@ -169,11 +169,11 @@
 
             @if (total() > 0) {
             <div class="d-flex align-items-center justify-content-between mt-3">
-                <span class="f-14">{{ total() }} row(s) · {{ periodLabel() }}</span>
+                <span class="f-14">{{ total() }} {{ 'common.rows' | t }} · {{ periodLabel() }}</span>
                 <div class="d-flex align-items-center gap-2">
-                    <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
-                    <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
-                    <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+                    <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">{{ 'common.prev' | t }}</button>
+                    <span class="f-14">{{ 'common.page' | t }} {{ page() }} / {{ totalPages() }}</span>
+                    <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">{{ 'common.next' | t }}</button>
                 </div>
             </div>
             }
@@ -186,13 +186,13 @@
 @if (printRows().length) {
 <div id="printArea" class="rep-print">
     <div class="rep-print-head">
-        <h1>{{ tab().label }} Report</h1>
-        <p>{{ periodLabel() }} · printed {{ printedAt() | date: 'dd MMM yyyy HH:mm' }}</p>
+        <h1>{{ tab().label | t }} {{ 'report.reportWord' | t }}</h1>
+        <p>{{ periodLabel() }} · {{ 'report.printedLabel' | t }} {{ printedAt() | date: 'dd MMM yyyy HH:mm' }}</p>
     </div>
 
     <div class="rep-print-summary">
         @for (tile of tab().tiles; track tile.key) {
-        <div><span>{{ tile.label }}</span><strong>{{ tileValue(tile) }}</strong></div>
+        <div><span>{{ tile.label | t }}</span><strong>{{ tileValue(tile) }}</strong></div>
         }
     </div>
 
@@ -200,7 +200,7 @@
         <thead>
             <tr>
                 @for (col of tab().columns; track col.key) {
-                <th [class.num]="col.right">{{ col.label }}</th>
+                <th [class.num]="col.right">{{ col.label | t }}</th>
                 }
             </tr>
         </thead>
@@ -215,6 +215,6 @@
         </tbody>
     </table>
 
-    <p class="rep-print-foot">{{ printRows().length }} row(s)</p>
+    <p class="rep-print-foot">{{ printRows().length }} {{ 'common.rows' | t }}</p>
 </div>
 }

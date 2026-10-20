@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import {
@@ -33,7 +34,7 @@ import {
 
 @Component({
   selector: 'app-add-edit-product',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, TranslatePipe],
   templateUrl: './add-edit-product.html',
   styleUrl: './add-edit-product.scss',
 })
@@ -50,7 +51,8 @@ export class AddEditProduct {
   productForm: FormGroup = new FormGroup({});
   submitted = false;
   saving = signal(false);
-  pageTitle = 'Add Product';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'product.addTitle';
   productId: string | null = null;
   statusList: ProductStatus[] = ['active', 'inactive'];
   unitList: ProductUnit[] = PRODUCT_UNITS;
@@ -93,7 +95,7 @@ export class AddEditProduct {
 
     this._activeRoute.params.subscribe((params) => {
       this.productId = params['id'] ?? null;
-      this.pageTitle = this.productId ? 'Edit Product' : 'Add Product';
+      this.pageTitle = this.productId ? 'product.editTitle' : 'product.addTitle';
       if (this.productId) {
         this.loadProduct(this.productId);
       }

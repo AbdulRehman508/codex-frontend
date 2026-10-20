@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +14,7 @@ import { DayClose } from './day-close.model';
 
 @Component({
   selector: 'app-day-close',
-  imports: [CommonModule, FormsModule, RouterModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, RouterModule, DatePickerModule, TranslatePipe],
   templateUrl: './day-close.html',
   styleUrl: './day-close.scss',
 })

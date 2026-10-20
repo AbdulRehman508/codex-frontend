@@ -1,3 +1,4 @@
+import { TranslatePipe } from '../../../../core/i18n/translate.pipe';
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import {
@@ -19,7 +20,7 @@ import { CreateCustomerDto, CustomerStatus } from '../customer.model';
 
 @Component({
   selector: 'app-add-edit-customer',
-  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, NgSelectModule, TranslatePipe],
   templateUrl: './add-edit-customer.html',
   styleUrl: './add-edit-customer.scss',
 })
@@ -35,7 +36,8 @@ export class AddEditCustomer {
   commonIcon = commonIcons;
   submitted = false;
   saving = signal(false);
-  pageTitle = 'Add Customer';
+  /** translation key; the template pipes it through `t` */
+  pageTitle = 'customer.addTitle';
   customerId: string | null = null;
   statusList: CustomerStatus[] = ['active', 'inactive'];
 
@@ -85,7 +87,7 @@ export class AddEditCustomer {
 
     this._activeRoute.params.subscribe((params) => {
       this.customerId = params['id'] ?? null;
-      this.pageTitle = this.customerId ? 'Edit Customer' : 'Add Customer';
+      this.pageTitle = this.customerId ? 'customer.editTitle' : 'customer.addTitle';
       if (this.customerId) {
         this.loadCustomer(this.customerId);
       }

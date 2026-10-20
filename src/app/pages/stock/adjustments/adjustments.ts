@@ -1,3 +1,5 @@
+import { TranslatePipe } from '../../../core/i18n/translate.pipe';
+import { TranslationService } from '../../../core/i18n/translation.service';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -38,12 +40,14 @@ interface StockStat {
 
 @Component({
   selector: 'app-stock-adjustments',
-  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule],
+  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule, TranslatePipe],
   templateUrl: './adjustments.html',
   styleUrl: './adjustments.scss',
 })
 export class StockAdjustments {
   private api = inject(StockApiService);
+  // option labels are built here, so they follow the language switch
+  private i18n = inject(TranslationService);
   private productApi = inject(ProductApiService);
   private ctx = inject(OfficeContextService);
   private toast = inject(MessageService);
@@ -118,20 +122,20 @@ export class StockAdjustments {
   private dateFrom = '';
   private dateTo = '';
 
-  typeList: { label: string; value: AdjustmentType }[] = [
-    { label: 'Stock In', value: 'increase' },
-    { label: 'Stock Out', value: 'decrease' },
-    { label: 'Recount', value: 'recount' },
-  ];
-  reasonList: { label: string; value: AdjustmentReason }[] = [
-    { label: 'Damaged', value: 'damaged' },
-    { label: 'Lost / Stolen', value: 'lost' },
-    { label: 'Expired', value: 'expired' },
-    { label: 'Found', value: 'found' },
-    { label: 'Customer Return', value: 'return' },
-    { label: 'Correction', value: 'correction' },
-    { label: 'Other', value: 'other' },
-  ];
+  typeList = computed(() => [
+    { label: this.i18n.t('stock.in'), value: 'increase' },
+    { label: this.i18n.t('stock.out'), value: 'decrease' },
+    { label: this.i18n.t('stock.recount'), value: 'recount' },
+  ]);
+  reasonList = computed(() => [
+    { label: this.i18n.t('stock.damaged'), value: 'damaged' },
+    { label: this.i18n.t('stock.lost'), value: 'lost' },
+    { label: this.i18n.t('stock.expired'), value: 'expired' },
+    { label: this.i18n.t('stock.found'), value: 'found' },
+    { label: this.i18n.t('stock.return'), value: 'return' },
+    { label: this.i18n.t('stock.correction'), value: 'correction' },
+    { label: this.i18n.t('stock.other'), value: 'other' },
+  ]);
 
   sort = signal<AdjustmentListQuery['sort']>('created_at');
   order = signal<'asc' | 'desc'>('desc');
@@ -155,11 +159,11 @@ export class StockAdjustments {
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
 
   stats = computed<StockStat[]>(() => [
-    { label: 'Entries', value: String(this.statEntries()), icon: 'pi pi-list', tone: 'primary' },
-    { label: 'Units In', value: units(this.statIn()), icon: 'pi pi-arrow-up', tone: 'green' },
-    { label: 'Units Out', value: units(this.statOut()), icon: 'pi pi-arrow-down', tone: 'danger' },
+    { label: this.i18n.t('stock.entries'), value: String(this.statEntries()), icon: 'pi pi-list', tone: 'primary' },
+    { label: this.i18n.t('stock.unitsIn'), value: units(this.statIn()), icon: 'pi pi-arrow-up', tone: 'green' },
+    { label: this.i18n.t('stock.unitsOut'), value: units(this.statOut()), icon: 'pi pi-arrow-down', tone: 'danger' },
     {
-      label: 'Net Change',
+      label: this.i18n.t('stock.netChange'),
       value: `${this.statNet() > 0 ? '+' : ''}${units(this.statNet())}`,
       icon: 'pi pi-sync',
       tone: 'info',
@@ -297,11 +301,11 @@ export class StockAdjustments {
   }
 
   reasonLabel(value: string): string {
-    return this.reasonList.find((r) => r.value === value)?.label ?? value;
+    return this.reasonList().find((r) => r.value === value)?.label ?? value;
   }
 
   typeLabel(value: string): string {
-    return this.typeList.find((t) => t.value === value)?.label ?? value;
+    return this.typeList().find((t) => t.value === value)?.label ?? value;
   }
 
   // ---------- dialog ----------

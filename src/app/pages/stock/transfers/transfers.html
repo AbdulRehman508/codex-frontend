@@ -2,10 +2,10 @@
 
     <div class="filter-bar">
         <div class="filter-field">
-            <label>Search</label>
+            <label>{{ 'common.search' | t }}</label>
             <div class="position-relative">
                 <input type="text" [(ngModel)]="searchTerm" (input)="filterRecord()" name="transfer-search"
-                    class="_input-icon custom-placeholder" placeholder="Search bill / branch / product" />
+                    class="_input-icon custom-placeholder" [placeholder]="'stock.searchTransfers' | t" />
                 <i class="pi pi-search _search-icon f-14"></i>
                 @if (searchTerm) {
                 <i class="pi pi-times _cross-icon f-14" (click)="searchTerm = ''; filterRecord()"></i>
@@ -13,28 +13,28 @@
             </div>
         </div>
         <div class="filter-field date-range">
-            <label>Date Range</label>
+            <label>{{ 'common.dateRange' | t }}</label>
             <p-datepicker [(ngModel)]="dateRange" name="date-range" selectionMode="range" dateFormat="dd-mm-yy"
-                placeholder="Select date range" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
+                [placeholder]="'common.selectDateRange' | t" [readonlyInput]="true" [showButtonBar]="true" [maxDate]="today"
                 appendTo="body" (onSelect)="onDateRangeChange()" (onClear)="onDateRangeChange()">
             </p-datepicker>
         </div>
         <div class="filter-field">
-            <label>Direction</label>
-            <ng-select [(ngModel)]="directionFilter" [items]="directionList" bindLabel="label" bindValue="value"
+            <label>{{ 'stock.direction' | t }}</label>
+            <ng-select [(ngModel)]="directionFilter" [items]="directionList()" bindLabel="label" bindValue="value"
                 placeholder="Sent and received" (change)="onFilterChange()"></ng-select>
         </div>
         <label class="filter-toggle" title="Show transfers that were sent back">
             <input type="checkbox" class="form-check-input" [(ngModel)]="includeReversed" (change)="onFilterChange()" />
-            <span>Include reversed</span>
+            <span>{{ 'stock.includeReversed' | t }}</span>
         </label>
-        <button class="_outline-btn filter-reset" (click)="clearSearch()">Reset</button>
+        <button class="_outline-btn filter-reset" (click)="clearSearch()">{{ 'common.reset' | t }}</button>
 
         <div class="filter-spacer"></div>
 
         @if (perm.can(module, 'create')) {
         <button class="_outline-btn" [disabled]="!hasOffice()" (click)="openDialog()"
-            [title]="hasOffice() ? 'Send stock to another branch' : 'Select an office in the header first'">Send Stock</button>
+            [title]="hasOffice() ? 'Send stock to another branch' : 'Select an office in the header first'">{{ 'stock.sendStock' | t }}</button>
         }
     </div>
 
@@ -56,27 +56,27 @@
                 <thead>
                     <tr>
                         <th class="cursor-pointer" (click)="changeSort('transfer_no')">
-                            Transfer <i class="pi" [ngClass]="sort() === 'transfer_no' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                            {{ 'stock.transfer' | t }} <i class="pi" [ngClass]="sort() === 'transfer_no' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                         </th>
                         <th class="cursor-pointer" (click)="changeSort('created_at')">
-                            Date <i class="pi" [ngClass]="sort() === 'created_at' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                            {{ 'common.date' | t }} <i class="pi" [ngClass]="sort() === 'created_at' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                         </th>
-                        <th>Direction</th>
-                        <th class="cursor-pointer" (click)="changeSort('from_office_name')">From</th>
-                        <th class="cursor-pointer" (click)="changeSort('to_office_name')">To</th>
-                        <th class="num cursor-pointer" (click)="changeSort('items_count')">Items</th>
-                        <th class="num cursor-pointer" (click)="changeSort('units')">Units</th>
-                        <th>Note</th>
-                        <th>Action</th>
+                        <th>{{ 'stock.direction' | t }}</th>
+                        <th class="cursor-pointer" (click)="changeSort('from_office_name')">{{ 'stock.from' | t }}</th>
+                        <th class="cursor-pointer" (click)="changeSort('to_office_name')">{{ 'stock.to' | t }}</th>
+                        <th class="num cursor-pointer" (click)="changeSort('items_count')">{{ 'common.items' | t }}</th>
+                        <th class="num cursor-pointer" (click)="changeSort('units')">{{ 'common.units' | t }}</th>
+                        <th>{{ 'common.note' | t }}</th>
+                        <th>{{ 'common.action' | t }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (loading()) {
-                    <tr><td colspan="9" class="empty">Loading...</td></tr>
+                    <tr><td colspan="9" class="empty">{{ 'common.loading' | t }}</td></tr>
                     } @else if (!hasOffice()) {
-                    <tr><td colspan="9" class="empty">Pick an office from the "Select Office" dropdown in the top bar.</td></tr>
+                    <tr><td colspan="9" class="empty">{{ 'common.pickOfficeFirst' | t }}</td></tr>
                     } @else if (rows().length === 0) {
-                    <tr><td colspan="9" class="empty">No stock has moved between branches yet.</td></tr>
+                    <tr><td colspan="9" class="empty">{{ 'stock.noTransfers' | t }}</td></tr>
                     } @else {
                     @for (r of rows(); track r.id) {
                     <tr [class.reversed]="r.reversed">
@@ -87,7 +87,7 @@
                                 <i class="pi" [ngClass]="rowDirection(r) === 'in' ? 'pi-arrow-down-left' : 'pi-arrow-up-right'"></i>
                                 {{ rowDirection(r) === 'in' ? 'Received' : 'Sent' }}
                             </span>
-                            @if (r.reversed) { <span class="badge reversed-tag">reversed</span> }
+                            @if (r.reversed) { <span class="badge reversed-tag">{{ 'stock.reversed' | t }}</span> }
                         </td>
                         <td>{{ r.from_office_name }}</td>
                         <td>{{ r.to_office_name }}</td>
@@ -112,11 +112,11 @@
 
         @if (!loading() && total() > 0) {
         <div class="d-flex align-items-center justify-content-between mt-3">
-            <span class="f-14">Total: {{ total() }}</span>
+            <span class="f-14">{{ 'common.total' | t }}: {{ total() }}</span>
             <div class="d-flex align-items-center gap-2">
-                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
-                <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
-                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">{{ 'common.prev' | t }}</button>
+                <span class="f-14">{{ 'common.page' | t }} {{ page() }} / {{ totalPages() }}</span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">{{ 'common.next' | t }}</button>
             </div>
         </div>
         }
@@ -129,8 +129,8 @@
 <div class="st-dialog" role="dialog" aria-label="Send stock to another branch">
     <div class="st-head">
         <div>
-            <h3>Send Stock</h3>
-            <p>Units leave this branch straight away and land in the other one.</p>
+            <h3>{{ 'stockDialog.sendTitle' | t }}</h3>
+            <p>{{ 'stockDialog.sendHint' | t }}</p>
         </div>
         <button class="st-close" (click)="closeDialog()" title="Close"><i class="pi pi-times"></i></button>
     </div>
@@ -139,15 +139,15 @@
         <div class="row">
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Send to <span class="text-danger">*</span></label>
+                    <label>{{ 'stock.sendTo' | t }} <span class="text-danger">*</span></label>
                     <ng-select [(ngModel)]="toOfficeId" [items]="destinations()" bindLabel="office_name" bindValue="id"
-                        placeholder="Select branch"></ng-select>
+                        [placeholder]="'stock.selectBranch' | t"></ng-select>
                     @if (fieldError('to_office_id')) { <small class="text-danger">{{ fieldError('to_office_id') }}</small> }
                 </div>
             </div>
             <div class="col-sm-6">
                 <div class="form-group">
-                    <label>Note</label>
+                    <label>{{ 'common.note' | t }}</label>
                     <input type="text" [(ngModel)]="note" name="st-note" placeholder="Optional" />
                 </div>
             </div>
@@ -155,26 +155,26 @@
 
         <div class="st-pick">
             <div class="st-pick-prod st-typeahead">
-                <label>Product</label>
+                <label>{{ 'common.product' | t }}</label>
                 <input #productInput type="text" [(ngModel)]="productTerm" name="st-product" autocomplete="off"
                     placeholder="Type a product name" (input)="onProductInput(productTerm)"
                     (focus)="onProductInput(productTerm)" (keydown)="onProductKeydown($event)" (blur)="onProductBlur()" />
                 @if (picked()) {
-                <span class="st-picked"><i class="pi pi-check-circle"></i> {{ picked()!.quantity }} here</span>
+                <span class="st-picked"><i class="pi pi-check-circle"></i> {{ picked()!.quantity }} {{ 'stock.hereCount' | t }}</span>
                 }
 
                 @if (suggestOpen()) {
                 <div class="st-suggest">
                     @if (searchingProduct()) {
-                    <div class="st-suggest-empty">Searching...</div>
+                    <div class="st-suggest-empty">{{ 'common.searching' | t }}</div>
                     } @else if (suggestions().length === 0) {
-                    <div class="st-suggest-empty">No matching product</div>
+                    <div class="st-suggest-empty">{{ 'pos.noMatch' | t }}</div>
                     } @else {
                     @for (p of suggestions(); track p.id; let si = $index) {
                     <div class="st-suggest-item" [class.active]="activeSuggestion() === si" (mousedown)="pickProduct(p)"
                         (mouseenter)="activeSuggestion.set(si)">
                         <span class="st-suggest-name">{{ p.name }}</span>
-                        <span class="st-suggest-meta">{{ p.quantity }} in stock</span>
+                        <span class="st-suggest-meta">{{ p.quantity }} {{ 'pos.inStock' | t }}</span>
                     </div>
                     }
                     }
@@ -182,20 +182,20 @@
                 }
             </div>
             <div class="st-pick-qty">
-                <label>Qty</label>
+                <label>{{ 'common.qty' | t }}</label>
                 <input #qtyInput type="number" min="1" [(ngModel)]="draftQty" name="st-qty"
                     (keydown)="onQtyKeydown($event)" />
             </div>
             <button type="button" class="_primary-btn st-add" (click)="addLine()">
-                <i class="pi pi-plus"></i> Add
+                <i class="pi pi-plus"></i> {{ 'pos.add' | t }}
             </button>
         </div>
 
         <div class="st-lines">
             <div class="st-lines-head">
-                <span class="col-prod">Product</span>
-                <span class="col-num">Qty</span>
-                <span class="col-have">In stock</span>
+                <span class="col-prod">{{ 'common.product' | t }}</span>
+                <span class="col-num">{{ 'common.qty' | t }}</span>
+                <span class="col-have">{{ 'common.inStock' | t }}</span>
                 <span class="col-act"></span>
             </div>
             @for (line of draft(); track line.product_id; let i = $index) {
@@ -208,10 +208,10 @@
                 <i class="pi pi-trash col-act st-line-del" (click)="removeLine(i)" title="Remove"></i>
             </div>
             @if (overStock(line)) {
-            <p class="st-line-warn">Only {{ line.available }} of "{{ line.name }}" at this branch.</p>
+            <p class="st-line-warn">{{ 'pos.only' | t }} {{ line.available }} — "{{ line.name }}" {{ 'stock.atThisBranch' | t }}</p>
             }
             } @empty {
-            <p class="st-line-empty">Nothing added yet — pick a product above.</p>
+            <p class="st-line-empty">{{ 'stockDialog.nothingAdded' | t }}</p>
             }
         </div>
 
@@ -219,9 +219,9 @@
     </div>
 
     <div class="st-foot">
-        <span class="st-total">{{ draft().length }} item(s) · {{ draftUnits() }} unit(s)</span>
+        <span class="st-total">{{ draft().length }} {{ 'stock.items' | t }} · {{ draftUnits() }} {{ 'stock.unitsWord' | t }}</span>
         <div class="d-flex gap-2">
-            <button class="_cancel-btn" (click)="closeDialog()">Cancel</button>
+            <button class="_cancel-btn" (click)="closeDialog()">{{ 'common.cancel' | t }}</button>
             <button class="_primary-btn" [disabled]="saving()" (click)="send()">
                 {{ saving() ? 'Sending...' : 'Send Stock' }}
             </button>

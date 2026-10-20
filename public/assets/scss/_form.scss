@@ -3,66 +3,105 @@
 
 
 @mixin input {
-  @extend .f-12;
   @extend ._fw-400;
   @extend .font-family;
   width: 100%;
-  height: 35px;
-  border-radius: 8px !important;
+  height: 38px;
+  font-size: 13px;
+  background-color: var(--surface);
+  border-radius: var(--r-sm) !important;
   border: solid 1px var(--borderColor);
   color: var(--black) !important;
+  transition: border-color var(--ease), box-shadow var(--ease),
+    background-color var(--ease);
 
-  x &::placeholder {
-    color: var(--black) !important;
+  &:hover:not(:disabled):not(:focus) {
+    border-color: #d4dce5;
+  }
+
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: var(--ring);
+    outline: none;
+  }
+
+  &:disabled {
+    background-color: var(--surface-2);
+    color: var(--lightDarkGray) !important;
+    cursor: not-allowed;
+  }
+
+  &::placeholder {
+    color: var(--lightDarkGray) !important;
   }
 
   &::-webkit-input-placeholder {
-    color: var(--black) !important;
+    color: var(--lightDarkGray) !important;
   }
 
   &:-moz-placeholder {
-    color: var(--black) !important;
+    color: var(--lightDarkGray) !important;
   }
 
   &::-moz-placeholder {
-    color: var(--black) !important;
+    color: var(--lightDarkGray) !important;
   }
 
   &:-ms-input-placeholder {
-    color: var(--black) !important;
+    color: var(--lightDarkGray) !important;
   }
 }
 
 ._input,
 input {
   @include input;
-  padding: 0 7px;
+  padding: 0 12px;
 }
 
 textarea {
   @include input;
-  padding: 7px;
-  min-height: 150px;
+  height: auto;
+  padding: 10px 12px;
+  min-height: 120px;
+  line-height: 1.6;
   resize: vertical;
-
-  &:focus {
-    outline: none;
-    box-shadow: none;
-  }
 }
 
-input::placeholder {
-  color: #888888;
+input::placeholder,
+textarea::placeholder {
+  color: var(--lightDarkGray);
   opacity: 1;
 }
 
-input:focus-visible {
-  outline: none !important;
+/* ---- Autofilled fields ----
+   A field the browser fills gets Chrome's own background, and `background`
+   cannot override it. The 1000px inset shadow paints over it, the long
+   transition stops Chrome fading its colour back in, and the focus rule keeps
+   the ring visible on top of the cover. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--black) !important;
+  caret-color: var(--black);
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill:focus {
+  -webkit-box-shadow: var(--ring), 0 0 0 1000px var(--surface) inset !important;
+  box-shadow: var(--ring), 0 0 0 1000px var(--surface) inset !important;
 }
 
 ._input-icon {
   @include input;
-  padding: 0px 32px;
+  // room for the search glyph on the typing side, whichever side that is
+  padding: 0 12px;
+  padding-inline-start: 34px;
 }
 
 
@@ -72,9 +111,10 @@ ng-select {
   .ng-select-container {
     color: var(--black) !important;
     background-color: var(--white) !important;
-    height: 35px !important;
-    border-radius: 8px !important;
+    min-height: 38px !important;
+    border-radius: var(--r-sm) !important;
     border: solid 1px var(--borderColor) !important;
+    transition: border-color var(--ease), box-shadow var(--ease);
     cursor: pointer !important;
     align-items: center !important;
     box-shadow: none !important;
@@ -82,14 +122,14 @@ ng-select {
     @extend .f-12;
 
     .ng-value-container {
-      padding-left: 5px !important;
+      padding-inline-start: 5px !important;
       color: var(--black) !important;
       @extend .font-family;
       @extend .f-12;
 
       .ng-placeholder {
-        color: var(--black) !important;
-        padding-left: 5px !important;
+        color: var(--lightDarkGray) !important;
+        padding-inline-start: 5px !important;
         @extend .font-family;
         @extend .f-12;
         position: relative;
@@ -100,14 +140,14 @@ ng-select {
         @extend .font-family;
         @extend .f-12;
         z-index: 6;
-        padding: 5px 10px 5px 5px !important;
+        padding: 5px 10px !important;
       }
 
       .ng-input {
         top: 0px !important;
-        left: 0 !important;
-        padding-left: 10px !important;
-        padding-right: 50px !important;
+        inset-inline-start: 0 !important;
+        padding-inline-start: 10px !important;
+        padding-inline-end: 50px !important;
         opacity: 1 !important;
         cursor: pointer !important;
       }
@@ -122,30 +162,35 @@ ng-select {
     top: 100% !important;
     padding: 10px !important;
     margin-top: 0px !important;
-    border-radius: 16px !important;
+    border-radius: var(--r-md) !important;
   }
 
   .ng-dropdown-panel-items {
     .ng-option.ng-option-marked {
       background: var(--secondary) !important;
       color: var(--primary) !important;
-      border-radius: 16px !important;
+      border-radius: var(--r-md) !important;
       @extend .font-family;
       @extend .f-12;
     }
   }
 
+  &.ng-select-focused .ng-select-container {
+    border-color: var(--primary) !important;
+    box-shadow: var(--ring) !important;
+  }
+
   .ng-dropdown-panel {
     background-color:  var(--white) !important;
-    box-shadow: 0 0 40px  var(--borderColor) !important;
+    box-shadow: var(--shadow-lg) !important;
     left: 0 !important;
     padding: 10px !important;
-    border-radius: 16px !important;
+    border-radius: var(--r-md) !important;
     border-color:  var(--borderColor) !important;
 
     .ng-dropdown-panel-items {
       .ng-option {
-        border-radius: 16px !important;
+        border-radius: var(--r-md) !important;
         margin: 4px 0 !important;
         padding: 5px 10px !important;
         @extend .f-12;
@@ -161,16 +206,116 @@ ng-select {
   }
 }
 
+/* Picking several offices uses the same control in "multiple" mode, and the
+   stock theme pads it for chips even when it is empty: an untouched box stood
+   49px tall beside a 38px single select, with the placeholder pushed to the
+   top. Flatten the padding, centre the placeholder, and let the box grow only
+   once there are chips in it. */
+ng-select.ng-select-multiple {
+  .ng-select-container {
+    height: auto !important;
+
+    .ng-value-container {
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      padding-inline-start: 5px !important;
+      align-items: center;
+      // chips wrap onto a second line with the same gap they have side by side
+      row-gap: 4px;
+
+      .ng-placeholder {
+        top: auto !important;
+        padding: 0 !important;
+        padding-inline-start: 5px !important;
+      }
+
+      // left to itself the typing field stretches to fill the row and
+      // pushes the box 2px past the single select beside it
+      // left to itself the typing field claims the whole row, so a chip and
+      // the caret stack instead of sitting side by side
+      .ng-input {
+        padding-bottom: 0 !important;
+        // the single-select rule reserves 50px on the end for the arrow; here
+        // that padding is what pushed the caret onto a line of its own
+        padding-inline-start: 4px !important;
+        padding-inline-end: 0 !important;
+        height: 24px !important;
+        align-self: center;
+        position: static !important;
+        width: auto !important;
+        // it only needs room for the caret: the chips keep the row, and it
+        // wraps to its own line only when there is genuinely no space left
+        flex: 1 1 8px !important;
+        min-width: 8px !important;
+      }
+
+      // one picked office: a soft brand pill, not the theme's blue box
+      .ng-value {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 4px 4px 0 !important;
+        padding: 3px 9px !important;
+        background: var(--primary-soft) !important;
+        color: var(--primary) !important;
+        border: 1px solid transparent;
+        border-radius: var(--r-pill) !important;
+        line-height: 1.5;
+
+        .ng-value-icon {
+          border: none !important;
+          padding: 0 !important;
+          font-size: 14px;
+          line-height: 1;
+          opacity: 0.75;
+          transition: opacity var(--ease), color var(--ease);
+
+          &:hover {
+            background: transparent !important;
+            color: var(--danger) !important;
+            opacity: 1;
+          }
+        }
+
+        .ng-value-label {
+          padding: 0 !important;
+        }
+      }
+    }
+  }
+}
+
+/* the same chip in Urdu: the margin follows the reading direction */
+[dir='rtl'] ng-select.ng-select-multiple .ng-value {
+  margin: 4px 0 4px 4px !important;
+}
+
 
 // Checkbox
 
 .form-check-input {
   width: 17px;
   height: 17px;
+  // the shared input rule pads every <input> by 12px, which a 17px box cannot
+  // absorb: the tick boxes were rendering 26px wide, as flat pills
+  padding: 0;
+  min-width: 17px;
+  flex: none;
   background-color: var(--white);
-  border-radius: 50px !important;
-  border: solid 1px var(--borderColor);
+  border-radius: var(--r-xs) !important;
+  border: solid 1px #cfd8e3;
   margin: 0;
+  cursor: pointer;
+  transition: background-color var(--ease), border-color var(--ease),
+    box-shadow var(--ease);
+}
+
+.form-check-input[type='radio'] {
+  border-radius: var(--r-pill) !important;
+}
+
+.form-check-input:focus-visible {
+  box-shadow: var(--ring);
 }
 
 .form-check-input[type=checkbox]:checked {
@@ -188,7 +333,8 @@ ng-select {
 
 ._inputError {
   border: 1px solid var(--danger) !important;
-  border-radius: 8px;
+  border-radius: var(--r-sm);
+  box-shadow: 0 0 0 3px rgba(205, 24, 24, 0.1);
 }
 
 .invalid-list {

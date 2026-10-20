@@ -1,9 +1,9 @@
-<p class="f-16 _fw-600">{{pageTitle}}</p>
+<p class="f-16 _fw-600">{{ pageTitle | t }}</p>
 
 <div class="d-flex align-items-end justify-content-end">
     <div class="d-flex gap-2">
-        <button class="_cancel-btn" (click)="closeRole()">Cancel</button>
-        <button class="_primary-btn" [disabled]="saving()" (click)="createRole()">{{ saving() ? 'Saving...' : 'Save' }}</button>
+        <button class="_cancel-btn" (click)="closeRole()">{{ 'common.cancel' | t }}</button>
+        <button class="_primary-btn" [disabled]="saving()" (click)="createRole()">{{ saving() ? ('common.saving' | t) : ('common.save' | t) }}</button>
     </div>
 </div>
 
@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="role_name">Role Name</label>
+                <label for="role_name">{{ 'role.name' | t }}</label>
                 <input type="text" id="role_name" formControlName="role_name"
                     [ngClass]="{ _inputError: (submitted && roleForm.controls['role_name'].invalid) || fieldError('role') }">
                 @if (fieldError('role')) { <small class="text-danger">{{ fieldError('role') }}</small> }
@@ -19,9 +19,9 @@
         </div>
         <div class="col-sm-4">
             <div class="form-group position-relative">
-                <label for="office_id">Office</label>
+                <label for="office_id">{{ 'form.office' | t }}</label>
                 <ng-select formControlName="office_id" [items]="officeList()" bindLabel="office_name" bindValue="id"
-                    placeholder="Select Office"
+                    [placeholder]="'common.selectOffice' | t"
                     [ngClass]="{ _inputError: (submitted && roleForm.controls['office_id'].invalid) || fieldError('office_id') }">
                 </ng-select>
                 @if (fieldError('office_id')) { <small class="text-danger">{{ fieldError('office_id') }}</small> }
@@ -29,7 +29,7 @@
         </div>
         <div class="col-sm-12">
             <div class="form-group">
-                <label for="description">Description</label>
+                <label for="description">{{ 'form.description' | t }}</label>
                 <textarea formControlName="description" cols="20" rows="5"></textarea>
             </div>
         </div>

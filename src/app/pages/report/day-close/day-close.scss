@@ -31,7 +31,7 @@
     color: var(--primary);
     text-decoration: none;
 
-    i { font-size: 11px; margin-right: 4px; }
+    i { font-size: 11px; margin-inline-end: 4px; }
     &:hover { text-decoration: underline; }
 }
 
@@ -49,7 +49,7 @@
 
 :host ::ng-deep .dc-controls p-datepicker .p-datepicker-input {
     border: 1px solid var(--borderColor);
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     padding: 7px 10px;
     font-size: 13px;
     outline: none;
@@ -60,9 +60,9 @@
 .dc-sheet {
     background: var(--white);
     border: 1px solid var(--borderColor);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 24px;
-    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+    box-shadow: var(--shadow-sm);
     transition: opacity 150ms ease;
 
     &.refetching { opacity: 0.6; }
@@ -113,7 +113,7 @@
     padding: 18px 20px;
     border: 1px solid rgba(var(--primary-rgb), 0.25);
     background: var(--secondary);
-    border-radius: 14px;
+    border-radius: var(--r-md);
 }
 
 .dc-drawer-main {
@@ -166,7 +166,7 @@
 
 .dc-block {
     border: 1px solid var(--borderColor);
-    border-radius: 12px;
+    border-radius: var(--r-md);
     padding: 14px 16px;
 
     h4 {

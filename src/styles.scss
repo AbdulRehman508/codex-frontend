@@ -62,3 +62,99 @@
         width: 68mm;
     }
 }
+
+/* ---- Urdu / right-to-left ----
+   The language switch sets dir="rtl" and .lang-ur on <html>. Layout mirrors
+   itself from the dir attribute; these rules cover the places where the app
+   pins a side explicitly, and the few that must never flip. */
+
+.lang-ur {
+    body,
+    .p-component,
+    .ng-select,
+    input,
+    textarea,
+    button,
+    select {
+        font-family: 'Noto Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+    }
+
+    // Urdu glyphs sit lower and need a little more room than Latin
+    body {
+        line-height: 1.75;
+    }
+
+    th,
+    td,
+    label,
+    .form-group label {
+        letter-spacing: 0;
+    }
+}
+
+[dir='rtl'] {
+    // Tables carry both scripts at once: an Urdu product name beside a date,
+    // a bill number and an amount.  lets each cell follow its own
+    // first strong character, so "2026-10-13 11:20" stays in that order
+    // instead of being reordered into "11:20 2026-10-13".
+    th,
+    td {
+        text-align: right;
+        unicode-bidi: plaintext;
+    }
+
+    th.num,
+    td.num,
+    td.amount,
+    .col-total,
+    .col-have {
+        text-align: left;
+    }
+
+    .form-group label,
+    .filter-field label,
+    .rep-field label {
+        text-align: right;
+    }
+
+    // icons that mean "forward"/"back" point the other way in RTL
+    .pi-chevron-right,
+    .pi-chevron-left,
+    .pi-arrow-right,
+    .pi-arrow-left,
+    .pi-arrow-up-right,
+    .pi-arrow-down-left {
+        transform: scaleX(-1);
+    }
+
+}
+
+/* Money, counts, dates and codes stay left-to-right even in an RTL page:
+   "1,250.00" must never render as "00.052,1". */
+[dir='rtl'] .amount,
+[dir='rtl'] .num,
+[dir='rtl'] .stat-value,
+[dir='rtl'] .tile-value,
+[dir='rtl'] .dc-drawer-main strong,
+[dir='rtl'] .invoice,
+[dir='rtl'] .bill-no,
+[dir='rtl'] .transfer-no,
+[dir='rtl'] input[type='number'],
+[dir='rtl'] input[type='date'],
+[dir='rtl'] .pos-receipt {
+    direction: ltr;
+    unicode-bidi: isolate;
+    // the digits run left-to-right inside, but the block still hangs off the
+    // right edge like the Urdu text above it
+    text-align: right;
+}
+
+/* The printed receipt is a fixed 80mm slip: it always prints LTR, whatever
+   the screen language is, because the thermal printer column layout depends
+   on it. */
+@media print {
+    #printArea,
+    #labelSheet {
+        direction: ltr;
+    }
+}

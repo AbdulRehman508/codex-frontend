@@ -7,7 +7,7 @@ small.text-muted {
 
 .preview-box {
     border: 1px solid #e5e7eb;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     padding: 12px 16px;
     background: #fafafa;
 }

@@ -13,15 +13,17 @@ export class TokenService {
     constructor(
     ) { }
 
-    setToken(token: string) {
-        localStorage.setItem('token', token);
+    /**
+     * The session token is an httpOnly cookie set by the API — script here
+     * cannot read it, which is the point. What is left in localStorage is the
+     * user object the UI renders from, which carries nothing secret.
+     */
+    isSignedIn(): boolean {
+        return !!this.getUser();
     }
 
-    getToken() {
-        return localStorage.getItem('token');
-    }
-
-    removeToken() {
+    /** Drop anything an older build left behind in localStorage. */
+    private removeLegacyToken() {
         localStorage.removeItem('token');
     }
 
@@ -40,7 +42,7 @@ export class TokenService {
 
     /** Clear the whole session (token + user). */
     clearSession() {
-        this.removeToken();
+        this.removeLegacyToken();
         this.removeUser();
     }
 

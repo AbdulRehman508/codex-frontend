@@ -63,8 +63,14 @@ export const appConfig: ApplicationConfig = {
     providePrimeNG({
       ripple: true,
       theme: {
-        preset: CodexPreset
-      }
+        preset: CodexPreset,
+        options: {
+          // PrimeNG follows the OS colour scheme by default, so on a machine
+          // set to dark the datepicker, dropdowns and dialogs went black while
+          // the rest of the app stayed white. The app has one theme; say so.
+          darkModeSelector: false,
+        },
+      },
     })
   ]
 };

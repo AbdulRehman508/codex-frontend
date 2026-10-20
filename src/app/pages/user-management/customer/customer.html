@@ -1,15 +1,15 @@
 <div class="top-box">
-    <button class="_outline-btn" (click)="clearSearch()">Reset</button>
+    <button class="_outline-btn" (click)="clearSearch()">{{ 'common.reset' | t }}</button>
     <div class="position-relative">
         <input type="text" [(ngModel)]="searchByKeyword" (input)="filterRecord()" name="customer-search"
-            class="_input-icon w-200 custom-placeholder" placeholder="Search name / mobile" />
+            class="_input-icon w-200 custom-placeholder" [placeholder]="'customer.searchPlaceholder' | t" />
         <i class="pi pi-search _search-icon f-14"></i>
         @if (searchByKeyword) {
         <i class="pi pi-times _cross-icon f-14" (click)="searchByKeyword = ''; filterRecord()"></i>
         }
     </div>
     <div class="position-relative w-200">
-        <ng-select [(ngModel)]="searchByStatus" [items]="statusList" placeholder="Select Status"
+        <ng-select [(ngModel)]="searchByStatus" [items]="statusList" [placeholder]="'form.selectStatus' | t"
             (change)="onStatusFilterChange()">
         </ng-select>
     </div>
@@ -20,7 +20,7 @@
     }
     @if (perm.can(module, 'create')) {
     <button class="_outline-btn" [disabled]="!hasOffice()" [routerLink]="['/user-management/customer/add']"
-        [title]="hasOffice() ? 'Add a customer' : 'Select an office in the header first'">Add New</button>
+        [title]="hasOffice() ? ('customer.addOne' | t) : ('common.pickOfficeHeader' | t)">{{ 'common.addNew' | t }}</button>
     }
 </div>
 
@@ -35,28 +35,28 @@
                             (change)="checkAll()">
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('first_name')">
-                        Full Name <i class="pi" [ngClass]="sort() === 'first_name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'customer.fullName' | t }} <i class="pi" [ngClass]="sort() === 'first_name' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('customer_status')">
-                        Status <i class="pi" [ngClass]="sort() === 'customer_status' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'common.status' | t }} <i class="pi" [ngClass]="sort() === 'customer_status' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('mobile_no')">
-                        Mobile No <i class="pi" [ngClass]="sort() === 'mobile_no' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'common.mobile' | t }} <i class="pi" [ngClass]="sort() === 'mobile_no' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
                     <th scope="col" class="cursor-pointer" (click)="changeSort('email')">
-                        Email <i class="pi" [ngClass]="sort() === 'email' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
+                        {{ 'common.email' | t }} <i class="pi" [ngClass]="sort() === 'email' ? (order() === 'asc' ? 'pi-sort-up' : 'pi-sort-down') : 'pi-sort'"></i>
                     </th>
-                    <th scope="col">Borrow</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">{{ 'common.borrow' | t }}</th>
+                    <th scope="col">{{ 'common.action' | t }}</th>
                 </tr>
             </thead>
             <tbody>
                 @if (loading()) {
-                <tr><td colspan="7"><p>Loading...</p></td></tr>
+                <tr><td colspan="7"><p>{{ 'common.loading' | t }}</p></td></tr>
                 } @else if (!hasOffice()) {
-                <tr><td colspan="7"><p>Pick an office from the "Select Office" dropdown in the top bar.</p></td></tr>
+                <tr><td colspan="7"><p>{{ 'common.pickOfficeFirst' | t }}</p></td></tr>
                 } @else if (rows().length === 0) {
-                <tr><td colspan="7"><p>Record not available</p></td></tr>
+                <tr><td colspan="7"><p>{{ 'common.noRecords' | t }}</p></td></tr>
                 } @else {
                 @for (row of rows(); track row.id) {
                 <tr>
@@ -102,11 +102,11 @@
 
     @if (!loading() && total() > 0) {
     <div class="d-flex align-items-center justify-content-between mt-3">
-        <span class="f-14">Total: {{ total() }}</span>
+        <span class="f-14">{{ 'common.total' | t }}: {{ total() }}</span>
         <div class="d-flex align-items-center gap-2">
-            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">Prev</button>
-            <span class="f-14">Page {{ page() }} / {{ totalPages() }}</span>
-            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">Next</button>
+            <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">{{ 'common.prev' | t }}</button>
+            <span class="f-14">{{ 'common.page' | t }} {{ page() }} / {{ totalPages() }}</span>
+            <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">{{ 'common.next' | t }}</button>
         </div>
     </div>
     }

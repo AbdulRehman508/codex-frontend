@@ -1,7 +1,7 @@
 .password-icon {
     position: absolute;
     top: 32px;
-    right: 15px;
+    inset-inline-end: 15px;
     cursor: pointer;
 }
 
@@ -29,7 +29,7 @@
 
 .strength-bar {
     height: 8px;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     margin-top: 5px;
 }
 
@@ -54,7 +54,7 @@
 .password-icon {
     position: absolute;
     top: 36px;
-    right: 12px;
+    inset-inline-end: 12px;
     cursor: pointer;
     font-size: 12px;
 }
@@ -130,7 +130,7 @@
 .avatar-remove {
     position: absolute;
     top: -2px;
-    left: 86px;
+    inset-inline-start: 86px;
     width: 26px;
     height: 26px;
     border-radius: 50%;
@@ -171,7 +171,7 @@
     .ng-select {
         .ng-select-container {
             min-height: 35px;
-            border-radius: 8px;
+            border-radius: var(--r-sm);
             border: 1px solid var(--borderColor);
             background: var(--white);
             color: var(--black);
@@ -234,7 +234,7 @@
                 justify-content: center;
                 width: 16px;
                 height: 16px;
-                margin-left: 4px;
+                margin-inline-start: 4px;
                 border-radius: 50%;
                 font-size: 13px;
                 line-height: 1;
@@ -252,7 +252,7 @@
 
     // dropdown options
     .ng-dropdown-panel {
-        border-radius: 8px;
+        border-radius: var(--r-sm);
         border: 1px solid var(--borderColor);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
         overflow: hidden;
@@ -273,4 +273,75 @@
             }
         }
     }
+}
+
+/* ---- Office picker ----
+   Every branch on screen as a tick box. They wrap, so three offices sit on one
+   line and a dozen flow onto the next without the field growing taller than
+   the form. */
+.office-picks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 38px;
+    padding: 4px;
+    border: 1px solid var(--borderColor);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    max-height: 104px;
+    overflow-y: auto;
+
+    &.invalid {
+        border-color: var(--danger);
+    }
+}
+
+.office-pick {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 5px 10px;
+    border: 1px solid var(--borderColor);
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    font-size: 12px;
+    color: var(--fullGray);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color var(--ease), border-color var(--ease),
+        color var(--ease);
+
+    &:hover {
+        border-color: var(--primary);
+        color: var(--black);
+    }
+
+    // a ticked branch reads as chosen without relying on the box alone
+    &.picked {
+        background: var(--primary-soft);
+        border-color: var(--primary);
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    input {
+        margin: 0;
+        padding: 0;
+        width: 15px;
+        min-width: 15px;
+        height: 15px;
+        flex: 0 0 auto;
+    }
+
+    &:focus-within {
+        box-shadow: var(--ring);
+    }
+}
+
+.office-empty {
+    margin: 0;
+    padding: 7px 6px;
+    font-size: 12px;
+    color: var(--lightDarkGray) !important;
 }

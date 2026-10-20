@@ -57,6 +57,18 @@ export interface OfficeListRow {
   is_main: boolean;
 }
 
+/**
+ * What a picker needs. The offices module is admin-only, so a manager reads
+ * the branches they may work in from `profile/offices` instead; that answer
+ * carries these four fields.
+ */
+export interface OfficePick {
+  id: string;
+  office_name: string;
+  office_status: OfficeStatus;
+  is_main: boolean;
+}
+
 /** Body for POST / PUT. */
 export interface CreateOfficeDto {
   office_name: string;

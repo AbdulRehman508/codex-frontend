@@ -40,14 +40,15 @@
 }
 
 /* ---- Period presets: the single filter row ---- */
+// a segmented control: one track, the chosen chip lifted out of it
 .period-row {
     display: inline-flex;
     flex-wrap: wrap;
-    gap: 4px;
-    padding: 4px;
-    background: var(--white);
+    gap: 2px;
+    padding: 3px;
+    background: var(--surface-2);
     border: 1px solid var(--borderColor);
-    border-radius: 12px;
+    border-radius: var(--r-md);
     align-self: flex-start;
 }
 
@@ -62,12 +63,13 @@
     cursor: pointer;
     transition: background 150ms ease, color 150ms ease;
 
-    &:hover { background: var(--lightGrayBG); }
+    &:hover { color: var(--black); }
 
     &.active {
-        background: var(--secondary);
+        background: var(--surface);
         color: var(--primary);
         font-weight: 600;
+        box-shadow: var(--shadow-xs);
     }
 
     &:focus-visible {
@@ -84,27 +86,38 @@
 }
 
 .stat-card {
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--borderColor);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 18px;
     display: flex;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--ease), box-shadow var(--ease),
+        border-color var(--ease);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: #d9e1ea;
+    }
 }
 
 .stat-icon {
     width: 48px;
     height: 48px;
-    border-radius: 14px;
+    border-radius: var(--r-md);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
     flex-shrink: 0;
 
-    &.primary { background: rgba(var(--primary-rgb), 0.12); color: var(--primary); }
+    &.primary {
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.16), rgba(var(--primary-rgb), 0.07));
+        color: var(--primary);
+    }
     &.info    { background: rgba(245, 114, 0, 0.12);  color: var(--info); }
     &.green   { background: rgba(78, 197, 66, 0.14);  color: var(--green); }
     &.danger  { background: rgba(205, 24, 24, 0.10);  color: var(--danger); }
@@ -159,11 +172,11 @@
 
 /* ---- Panels ---- */
 .panel {
-    background: var(--white);
+    background: var(--surface);
     border: 1px solid var(--borderColor);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(26, 47, 69, 0.04);
+    box-shadow: var(--shadow-sm);
     min-width: 0;
 }
 
@@ -196,7 +209,7 @@
 
     &.ok {
         color: #2f9e25;
-        .pi { margin-right: 4px; }
+        .pi { margin-inline-end: 4px; }
     }
 }
 
@@ -257,7 +270,7 @@
 
     span {
         position: absolute;
-        right: 0;
+        inset-inline-end: 0;
         transform: translateY(50%);
         font-size: 11px;
         color: var(--lightDarkGray);
@@ -273,8 +286,8 @@
 // solid hairlines, one step off the surface — never dashed
 .grid-line {
     position: absolute;
-    left: 0;
-    right: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
     height: 1px;
     background: var(--borderColor);
 }
@@ -340,9 +353,9 @@
     transform: translateX(-50%);
     background: var(--white);
     border: 1px solid var(--borderColor);
-    border-radius: 10px;
+    border-radius: var(--r-sm);
     padding: 8px 12px;
-    box-shadow: 0 8px 24px rgba(26, 47, 69, 0.12);
+    box-shadow: var(--shadow-md);
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -362,6 +375,12 @@
     }
 
     .tip-title { color: var(--lightDarkGray); }
+}
+
+// inset-inline-start measures from the right in Urdu, so the centring shift
+// has to turn around with it
+:host-context([dir='rtl']) .chart-tip {
+    transform: translateX(50%);
 }
 
 .chart-empty {
@@ -449,13 +468,21 @@
     border-collapse: collapse;
 
     th {
+        // a tinted, uppercase header band: the eye finds the columns without
+        // a heavy rule under them
         text-align: left;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
         color: var(--lightDarkGray);
-        padding: 10px 12px;
+        background: var(--surface-2);
+        padding: 11px 14px;
         border-bottom: 1px solid var(--borderColor);
         white-space: nowrap;
+
+        &:first-child { border-start-start-radius: var(--r-sm); }
+        &:last-child { border-start-end-radius: var(--r-sm); }
     }
 
     td {
@@ -515,7 +542,7 @@
 .rank {
     width: 26px;
     height: 26px;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     background: var(--secondary);
     color: var(--primary);
     font-size: 12px;
@@ -593,7 +620,7 @@
     gap: 10px;
     padding: 10px 12px;
     border: 1px solid var(--borderColor);
-    border-radius: 10px;
+    border-radius: var(--r-sm);
 }
 
 .stock-info {

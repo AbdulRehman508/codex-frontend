@@ -1,3 +1,4 @@
-<p-toast />
+<!-- 4s matches the life bar drawn in _toast.scss; change both together -->
+<p-toast position="top-right" [life]="4000" />
 <p-confirmdialog [style]="{ width: '420px' }" />
 <router-outlet />
