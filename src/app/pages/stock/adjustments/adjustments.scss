@@ -329,7 +329,9 @@
 
 .sa-suggest {
     position: absolute;
-    z-index: 5;
+    // above the selects on the next row: ng-select paints its own value at
+    // z-index 6, which is what used to show through this panel
+    z-index: 30;
     top: calc(100% - 4px);
     inset-inline-start: 0;
     inset-inline-end: 0;

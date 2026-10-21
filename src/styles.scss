@@ -69,6 +69,8 @@
    pins a side explicitly, and the few that must never flip. */
 
 .lang-ur {
+    // Inter leads so digits, codes and anything Latin keep their own face;
+    // it carries no Arabic, so every Urdu letter falls through to Nastaliq.
     body,
     .p-component,
     .ng-select,
@@ -76,12 +78,40 @@
     textarea,
     button,
     select {
-        font-family: 'Noto Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+        font-family: 'Inter', 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Segoe UI',
+            system-ui, sans-serif;
     }
 
-    // Urdu glyphs sit lower and need a little more room than Latin
+    // Nastaliq writes each word on a downward slope, so a line of it is far
+    // taller than the same words in a sans. Without this the descenders of
+    // one line sit on the heads of the next.
     body {
-        line-height: 1.75;
+        line-height: 1.95;
+    }
+
+    // Nastaliq's strokes are finer than a sans at the same nominal size, so
+    // the body text goes up a point. The dense metadata under a figure stays
+    // where it was, or the tiles start wrapping.
+    body,
+    .p-component,
+    .ng-select,
+    input,
+    textarea,
+    button,
+    select {
+        font-size: 14px;
+    }
+
+    .stat-delta,
+    .stat-note,
+    .stat-vs,
+    .pf-earner-meta,
+    .pf-sub,
+    .panel-sub,
+    .product-sold,
+    .f-11,
+    .f-12 {
+        font-size: 12.5px;
     }
 
     th,
@@ -89,6 +119,30 @@
     label,
     .form-group label {
         letter-spacing: 0;
+        line-height: 1.95;
+    }
+
+    // controls are a fixed height, so their text is centred rather than
+    // leading — a leading line inside a 38px box would push the glyphs out
+    .ng-select-container,
+    ._input,
+    input,
+    select,
+    .p-inputtext,
+    button,
+    ._primary-btn,
+    ._outline-btn,
+    ._cancel-btn,
+    .badge {
+        line-height: 1.6;
+    }
+
+    // the tallest glyphs of a Nastaliq word reach well above the baseline;
+    // table rows need the room or the line clips
+    td,
+    th {
+        padding-top: 10px;
+        padding-bottom: 10px;
     }
 }
 

@@ -13,6 +13,8 @@ export interface DashboardOverview {
     orders: Compared;
     new_customers: Compared;
     refunds: Compared;
+    /** revenue less the cost of what was sold, over the same period */
+    profit: Compared;
     /** what customers owe right now — a balance, not a period figure */
     outstanding_borrow: number;
     /** value of the stock bought in from suppliers during the period */

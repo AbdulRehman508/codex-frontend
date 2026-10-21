@@ -61,7 +61,10 @@
     }
 }
 
-.display-content {
+/* Nested under the list on purpose: Angular adds an attribute to every
+   selector, so a flat `.display-content` lost the specificity race against
+   `.right-menu li img` and the active icon stayed at 55% opacity. */
+.right-menu li.display-content {
     &:hover {
         background-color: var(--primary-soft);
 
