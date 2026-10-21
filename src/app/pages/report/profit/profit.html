@@ -1,0 +1,179 @@
+<div class="pf">
+
+    <div class="pf-head">
+        <div>
+            <a class="pf-back" routerLink="/report"><i class="pi pi-arrow-left"></i> {{ 'report.title' | t }}</a>
+            <h2>{{ 'profit.title' | t }}</h2>
+            <p>{{ 'profit.subtitle' | t }}</p>
+        </div>
+
+        <!-- one row of windows, above everything they scope -->
+        <div class="pf-periods" role="tablist" [attr.aria-label]="'profit.title' | t">
+            @for (p of periods; track p.key) {
+            <button type="button" class="pf-chip" role="tab" [class.active]="period() === p.key"
+                [attr.aria-selected]="period() === p.key" (click)="setPeriod(p.key)">
+                {{ p.label | t }}
+            </button>
+            }
+        </div>
+    </div>
+
+    @if (!hasOffice()) {
+    <div class="pf-panel pf-empty">
+        <i class="pi pi-building"></i>
+        <p>{{ 'common.pickOfficeFirst' | t }}</p>
+    </div>
+    } @else if (!data()) {
+    <div class="pf-panel pf-empty">
+        <p>{{ (loading() ? 'common.loading' : 'dashboard.noData') | t }}</p>
+    </div>
+    } @else if (data(); as d) {
+    <div class="pf-body" [class.refetching]="loading()">
+
+        <!-- the headline: what was earned, and how that compares -->
+        <div class="pf-hero">
+            <div class="pf-hero-main">
+                <p class="pf-hero-label">{{ 'profit.earned' | t }} · {{ periodLabel() | t }}</p>
+                <h3 class="pf-hero-value num" [class.loss]="d.totals.profit < 0">
+                    {{ money(d.totals.profit) }}
+                </h3>
+                @if (d.change.profit === null) {
+                <span class="pf-change flat">{{ 'dashboard.noCompare' | t }}</span>
+                } @else {
+                <span class="pf-change" [ngClass]="changeTone(d.change.profit)">
+                    <i class="pi" [ngClass]="d.change.profit > 0 ? 'pi-arrow-up-right' : 'pi-arrow-down-right'"></i>
+                    <span class="num">{{ d.change.profit > 0 ? '+' : '' }}{{ d.change.profit }}%</span>
+                    <span class="pf-vs">{{ comparisonKey() | t }}</span>
+                </span>
+                }
+            </div>
+
+            <div class="pf-hero-split">
+                <div>
+                    <p>{{ 'report.revenue' | t }}</p>
+                    <strong class="num">{{ money(d.totals.revenue) }}</strong>
+                </div>
+                <div>
+                    <p>{{ 'report.costOfGoods' | t }}</p>
+                    <strong class="num">{{ money(d.totals.cost) }}</strong>
+                </div>
+                <div>
+                    <p>{{ 'report.margin' | t }}</p>
+                    <strong class="num">{{ d.totals.margin }}%</strong>
+                </div>
+                <div>
+                    <p>{{ 'dashboard.orders' | t }}</p>
+                    <strong class="num">{{ d.totals.orders }}</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- a cost price nobody filled in makes the profit read high; say so -->
+        @if (d.totals.uncosted_units > 0) {
+        <p class="pf-warn">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>{{ 'profit.uncostedA' | t }} <strong class="num">{{ d.totals.uncosted_units }}</strong>
+                {{ 'profit.uncostedB' | t }}</span>
+        </p>
+        }
+
+        <div class="pf-row">
+            <!-- profit per hour / per day -->
+            <div class="pf-panel pf-chart-panel">
+                <div class="pf-panel-head">
+                    <div>
+                        <h4>{{ 'profit.trend' | t }}</h4>
+                        <span class="pf-sub">{{ (d.period.bucket === 'hour' ? 'profit.byHour' : 'profit.byDay') | t }}</span>
+                    </div>
+                </div>
+
+                <div class="pf-chart">
+                    <div class="pf-plot">
+                        <div class="pf-grid-line" style="bottom: 100%"></div>
+                        <div class="pf-grid-line" style="bottom: 50%"></div>
+                        <div class="pf-grid-line" style="bottom: 0%"></div>
+
+                        <div class="pf-columns">
+                            @for (point of series(); track point.key; let i = $index) {
+                            <!-- the whole band is the hit target, not just the bar -->
+                            <div class="pf-band" tabindex="0" [class.active]="hoverIndex() === i"
+                                [attr.aria-label]="point.label + ': ' + money(point.profit)"
+                                (mouseenter)="hoverIndex.set(i)" (mouseleave)="hoverIndex.set(null)"
+                                (focus)="hoverIndex.set(i)" (blur)="hoverIndex.set(null)">
+                                @if (point.profit !== 0) {
+                                <div class="pf-bar" [class.loss]="point.profit < 0"
+                                    [style.height.%]="barHeight(point)"></div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        @if (hovered(); as h) {
+                        <div class="pf-tip" [style.inset-inline-start.%]="tooltipLeft()">
+                            <strong class="num">{{ money(h.profit) }}</strong>
+                            <span>{{ 'report.revenue' | t }} <span class="num">{{ money(h.revenue) }}</span></span>
+                            <span class="pf-tip-title">{{ h.label }}</span>
+                        </div>
+                        }
+
+                        @if (!hasProfitData()) {
+                        <div class="pf-chart-empty">{{ 'profit.noneYet' | t }}</div>
+                        }
+                    </div>
+
+                    <div class="pf-axis">
+                        @for (point of series(); track point.key; let i = $index) {
+                        <span class="pf-tick">{{ showLabel(i) ? point.label : '' }}</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- who earned it -->
+            <div class="pf-panel">
+                <div class="pf-panel-head">
+                    <div>
+                        <h4>{{ 'profit.topEarners' | t }}</h4>
+                        <span class="pf-sub">{{ 'profit.topEarnersSub' | t }}</span>
+                    </div>
+                </div>
+
+                @if (d.top.length) {
+                <ul class="pf-earners">
+                    @for (item of d.top; track item.product_id; let i = $index) {
+                    <li>
+                        <span class="pf-rank">{{ i + 1 }}</span>
+                        <div class="pf-earner">
+                            <p class="pf-earner-name" [title]="item.name">{{ item.name }}</p>
+                            <span class="pf-earner-meta">
+                                <span class="num">{{ item.quantity }}</span> {{ 'dashboard.sold' | t }} ·
+                                <span class="num">{{ item.margin }}%</span>
+                            </span>
+                        </div>
+                        <span class="pf-earner-profit num">{{ money(item.profit) }}</span>
+                    </li>
+                    }
+                </ul>
+                } @else {
+                <p class="pf-panel-empty">{{ 'profit.noneYet' | t }}</p>
+                }
+
+                <!-- sold at or below cost: worth knowing about -->
+                @if (d.losing.length) {
+                <div class="pf-losing">
+                    <p class="pf-losing-head">
+                        <i class="pi pi-exclamation-circle"></i> {{ 'profit.atLoss' | t }}
+                    </p>
+                    @for (item of d.losing; track item.product_id) {
+                    <div class="pf-losing-row">
+                        <span [title]="item.name">{{ item.name }}</span>
+                        <span class="num">{{ money(item.profit) }}</span>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    }
+</div>

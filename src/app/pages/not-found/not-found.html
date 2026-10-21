@@ -7,7 +7,7 @@
     <div class="nf-actions">
         <button type="button" class="_cancel-btn" (click)="back()">{{ 'notFound.goBack' | t }}</button>
         <a class="_primary-btn" [routerLink]="homeLink">
-            {{ homeLink === '/login' ? 'Sign in' : 'Dashboard' }}
+            {{ (homeLink === '/login' ? 'login.submit' : 'nav.dashboard') | t }}
         </a>
     </div>
 </div>

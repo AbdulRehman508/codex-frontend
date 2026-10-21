@@ -78,6 +78,14 @@ export const afterLoginRoutes: Routes = [
           import('../../pages/report/report').then((c) => c.Report),
       },
       {
+        // what the shop earned, not what it took: its own page
+        path: 'report/profit',
+        canActivate: [accessGuard],
+        data: { module: 'reports' },
+        loadComponent: () =>
+          import('../../pages/report/profit/profit').then((c) => c.Profit),
+      },
+      {
         // its own page: a closing sheet, not another grid
         path: 'report/day-close',
         canActivate: [accessGuard],

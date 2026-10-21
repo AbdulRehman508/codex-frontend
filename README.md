@@ -46,6 +46,7 @@ same build works on any domain.
 | **Stock** | Adjustments (damage, loss, expiry, recount) as a permanent audit trail, and branch-to-branch transfers |
 | **Customers** | Customer book, running borrow balances, recorded repayments |
 | **Reports** | Sales, item-wise with cost/profit/margin, stock on hand valued at cost, receivables, payables, expiry — CSV export and print |
+| **Profit** | What the shop earned today / this week / this month: revenue less the cost of what sold, against the window before it, hour-by-hour or day-by-day, with the products that earned it. Says so when a product has no cost price, because that reads as pure profit. |
 | **Day Close** | One day's takings, credit given, money paid out and the cash that should be in the drawer, printable |
 | **User Management** | Offices (admin only), staff, customers |
 | **Settings** | Roles, the per-role permission matrix, the activity log and the trash (both admin only) |
@@ -102,9 +103,13 @@ src/app/
 ## Languages
 
 English and Urdu, switched from the header. Urdu flips the page to
-right-to-left (`dir="rtl"` on `<html>`), swaps in a Noto Sans Arabic face and
-keeps money, dates and codes left-to-right, so "1,250.00" never renders
-backwards. The choice is remembered per browser.
+right-to-left (`dir="rtl"` on `<html>`) and sets the text in **Noto Nastaliq
+Urdu** — the sloping script Urdu is actually written in, not a Naskh sans. The
+font stack puts Inter first: it carries no Arabic, so Latin and digits keep
+their own face and every Urdu letter falls through to Nastaliq. Nastaliq needs
+the room (line-height 1.95, a point larger, taller table rows), and money,
+dates and codes stay left-to-right, so "1,250.00" never renders backwards. The
+choice is remembered per browser.
 
 Strings live in `core/i18n/translations.ts` as flat keys, used through the `t`
 pipe: `{{ 'nav.sales' | t }}`. A key missing from Urdu falls back to English,

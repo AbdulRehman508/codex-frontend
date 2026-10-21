@@ -138,6 +138,7 @@ export class Dashboard {
     const k = d.kpis;
     return [
       this.tile('dashboard.totalSales', k.revenue, 'pi pi-dollar', 'primary', true, true),
+      this.tile('dashboard.profit', k.profit, 'pi pi-chart-line', 'green', true, true),
       this.tile('dashboard.orders', k.orders, 'pi pi-shopping-cart', 'info', true, false),
       this.tile('dashboard.newCustomers', k.new_customers, 'pi pi-users', 'green', true, false),
       this.tile('dashboard.refunds', k.refunds, 'pi pi-undo', 'danger', false, true),
