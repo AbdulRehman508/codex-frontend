@@ -43,6 +43,20 @@ export class ApiService {
     return this.http.patch<T>(`${this.url(endpoint)}/${id}`, body);
   }
 
+  /**
+   * PATCH to a path of its own, with optional query params — an action route
+   * such as `stock/requests/:id/approve`, which has no id to append.
+   */
+  patchTo<T>(
+    endpoint: string,
+    body: any,
+    params?: Record<string, any>,
+  ): Observable<T> {
+    return this.http.patch<T>(this.url(endpoint), body, {
+      params: this.toParams(params),
+    });
+  }
+
   delete<T>(endpoint: string, id: string | number): Observable<T> {
     return this.http.delete<T>(`${this.url(endpoint)}/${id}`);
   }

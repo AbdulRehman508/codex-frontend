@@ -12,6 +12,7 @@ import {
   untracked,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { MessageService } from 'primeng/api';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -53,7 +54,7 @@ interface TransferStat {
 
 @Component({
   selector: 'app-stock-transfers',
-  imports: [CommonModule, FormsModule, NgSelectModule, DatePickerModule, TranslatePipe],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectModule, DatePickerModule, TranslatePipe],
   templateUrl: './transfers.html',
   styleUrl: './transfers.scss',
 })

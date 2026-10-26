@@ -26,6 +26,7 @@ export class Stock {
 
   private allTabs: TabItem[] = [
     { label: 'stock.tabAdjustments', icon: 'pi pi-sliders-h', url: '/stock/adjustments' },
+    { label: 'stock.tabRequests', icon: 'pi pi-send', url: '/stock/requests' },
     { label: 'stock.tabTransfers', icon: 'pi pi-arrow-right-arrow-left', url: '/stock/transfers' },
   ];
 
