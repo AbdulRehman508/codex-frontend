@@ -32,9 +32,16 @@
 
         <div class="filter-spacer"></div>
 
-        @if (perm.can(module, 'create')) {
+        <!-- a branch no longer helps itself to another's shelves: stock moves on a
+             request the holding branch approves. The direct send stays for an
+             admin, who is correcting stock rather than trading it. -->
+        @if (perm.isAdmin()) {
         <button class="_outline-btn" [disabled]="!hasOffice()" (click)="openDialog()"
-            [title]="hasOffice() ? 'Send stock to another branch' : 'Select an office in the header first'">{{ 'stock.sendStock' | t }}</button>
+            [title]="hasOffice() ? ('stock.sendStock' | t) : ('common.pickOfficeHeader' | t)">{{ 'stock.sendStock' | t }}</button>
+        } @else if (perm.can(module, 'create')) {
+        <a class="_primary-btn" routerLink="/stock/requests">
+            <i class="pi pi-send"></i> {{ 'request.ask' | t }}
+        </a>
         }
     </div>
 

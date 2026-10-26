@@ -43,13 +43,31 @@ same build works on any domain.
 | **Location** | A rack generates every row/column/bin as its own record with a unique code |
 | **Sales (POS)** | Multi-tab orders, barcode scanning, credit sales, per-branch sales tax, 80mm receipts with scan-to-pay QR |
 | **Purchase** | Supplier bills that raise stock, buy-by-carton conversion, landed cost, batch & expiry, supplier book with payments |
-| **Stock** | Adjustments (damage, loss, expiry, recount) as a permanent audit trail, and branch-to-branch transfers |
+| **Stock** | Adjustments (damage, loss, expiry, recount) as a permanent audit trail, stock requests between branches, and the transfers an approval creates |
 | **Customers** | Customer book, running borrow balances, recorded repayments |
 | **Reports** | Sales, item-wise with cost/profit/margin, stock on hand valued at cost, receivables, payables, expiry — CSV export and print |
 | **Profit** | What the shop earned today / this week / this month: revenue less the cost of what sold, against the window before it, hour-by-hour or day-by-day, with the products that earned it. Says so when a product has no cost price, because that reads as pure profit. |
 | **Day Close** | One day's takings, credit given, money paid out and the cash that should be in the drawer, printable |
 | **User Management** | Offices (admin only), staff, customers |
 | **Settings** | Roles, the per-role permission matrix, the activity log and the trash (both admin only) |
+
+### Asking another branch for stock
+
+A branch that has run out does not reach into another branch's shelves. It
+asks, and the branch holding the stock answers:
+
+1. **Pick the branch**, then the product — the picker only lists what that
+   branch actually has, with the count beside each name.
+2. The request is sent. **Nothing moves yet.**
+3. The holding branch **approves** it, which is what creates the transfer and
+   shifts the units, or **declines** it — and a decline has to carry a reason,
+   which the asking branch reads on its own screen.
+4. Either side sees the answer **as it happens**: the API keeps a server-sent
+   event stream per branch (`GET /events?office_id=…`), and the screen re-reads
+   itself when one arrives. Nobody refreshes anything.
+
+The direct `Send Stock` action is admin-only now — a head office correcting
+stock, rather than a branch helping itself.
 
 ### At the counter
 

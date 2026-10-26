@@ -1,0 +1,323 @@
+<div class="sr">
+
+    <!-- which side of the conversation, and what is waiting on each -->
+    <div class="sr-bar">
+        <div class="sr-sides" role="tablist" [attr.aria-label]="'request.title' | t">
+            <button type="button" class="sr-side" role="tab" [class.active]="direction() === 'incoming'"
+                [attr.aria-selected]="direction() === 'incoming'" (click)="setDirection('incoming')">
+                {{ 'request.incoming' | t }}
+                @if (pendingIncoming() > 0) {
+                <span class="sr-badge num">{{ pendingIncoming() }}</span>
+                }
+            </button>
+            <button type="button" class="sr-side" role="tab" [class.active]="direction() === 'outgoing'"
+                [attr.aria-selected]="direction() === 'outgoing'" (click)="setDirection('outgoing')">
+                {{ 'request.outgoing' | t }}
+                @if (pendingOutgoing() > 0) {
+                <span class="sr-badge num">{{ pendingOutgoing() }}</span>
+                }
+            </button>
+        </div>
+
+        <div class="sr-filters">
+            <div class="position-relative">
+                <input type="text" class="_input-icon w-200 custom-placeholder" [(ngModel)]="searchTerm"
+                    name="sr-search" (input)="onSearch(searchTerm)" [placeholder]="'request.searchPlaceholder' | t" />
+                <i class="pi pi-search _search-icon"></i>
+            </div>
+            <div class="w-180px">
+                <ng-select [(ngModel)]="statusFilter" [items]="statusList()" bindLabel="label" bindValue="value"
+                    [placeholder]="'request.allStatuses' | t" (change)="onFilterChange()"></ng-select>
+            </div>
+            <button type="button" class="_outline-btn" (click)="reset()">{{ 'common.reset' | t }}</button>
+            @if (perm.can(module, 'create')) {
+            <button type="button" class="_primary-btn" [disabled]="!hasOffice()" (click)="openDialog()">
+                <i class="pi pi-send"></i> {{ 'request.ask' | t }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- grid -->
+    <div class="body-details sr-panel">
+        @if (!hasOffice()) {
+        <p class="sr-empty">{{ 'common.pickOfficeFirst' | t }}</p>
+        } @else if (loading() && !rows().length) {
+        <p class="sr-empty">{{ 'common.loading' | t }}</p>
+        } @else if (!rows().length) {
+        <p class="sr-empty">
+            {{ (direction() === 'incoming' ? 'request.noneIncoming' : 'request.noneOutgoing') | t }}
+        </p>
+        } @else {
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">{{ 'request.requestNo' | t }}</th>
+                        <th scope="col">{{ 'common.date' | t }}</th>
+                        <th scope="col">
+                            {{ (direction() === 'incoming' ? 'request.askedBy' : 'request.askedOf') | t }}
+                        </th>
+                        <th scope="col" class="num">{{ 'common.items' | t }}</th>
+                        <th scope="col" class="num">{{ 'common.units' | t }}</th>
+                        <th scope="col">{{ 'common.status' | t }}</th>
+                        <th scope="col">{{ 'common.action' | t }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of rows(); track row.id) {
+                    <tr class="sr-row" [class.open]="openRow() === row.id">
+                        <td>
+                            <button type="button" class="sr-no" (click)="toggleRow(row)">
+                                <i class="pi" [ngClass]="openRow() === row.id ? 'pi-chevron-down' : 'pi-chevron-right'"></i>
+                                <span class="num">{{ row.request_no }}</span>
+                            </button>
+                        </td>
+                        <td>{{ row.created_at | date: 'dd MMM yyyy, HH:mm' }}</td>
+                        <td>{{ counterparty(row) }}</td>
+                        <td class="num">{{ row.items_count }}</td>
+                        <td class="num">{{ row.units }}</td>
+                        <td>
+                            <span class="sr-status" [ngClass]="row.status">{{ statusKey(row.status) | t }}</span>
+                        </td>
+                        <td>
+                            <div class="sr-actions">
+                                @if (canAnswer(row)) {
+                                <button type="button" class="sr-act approve" (click)="approve(row)">
+                                    <i class="pi pi-check"></i> {{ 'request.approve' | t }}
+                                </button>
+                                <button type="button" class="sr-act decline" (click)="openDecline(row)">
+                                    <i class="pi pi-times"></i> {{ 'request.decline' | t }}
+                                </button>
+                                }
+                                @if (canCancel(row)) {
+                                <button type="button" class="sr-act" (click)="cancel(row)">
+                                    <i class="pi pi-undo"></i> {{ 'request.cancelRequest' | t }}
+                                </button>
+                                }
+                                @if (!canAnswer(row) && !canCancel(row)) {
+                                <span class="sr-waiting">
+                                    {{ row.status === 'pending' ? ('request.waiting' | t) : '—' }}
+                                </span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- the lines, and the answer that was given -->
+                    @if (openRow() === row.id) {
+                    <tr class="sr-detail-row">
+                        <td colspan="7">
+                            @if (!openDetail()) {
+                            <p class="sr-detail-empty">{{ 'common.loading' | t }}</p>
+                            } @else {
+                            <div class="sr-detail">
+                                <div class="sr-lines">
+                                    <div class="sr-lines-head">
+                                        <span>{{ 'common.product' | t }}</span>
+                                        <span class="num">{{ 'request.asked' | t }}</span>
+                                        <span class="num">{{ 'request.hadThen' | t }}</span>
+                                    </div>
+                                    @for (line of openDetail()!.lines; track line.product_id) {
+                                    <div class="sr-line">
+                                        <span class="sr-line-name" [title]="line.name">
+                                            {{ line.name }}
+                                            @if (line.sku) { <small class="num">{{ line.sku }}</small> }
+                                        </span>
+                                        <span class="num">{{ line.quantity }}</span>
+                                        <span class="num sr-had">{{ line.available_at_request }}</span>
+                                    </div>
+                                    }
+                                </div>
+
+                                <div class="sr-aside">
+                                    @if (openDetail()!.note) {
+                                    <p class="sr-aside-label">{{ 'request.why' | t }}</p>
+                                    <p class="sr-aside-text">{{ openDetail()!.note }}</p>
+                                    }
+                                    @if (openDetail()!.status === 'declined') {
+                                    <p class="sr-aside-label declined">{{ 'request.declinedBecause' | t }}</p>
+                                    <p class="sr-aside-text">{{ openDetail()!.decline_reason }}</p>
+                                    }
+                                    @if (openDetail()!.status === 'approved') {
+                                    <p class="sr-aside-label approved">
+                                        <i class="pi pi-check-circle"></i> {{ 'request.stockSent' | t }}
+                                    </p>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        </td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-3">
+            <span class="f-14">{{ 'common.total' | t }}: {{ total() }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">
+                    {{ 'common.prev' | t }}
+                </button>
+                <span class="f-14">{{ 'common.page' | t }} <span class="num">{{ page() }} / {{ totalPages() }}</span></span>
+                <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">
+                    {{ 'common.next' | t }}
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+
+<!-- Ask another branch -->
+@if (dialogOpen()) {
+<div class="sr-backdrop" (click)="closeDialog()"></div>
+<div class="sr-dialog" role="dialog" [attr.aria-label]="'request.ask' | t">
+    <div class="sr-dialog-head">
+        <div>
+            <h3>{{ 'request.ask' | t }}</h3>
+            <p>{{ 'request.askHint' | t }}</p>
+        </div>
+        <button class="sr-close" (click)="closeDialog()" [title]="'common.close' | t">
+            <i class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <div class="sr-dialog-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'request.askFrom' | t }} <span class="text-danger">*</span></label>
+                    <ng-select [(ngModel)]="sourceOfficeId" [items]="sources()" bindLabel="office_name" bindValue="id"
+                        [placeholder]="'stock.selectBranch' | t" (change)="onSourceChange()"></ng-select>
+                    @if (fieldError('source_office_id')) {
+                    <small class="text-danger">{{ fieldError('source_office_id') }}</small>
+                    }
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'request.why' | t }}</label>
+                    <input type="text" [(ngModel)]="note" name="sr-note" [placeholder]="'common.optional' | t" />
+                </div>
+            </div>
+        </div>
+
+        <!-- the picker only knows the branch that was chosen above -->
+        <div class="sr-pick" [class.disabled]="!sourceOfficeId">
+            <div class="sr-pick-prod sr-typeahead">
+                <label>{{ 'common.product' | t }}</label>
+                <input #productInput type="text" [(ngModel)]="productTerm" name="sr-product" autocomplete="off"
+                    [disabled]="!sourceOfficeId"
+                    [placeholder]="(sourceOfficeId ? 'request.typeProduct' : 'request.pickBranchFirst') | t"
+                    (input)="onProductInput(productTerm)" (focus)="onProductInput(productTerm)"
+                    (keydown)="onProductKeydown($event)" (blur)="onProductBlur()" />
+                @if (picked()) {
+                <span class="sr-picked">
+                    <i class="pi pi-check-circle"></i>
+                    <span class="num">{{ picked()!.quantity }}</span> {{ 'request.theyHave' | t }}
+                </span>
+                }
+
+                @if (suggestOpen()) {
+                <div class="sr-suggest">
+                    @if (searchingProduct()) {
+                    <div class="sr-suggest-empty">{{ 'common.searching' | t }}</div>
+                    } @else if (suggestions().length === 0) {
+                    <div class="sr-suggest-empty">{{ 'request.nothingThere' | t }}</div>
+                    } @else {
+                    @for (p of suggestions(); track p.product_id; let si = $index) {
+                    <div class="sr-suggest-item" [class.active]="activeSuggestion() === si"
+                        (mousedown)="pickProduct(p)" (mouseenter)="activeSuggestion.set(si)">
+                        <span class="sr-suggest-name">{{ p.name }}</span>
+                        <span class="sr-suggest-meta">
+                            <span class="num">{{ p.quantity }}</span> {{ 'request.theyHave' | t }}
+                        </span>
+                    </div>
+                    }
+                    }
+                </div>
+                }
+            </div>
+            <div class="sr-pick-qty">
+                <label>{{ 'common.qty' | t }}</label>
+                <input #qtyInput type="number" min="1" [(ngModel)]="draftQty" name="sr-qty"
+                    [disabled]="!picked()" (keydown)="onQtyKeydown($event)" />
+            </div>
+            <button type="button" class="_primary-btn sr-add" [disabled]="!picked()" (click)="addLine()">
+                <i class="pi pi-plus"></i> {{ 'pos.add' | t }}
+            </button>
+        </div>
+
+        <div class="sr-draft">
+            <div class="sr-draft-head">
+                <span class="col-prod">{{ 'common.product' | t }}</span>
+                <span class="col-num">{{ 'request.asked' | t }}</span>
+                <span class="col-have">{{ 'request.theyHaveShort' | t }}</span>
+                <span class="col-act"></span>
+            </div>
+
+            @for (line of draft(); track line.product_id; let i = $index) {
+            <div class="sr-draft-line" [class.over]="overAsked(line)">
+                <span class="col-prod" [title]="line.name">{{ line.name }}</span>
+                <input class="col-num" type="number" min="1" [(ngModel)]="line.quantity" name="sr-line-{{ i }}" />
+                <span class="col-have num">{{ line.available }}</span>
+                <i class="pi pi-trash col-act sr-line-del" (click)="removeLine(i)"></i>
+            </div>
+            } @empty {
+            <p class="sr-draft-empty">{{ 'stockDialog.nothingAdded' | t }}</p>
+            }
+        </div>
+    </div>
+
+    <div class="sr-dialog-foot">
+        <span class="sr-count">
+            <span class="num">{{ draft().length }}</span> {{ 'stock.items' | t }} ·
+            <span class="num">{{ draftUnits() }}</span> {{ 'stock.unitsWord' | t }}
+        </span>
+        <div class="d-flex gap-2">
+            <button type="button" class="_cancel-btn" (click)="closeDialog()">{{ 'common.cancel' | t }}</button>
+            <button type="button" class="_primary-btn" [disabled]="saving() || !sourceOfficeId || !draft().length"
+                (click)="submit()">
+                {{ (saving() ? 'common.saving' : 'request.send') | t }}
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- A "no" has to say why -->
+@if (declineFor(); as row) {
+<div class="sr-backdrop" (click)="closeDecline()"></div>
+<div class="sr-dialog sr-dialog-sm" role="dialog" [attr.aria-label]="'request.decline' | t">
+    <div class="sr-dialog-head">
+        <div>
+            <h3>{{ 'request.decline' | t }} — <span class="num">{{ row.request_no }}</span></h3>
+            <p>{{ 'request.declineHint' | t }}</p>
+        </div>
+        <button class="sr-close" (click)="closeDecline()" [title]="'common.close' | t">
+            <i class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <div class="sr-dialog-body">
+        <div class="form-group">
+            <label>{{ 'request.reason' | t }} <span class="text-danger">*</span></label>
+            <textarea rows="3" [(ngModel)]="declineReason" name="sr-reason"
+                [placeholder]="'request.reasonHint' | t"></textarea>
+        </div>
+    </div>
+
+    <div class="sr-dialog-foot">
+        <span></span>
+        <div class="d-flex gap-2">
+            <button type="button" class="_cancel-btn" (click)="closeDecline()">{{ 'common.cancel' | t }}</button>
+            <button type="button" class="_danger-btn" [disabled]="declining()" (click)="submitDecline()">
+                {{ (declining() ? 'common.saving' : 'request.decline') | t }}
+            </button>
+        </div>
+    </div>
+</div>
+}
