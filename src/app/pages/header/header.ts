@@ -17,6 +17,8 @@ import { AuthUser } from '../authentication/auth.model';
 import { TranslatePipe } from '../../core/i18n/translate.pipe';
 import { TranslationService } from '../../core/i18n/translation.service';
 import { Lang } from '../../core/i18n/translations';
+import { NotificationCenterService } from '../../core/services/notification-center.service';
+import { AppNotification } from '../../core/services/notification.api';
 @Component({
   selector: 'app-header',
   imports: [CommonModule, FormsModule, NgSelectModule, Menu, TranslatePipe],
@@ -34,6 +36,7 @@ export class Header {
   private toast = inject(MessageService);
   ctx = inject(OfficeContextService);
   i18n = inject(TranslationService);
+  bell = inject(NotificationCenterService);
 
   ImageIcon = commonIcons
   dropdownOpen: boolean = false;
@@ -45,6 +48,7 @@ export class Header {
   user = signal<AuthUser | null>(null);
 
   @ViewChild('topBar') topBar!: ElementRef;
+  @ViewChild('bellBox') bellBox?: ElementRef<HTMLElement>;
 
   // PrimeNG builds this menu from plain objects, so it is rebuilt on read
   // rather than translated in the template
@@ -161,10 +165,64 @@ export class Header {
 
 
 
+  // ---- the bell ----
+
+  /** The news a branch gets is about requests, so the icon says which answer. */
+  iconFor(type: string): string {
+    switch (type) {
+      case 'stock-request.created':
+        return 'pi-inbox';
+      case 'stock-request.approved':
+        return 'pi-check-circle ok';
+      case 'stock-request.declined':
+        return 'pi-times-circle bad';
+      case 'stock-request.cancelled':
+        return 'pi-ban muted';
+      default:
+        return 'pi-bell';
+    }
+  }
+
+  /**
+   * "2 minutes ago", in whichever language is on. Anything older than a week
+   * is given as a date — "9 days ago" is harder to place than the day itself.
+   */
+  when(iso: string): string {
+    const then = new Date(iso).getTime();
+    if (!then) return '';
+    const mins = Math.floor((Date.now() - then) / 60000);
+    if (mins < 1) return this.i18n.t('notif.justNow');
+    if (mins < 60) return this.i18n.t('notif.minutesAgo', { n: mins });
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return this.i18n.t('notif.hoursAgo', { n: hours });
+    const days = Math.floor(hours / 24);
+    if (days < 7) return this.i18n.t('notif.daysAgo', { n: days });
+    return new Date(then).toLocaleDateString(
+      this.i18n.lang() === 'ur' ? 'ur-PK' : 'en-GB',
+      { day: '2-digit', month: 'short', year: 'numeric' },
+    );
+  }
+
+  /** Read it, close the panel, and go to the screen it is about. */
+  openNotification(item: AppNotification) {
+    this.bell.markRead(item);
+    this.bell.close();
+    if (!item.link) return;
+    this.router.navigate([item.link], { queryParams: item.link_params ?? {} });
+  }
+
   @HostListener('document:click', ['$event'])
   clickOutside(event: MouseEvent) {
     if (this.dropdownOpen && !this.topBar.nativeElement.contains(event.target)) {
       this.dropdownOpen = false;
+    }
+    // the panel is inside the top bar, so it needs a check of its own
+    if (
+      this.bell.open() &&
+      this.bellBox &&
+      !this.bellBox.nativeElement.contains(event.target as Node)
+    ) {
+      this.bell.close();
     }
   }
 }

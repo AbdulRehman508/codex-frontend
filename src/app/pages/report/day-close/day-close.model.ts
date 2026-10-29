@@ -32,7 +32,21 @@ export interface DayClose {
   };
   stock: { adjustments: number; transfers: number };
   /** cash taken plus debts settled, less what went to suppliers */
-  cash_drawer: { in: number; out: number; expected: number };
+  expenses: {
+    entries: number;
+    total: number;
+    /** the part that left the till */
+    cash: number;
+    online: number;
+    by_category: { category: string; amount: number }[];
+  };
+  cash_drawer: {
+    /** the float the till opened with */
+    opening: number;
+    in: number;
+    out: number;
+    expected: number;
+  };
 }
 
 export interface DayCloseQuery {

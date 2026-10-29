@@ -55,15 +55,6 @@
     min-width: 240px;
 }
 
-:host ::ng-deep .filter-field p-datepicker .p-datepicker-input {
-    border: 1px solid var(--borderColor);
-    border-radius: var(--r-sm);
-    padding: 7px 10px;
-    font-size: 13px;
-    outline: none;
-    width: 100%;
-}
-
 .filter-reset {
     flex: 0 0 auto;
 }

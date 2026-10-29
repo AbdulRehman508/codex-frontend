@@ -37,6 +37,7 @@ export class SideBar {
     { label: 'nav.purchase', icon: this.ImageIcon.stock_icon, url: '/purchase', anyOf: ['purchase', 'supplier'] },
     { label: 'nav.stock', icon: this.ImageIcon.stock_icon, url: '/stock', module: 'stock' },
     // parked until this module is finished (see access.constants.ts too)
+    { label: 'nav.expense', icon: this.ImageIcon.wallet_icon, url: '/expense', module: 'expenses' },
     { label: 'nav.report', icon: this.ImageIcon.report_icon, url: '/report', module: 'reports' },
     { label: 'nav.location', icon: this.ImageIcon.location_icon, url: '/location', module: 'location' },
     // { label: 'nav.traceProduct', icon: this.ImageIcon.find_icon, url: '/trace-product' },

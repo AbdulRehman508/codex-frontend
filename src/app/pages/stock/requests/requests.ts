@@ -18,6 +18,8 @@ import { MessageService } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
+import { ActivatedRoute } from '@angular/router';
+
 import { ConfirmService } from '../../../core/services/confirm.service';
 import { OfficeContextService } from '../../../core/services/office-context.service';
 import { PermissionService } from '../../../core/services/permission.service';
@@ -57,6 +59,7 @@ export class StockRequests {
   private confirm = inject(ConfirmService);
   private toast = inject(MessageService);
   private realtime = inject(RealtimeService);
+  private route = inject(ActivatedRoute);
   private destroyRef = inject(DestroyRef);
   perm = inject(PermissionService);
 
@@ -132,6 +135,9 @@ export class StockRequests {
   hasOffice = computed(() => !!this.ctx.selectedOfficeId());
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit())));
 
+  /** a request the bell sent us to, opened once its row has loaded */
+  private focusId: string | null = null;
+
   ngOnInit() {
     this.search$
       .pipe(debounceTime(400), distinctUntilChanged())
@@ -141,9 +147,39 @@ export class StockRequests {
         this.load();
       });
 
+    // arriving from a notification: it says which side the request is on and
+    // which one it is, so the screen opens on the right tab with that request
+    // already unfolded
+    const params = this.route.snapshot.queryParamMap;
+    const side = params.get('side');
+    if (side === 'incoming' || side === 'outgoing') {
+      this.direction.set(side);
+    }
+    this.focusId = params.get('id');
+
     this.loadOffices();
     this.load();
     this.listenForAnswers();
+  }
+
+  /**
+   * Unfold the request the bell pointed at. It is cleared either way: a
+   * request that is not on this page (an old one, or one already answered)
+   * must not keep re-opening on every later load.
+   */
+  private openRequested() {
+    const id = this.focusId;
+    if (!id) return;
+    this.focusId = null;
+
+    const row = this.rows().find((r) => r.id === id);
+    if (!row) return;
+    this.openRow.set(row.id);
+    this.openDetail.set(null);
+    this.api.getOne(row.id, this.ctx.selectedOfficeId() ?? undefined).subscribe({
+      next: (doc) => this.openDetail.set(doc),
+      error: () => this.openDetail.set(null),
+    });
   }
 
   /**
@@ -214,6 +250,7 @@ export class StockRequests {
           this.pendingIncoming.set(res.summary.pending_incoming);
           this.pendingOutgoing.set(res.summary.pending_outgoing);
           this.loading.set(false);
+          this.openRequested();
         },
         error: (err) => {
           this.loading.set(false);

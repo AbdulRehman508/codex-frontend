@@ -13,9 +13,9 @@ import { TranslationService } from './translation.service';
 export class TranslatePipe implements PipeTransform {
   private i18n = inject(TranslationService);
 
-  transform(key: string): string {
+  transform(key: string, params?: Record<string, string | number>): string {
     // reading the signal here registers this view as a dependency
     this.i18n.lang();
-    return this.i18n.t(key);
+    return this.i18n.t(key, params);
   }
 }

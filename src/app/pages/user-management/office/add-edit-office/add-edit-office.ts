@@ -79,6 +79,7 @@ export class AddEditOffice {
       tax_rate: [0],
       tax_inclusive: [false],
       tax_number: [''],
+      cash_float: [0],
       payment_methods: this._formBuilder.array([]),
     });
 
@@ -116,6 +117,7 @@ export class AddEditOffice {
           tax_rate: office.tax_rate ?? 0,
           tax_inclusive: office.tax_inclusive ?? false,
           tax_number: office.tax_number ?? '',
+          cash_float: office.cash_float ?? 0,
         });
         this.officeLogo.set(office.office_logo); // existing URL, not changed
         this.logoChanged = false;

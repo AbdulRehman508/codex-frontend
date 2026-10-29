@@ -4,7 +4,8 @@ export type ReportKey =
   | 'stock'
   | 'receivables'
   | 'payables'
-  | 'expiry';
+  | 'expiry'
+  | 'expenses';
 
 /** Every report answers with the same envelope: a page of rows + totals. */
 export interface ReportPage<TRow, TSummary> {

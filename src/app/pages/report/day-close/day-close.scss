@@ -47,12 +47,8 @@
     line-height: 1;
 }
 
-:host ::ng-deep .dc-controls p-datepicker .p-datepicker-input {
-    border: 1px solid var(--borderColor);
-    border-radius: var(--r-sm);
-    padding: 7px 10px;
-    font-size: 13px;
-    outline: none;
+/* one day, not a range — the field only needs room for a date */
+:host ::ng-deep .dc-controls p-datepicker {
     width: 140px;
 }
 

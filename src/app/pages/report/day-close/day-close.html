@@ -51,6 +51,7 @@
                 <strong>{{ d.cash_drawer.expected | number: '1.2-2' }}</strong>
             </div>
             <div class="dc-drawer-split">
+                <div><span>{{ 'dayClose.opening' | t }}</span><strong>{{ d.cash_drawer.opening | number: '1.2-2' }}</strong></div>
                 <div><span>{{ 'dayClose.cashIn' | t }}</span><strong>{{ d.cash_drawer.in | number: '1.2-2' }}</strong></div>
                 <div><span>{{ 'dayClose.paidOut' | t }}</span><strong>−{{ d.cash_drawer.out | number: '1.2-2' }}</strong></div>
             </div>
@@ -114,6 +115,26 @@
                     <span>{{ 'dayClose.outToday' | t }}</span>
                     <span>{{ (d.purchases.paid + d.purchases.supplier_payments) | number: '1.2-2' }}</span>
                 </div>
+            </section>
+
+            <section class="dc-block">
+                <h4>{{ 'expense.title' | t }}</h4>
+                @if (!d.expenses.entries) {
+                <div class="dc-row"><span>{{ 'expense.noneToday' | t }}</span><span>0.00</span></div>
+                } @else {
+                @for (item of d.expenses.by_category; track item.category) {
+                <div class="dc-row">
+                    <span>{{ item.category }}</span>
+                    <span>{{ item.amount | number: '1.2-2' }}</span>
+                </div>
+                }
+                <div class="dc-row"><span>{{ 'expense.inCash' | t }}</span><span>{{ d.expenses.cash | number: '1.2-2' }}</span></div>
+                <div class="dc-row total">
+                    <span>{{ 'dayClose.spentToday' | t }}</span>
+                    <span>{{ d.expenses.total | number: '1.2-2' }}</span>
+                </div>
+                }
+                <p class="dc-note">{{ 'expense.cashHint' | t }}</p>
             </section>
 
             <section class="dc-block">

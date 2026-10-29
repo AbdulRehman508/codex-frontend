@@ -23,7 +23,12 @@ export interface ProfitTotals {
   units: number;
   revenue: number;
   cost: number;
+  /** revenue less the cost of goods — before the shop's own bills */
   profit: number;
+  /** rent, wages and the rest, over the same window */
+  expenses: number;
+  /** what the owner keeps: profit less those expenses */
+  net_profit: number;
   /** profit as a share of revenue, 0-100 */
   margin: number;
   /**
@@ -57,7 +62,9 @@ export interface ProfitReport {
   /** the window of the same length just before this one */
   previous: ProfitTotals;
   /** percent change against that window; null when it had nothing to compare */
-  change: { revenue: number | null; profit: number | null };
+  change: { revenue: number | null; profit: number | null; net_profit: number | null };
+  /** where the expenses went, biggest first */
+  expense_breakdown: { category: string; amount: number }[];
   series: ProfitPoint[];
   top: ProfitEarner[];
   /** lines that sold at or below cost */
