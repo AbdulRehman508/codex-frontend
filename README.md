@@ -46,8 +46,9 @@ same build works on any domain.
 | **Stock** | Adjustments (damage, loss, expiry, recount) as a permanent audit trail, stock requests between branches, and the transfers an approval creates |
 | **Customers** | Customer book, running borrow balances, recorded repayments |
 | **Reports** | Sales, item-wise with cost/profit/margin, stock on hand valued at cost, receivables, payables, expiry — CSV export and print |
-| **Profit** | What the shop earned today / this week / this month: revenue less the cost of what sold, against the window before it, hour-by-hour or day-by-day, with the products that earned it. Says so when a product has no cost price, because that reads as pure profit. |
-| **Day Close** | One day's takings, credit given, money paid out and the cash that should be in the drawer, printable |
+| **Profit** | What the shop earned today / this week / this month: revenue less the cost of what sold **and** the shop's own expenses, against the window before it, with the products that earned it and where the money went |
+| **Expenses** | Rent, wages, bills and the chai — categories a shop can add to, with the spend split by cash and card. Cash expenses leave the till, so they land in day close and in profit |
+| **Day Close** | One day's takings, credit given, money paid out, expenses and the cash that should be in the drawer — counted up from the branch's opening float, printable |
 | **User Management** | Offices (admin only), staff, customers |
 | **Settings** | Roles, the per-role permission matrix, the activity log and the trash (both admin only) |
 
@@ -68,6 +69,29 @@ asks, and the branch holding the stock answers:
 
 The direct `Send Stock` action is admin-only now — a head office correcting
 stock, rather than a branch helping itself.
+
+### The bell
+
+A live event only reaches a screen that is open at that moment, so every one
+of those answers is also **kept**, as a notification addressed to the branch
+that has to do something about it:
+
+- A branch is **asked** for stock → the branch holding it is told.
+- The holding branch **approves** or **declines** → the branch that asked is
+  told, with the reason on a decline.
+- A branch **withdraws** its own request → the branch it asked is told.
+
+Nobody is notified about their own action; the screen that did it already
+knows. The badge counts what is unread for the branch picked in the header, so
+switching branches switches the bell with it — a notification belongs to a
+counter, not to a person.
+
+Clicking a line marks it read and opens the request itself:
+`/stock/requests?id=…&side=incoming|outgoing` puts the screen on the right tab
+with that request already unfolded. The text is not stored — a key and its
+values are (`notif.requestDeclined` + `{office, request_no, reason}`), so the
+same notification reads in English or Urdu depending on who opens it. Mongo
+drops them after 60 days.
 
 ### At the counter
 
@@ -110,9 +134,20 @@ src/app/
   admin-only, so a manager has no access to the list endpoint, but still needs
   the names of the branches they work in. That call answers every live office
   for an admin and the assigned ones for anyone else.
-- **Permissions.** `PermissionService` drives menus and route guards, and the
-  API enforces the same matrix independently — the UI is convenience, not
-  security.
+- **Permissions are per branch.** A role belongs to one office, and every
+  office is seeded with the same role names, so "manager" in one shop can be
+  allowed things a manager in another is not. The matrix that applies is the
+  one for the **office selected in the header**: the server resolves the
+  user's role name inside that office, and `PermissionService` re-reads it
+  whenever the header office changes — a user assigned to three branches picks
+  up each branch's own rules with nobody re-assigning anything. An admin is an
+  admin everywhere. Switching to a branch that does not allow the screen you
+  are on sends you back to the dashboard.
+- `PermissionService` drives menus and route guards, and the API enforces the
+  same matrix independently — the UI is convenience, not security. It reads
+  its own rules from `GET profile/permissions?office_id=…`; the `access`
+  endpoints are for editing *other* roles' matrices and stay behind the
+  access-control key.
 - **The session is a cookie, not a variable.** Login leaves an httpOnly cookie
   the browser attaches to every call (`withCredentials`); nothing here can read
   the token, so an injected script cannot steal it. localStorage keeps only the

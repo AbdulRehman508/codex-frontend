@@ -1,0 +1,527 @@
+/* Expenses: what the shop spent that is not stock. */
+.ex {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.ex-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    h2 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: var(--black);
+    }
+
+    p {
+        margin: 2px 0 0;
+        font-size: 13px;
+        color: var(--lightDarkGray) !important;
+    }
+}
+
+/* ---- filters ---- */
+.ex-filters {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--borderColor);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-xs);
+}
+
+.ex-field {
+    flex: 1 1 170px;
+    min-width: 150px;
+
+    label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 11px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--lightDarkGray) !important;
+    }
+}
+
+.ex-reset { flex: 0 0 auto; }
+
+/* The stat cards are styled per screen: component styles do not reach
+   across, and a shared partial for four rules would hide them from the
+   screen that uses them. */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+}
+
+.stat-card {
+    background: var(--surface);
+    border: 1px solid var(--borderColor);
+    border-radius: var(--r-lg);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--ease), box-shadow var(--ease),
+        border-color var(--ease);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: #d9e1ea;
+    }
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+
+    &.primary {
+        background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.16), rgba(var(--primary-rgb), 0.07));
+        color: var(--primary);
+    }
+    &.green   { background: rgba(78, 197, 66, 0.14);  color: #2f9e25; }
+    &.danger  { background: rgba(205, 24, 24, 0.10);  color: var(--danger); }
+    &.info    { background: rgba(245, 114, 0, 0.12);  color: var(--info); }
+}
+
+.stat-body { display: flex; flex-direction: column; gap: 2px; }
+.stat-label { margin: 0; font-size: 12px; color: var(--lightDarkGray); }
+
+.stat-value {
+    margin: 0;
+    font-size: clamp(16px, 1.5vw, 22px);
+    font-weight: 700;
+    color: var(--black);
+}
+
+/* ---- the two columns ---- */
+.ex-row {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 16px;
+    align-items: start;
+}
+
+// the shared panel fills the viewport by default; these two sit side by
+// side, so they hug their own content instead
+.ex-panel,
+.ex-side {
+    min-height: 0;
+}
+
+.ex-panel { min-height: 260px; }
+
+.ex-empty {
+    margin: 0;
+    padding: 48px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--lightDarkGray) !important;
+}
+
+.ex-empty-sm {
+    margin: 0;
+    padding: 18px 0;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--lightDarkGray) !important;
+}
+
+/* ---- the list ----
+   Bootstrap's own .table reads at the body's size, which left this sheet a
+   size larger than the tables on sales and reports. Same band, same 13px
+   rows, so the two screens look like one app. */
+.ex-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        text-align: start;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--lightDarkGray);
+        background: var(--surface-2);
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--borderColor);
+        white-space: nowrap;
+
+        &:first-child { border-start-start-radius: var(--r-sm); }
+        &:last-child { border-start-end-radius: var(--r-sm); }
+    }
+
+    td {
+        padding: 11px 14px;
+        font-size: 13px;
+        color: var(--darkGray);
+        border-bottom: 1px solid var(--lightGrayBG);
+        vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--lightGrayBG); }
+
+    .num {
+        text-align: end;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+/* ---- rows ---- */
+.ex-cat {
+    display: block;
+    color: var(--black);
+}
+
+.ex-note {
+    display: block;
+    font-size: 11px;
+    color: var(--lightDarkGray);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+}
+
+.ex-method {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    font-size: 11.5px;
+    font-weight: 500;
+
+    // cash is the one that leaves the till, so it reads differently
+    &.cash {
+        background: rgba(245, 114, 0, 0.12);
+        color: var(--info);
+    }
+
+    &.online {
+        background: var(--primary-soft);
+        color: var(--primary);
+    }
+}
+
+/* money out stays red — said with the cell, so the sheet's own colour
+   (which is more specific than a bare class) does not wash it out */
+.ex-table td.ex-amount {
+    font-weight: 600;
+    color: var(--danger);
+}
+
+.ex-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .pi {
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--lightDarkGray);
+        transition: color var(--ease);
+
+        &:hover { color: var(--primary); }
+        &.danger:hover { color: var(--danger); }
+    }
+}
+
+/* ---- where the money went ---- */
+.ex-side {
+    h4 {
+        margin: 0 0 14px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--black);
+    }
+}
+
+.ex-cats {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    li {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 4px 10px;
+    }
+}
+
+.ex-cat-line {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.ex-cat-name {
+    font-size: 12.5px;
+    color: var(--black);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ex-cat-amount {
+    flex: 0 0 auto;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--black);
+}
+
+.ex-cat-track {
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: var(--surface-2);
+    overflow: hidden;
+}
+
+.ex-cat-fill {
+    height: 100%;
+    min-width: 4px;
+    border-radius: var(--r-pill);
+    background: var(--chart-2);
+    transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ex-cat-meta {
+    font-size: 11px;
+    color: var(--lightDarkGray);
+    align-self: center;
+}
+
+/* ---- dialog ---- */
+.ex-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(16, 36, 58, 0.42);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+}
+
+.ex-dialog {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 640px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    z-index: 1050;
+    overflow: hidden;
+}
+
+.ex-dialog-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px 12px;
+
+    h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--black);
+    }
+
+    p {
+        margin: 3px 0 0;
+        font-size: 12.5px;
+        color: var(--lightDarkGray) !important;
+    }
+}
+
+.ex-close {
+    border: none;
+    background: transparent;
+    color: var(--lightDarkGray);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: var(--r-xs);
+
+    &:hover { color: var(--black); background: var(--surface-2); }
+}
+
+.ex-dialog-body {
+    padding: 4px 20px 8px;
+    overflow-y: auto;
+}
+
+.ex-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--lightDarkGray) !important;
+}
+
+.ex-dialog-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--border-soft);
+    background: var(--surface-2);
+}
+
+@media (max-width: 1100px) {
+    .ex-row { grid-template-columns: 1fr; }
+}
+
+/* ---- header actions ---- */
+.ex-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ---- the photographed bill ---- */
+.ex-clip {
+    margin-inline-start: 8px;
+    font-size: 12px;
+    color: var(--lightDarkGray);
+    cursor: pointer;
+
+    &:hover { color: var(--primary); }
+}
+
+.ex-receipt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    img {
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+        border-radius: var(--r-sm);
+        border: 1px solid var(--borderColor);
+        cursor: zoom-in;
+    }
+}
+
+.ex-receipt-pick {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 9px 14px;
+    border: 1px dashed var(--borderColor);
+    border-radius: var(--r-sm);
+    font-size: 12.5px;
+    color: var(--fullGray);
+    cursor: pointer;
+    transition: border-color var(--ease), color var(--ease);
+
+    &:hover { border-color: var(--primary); color: var(--primary); }
+}
+
+/* ---- standing bills ---- */
+.ex-dialog-wide { width: 860px; }
+
+.ex-rules {
+    margin-top: 10px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.ex-rule {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px;
+    align-items: center;
+    padding: 11px 2px;
+    border-bottom: 1px solid var(--border-soft);
+
+    // a paused instruction is still listed, just quietly
+    &.paused { opacity: 0.6; }
+}
+
+.ex-rule-main { min-width: 0; }
+
+.ex-rule-name {
+    margin: 0;
+    font-size: 13px;
+    color: var(--black);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ex-paused {
+    padding: 2px 8px;
+    border-radius: var(--r-pill);
+    background: var(--surface-2);
+    font-size: 10.5px;
+    color: var(--lightDarkGray);
+}
+
+.ex-rule-meta {
+    font-size: 11.5px;
+    color: var(--lightDarkGray);
+}
+
+.ex-rule-amount {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+}
+
+.ex-rule-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .pi {
+        cursor: pointer;
+        font-size: 13px;
+        color: var(--lightDarkGray);
+        transition: color var(--ease);
+
+        &:hover { color: var(--primary); }
+        &.danger:hover { color: var(--danger); }
+    }
+}
+
+/* the printed sheet is the table, not the furniture around it */
+@media print {
+    .ex-filters,
+    .ex-head-actions,
+    .ex-side,
+    .ex-actions {
+        display: none !important;
+    }
+}

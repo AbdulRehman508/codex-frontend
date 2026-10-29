@@ -62,6 +62,10 @@ export const appConfig: ApplicationConfig = {
     provideAnimationsAsync(),
     providePrimeNG({
       ripple: true,
+      // A datepicker opened inside one of the app's own dialogs was landing
+      // behind it: PrimeNG floats overlays at 1000 and the dialogs sit at
+      // 1050. Lift overlays over the dialogs, still under the toast (1200).
+      zIndex: { modal: 1100, overlay: 1100, menu: 1100, tooltip: 1150 },
       theme: {
         preset: CodexPreset,
         options: {

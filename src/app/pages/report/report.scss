@@ -366,24 +366,6 @@
     .rep-reset { margin-inline-start: 0; }
 }
 
-/* the range picker renders its own input — match the other filter controls */
-:host ::ng-deep .rep-field p-datepicker {
-    display: block;
-    width: 100%;
-
-    .p-datepicker-input {
-        width: 100%;
-        border: 1px solid var(--borderColor);
-        border-radius: var(--r-sm);
-        padding: 7px 10px;
-        font-size: 13px;
-        font-weight: 400;
-        letter-spacing: 0;
-        color: var(--darkGray);
-        outline: none;
-    }
-}
-
 /* the expiry window is a plain number box, sized like the other controls */
 .rep-num {
     width: 120px;

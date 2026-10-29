@@ -43,6 +43,8 @@ export interface Office {
   tax_inclusive: boolean;
   /** registration number printed on the bill */
   tax_number: string;
+  /** cash the till starts each day with; day close counts up from it */
+  cash_float: number;
   created_at: string;
   updated_at: string;
 }

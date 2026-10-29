@@ -1,6 +1,50 @@
 <div class="siteTopBar" #topBar>
     <img src="{{ImageIcon.logo}}" alt="">
     <div class="d-flex align-items-center gap-2">
+        <!-- The bell. A branch that has been asked for stock finds out here,
+             whether or not it had the requests screen open. -->
+        <div class="bell" #bellBox>
+            <button type="button" class="bell-btn" [class.active]="bell.open()"
+                [attr.aria-label]="'notif.title' | t" [attr.aria-expanded]="bell.open()"
+                (click)="bell.toggle()">
+                <i class="pi pi-bell"></i>
+                @if (bell.unread(); as count) {
+                <span class="bell-dot">{{ count > 9 ? '9+' : count }}</span>
+                }
+            </button>
+
+            @if (bell.open()) {
+            <div class="bell-panel" role="dialog" [attr.aria-label]="'notif.title' | t">
+                <div class="bell-head">
+                    <h4>{{ 'notif.title' | t }}</h4>
+                    @if (bell.unread()) {
+                    <button type="button" class="link" (click)="bell.markAllRead()">
+                        {{ 'notif.markAllRead' | t }}
+                    </button>
+                    }
+                </div>
+
+                <div class="bell-list">
+                    @for (item of bell.items(); track item.id) {
+                    <button type="button" class="bell-item" [class.unread]="!item.read"
+                        (click)="openNotification(item)">
+                        <i class="pi" [ngClass]="iconFor(item.type)"></i>
+                        <span class="bell-text">
+                            <span class="bell-line">{{ item.title_key | t: item.params }}</span>
+                            <small class="bell-when">{{ when(item.created_at) }}</small>
+                        </span>
+                        @if (!item.read) { <span class="bell-unread-dot"></span> }
+                    </button>
+                    } @empty {
+                    <p class="bell-empty">
+                        {{ (bell.loading() ? 'common.loading' : 'notif.empty') | t }}
+                    </p>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
         <div class="w-200px">
             <ng-select [items]="officeList()" bindLabel="office_name" bindValue="id"
                 [ngModel]="selectedOffice()" (ngModelChange)="onOfficeChange($event)"

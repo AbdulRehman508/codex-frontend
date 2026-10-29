@@ -429,3 +429,45 @@
     .pf-hero { grid-template-columns: 1fr; }
     .pf-row { grid-template-columns: 1fr; }
 }
+
+/* the headline's arithmetic, in small type under it */
+.pf-maths {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--lightDarkGray) !important;
+}
+
+.pf-spend { color: var(--danger); }
+
+/* what the shop spent, beside what it earned */
+.pf-spend-list {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+}
+
+.pf-spend-head {
+    margin: 0 0 8px;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--lightDarkGray) !important;
+}
+
+.pf-spend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+    font-size: 12.5px;
+    color: var(--fullGray);
+
+    span:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    span:last-child { color: var(--danger); font-weight: 500; }
+}

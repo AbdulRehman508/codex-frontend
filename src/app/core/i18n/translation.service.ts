@@ -25,10 +25,23 @@ export class TranslationService {
     this.apply(this._lang());
   }
 
-  /** The string for a key in the current language. */
-  t(key: string): string {
+  /**
+   * The string for a key in the current language.
+   *
+   * A string may carry `{name}` placeholders — a notification says which
+   * branch and which request number, and those words are not translated.
+   * Both languages name the same placeholders, so the sentence can put them
+   * wherever its own grammar needs them.
+   */
+  t(key: string, params?: Record<string, string | number>): string {
     const lang = this._lang();
-    return DICTIONARIES[lang]?.[key] ?? EN[key] ?? key;
+    const text = DICTIONARIES[lang]?.[key] ?? EN[key] ?? key;
+    if (!params) return text;
+    return text.replace(/\{(\w+)\}/g, (match, name: string) =>
+      params[name] === undefined || params[name] === null
+        ? match
+        : String(params[name]),
+    );
   }
 
   use(lang: Lang) {

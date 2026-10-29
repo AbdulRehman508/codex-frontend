@@ -1,0 +1,384 @@
+<div class="ex">
+
+    <div class="ex-head">
+        <div>
+            <h2>{{ 'expense.title' | t }}</h2>
+            <p>{{ 'expense.subtitle' | t }}</p>
+        </div>
+        <div class="ex-head-actions no-print">
+            <button type="button" class="_outline-btn" [disabled]="!rows().length" (click)="exportCsv()">
+                <i class="pi pi-download"></i> {{ 'common.export' | t }}
+            </button>
+            <button type="button" class="_outline-btn" [disabled]="!rows().length" (click)="print()">
+                <i class="pi pi-print"></i> {{ 'common.print' | t }}
+            </button>
+            @if (perm.can(module, 'view')) {
+            <button type="button" class="_outline-btn" [disabled]="!hasOffice()" (click)="openRecurring()">
+                <i class="pi pi-replay"></i> {{ 'expense.recurring' | t }}
+            </button>
+            }
+            @if (perm.can(module, 'create')) {
+            <button type="button" class="_primary-btn" [disabled]="!hasOffice()" (click)="openDialog()">
+                <i class="pi pi-plus"></i> {{ 'expense.add' | t }}
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- filters -->
+    <div class="ex-filters">
+        <div class="ex-field">
+            <label>{{ 'common.search' | t }}</label>
+            <div class="position-relative">
+                <input type="text" class="_input-icon custom-placeholder" [(ngModel)]="searchTerm" name="ex-search"
+                    (input)="onSearch(searchTerm)" [placeholder]="'expense.searchPlaceholder' | t" />
+                <i class="pi pi-search _search-icon"></i>
+            </div>
+        </div>
+        <div class="ex-field">
+            <label>{{ 'common.dateRange' | t }}</label>
+            <p-datepicker [(ngModel)]="dateRange" name="ex-range" selectionMode="range" dateFormat="dd-mm-yy"
+                [placeholder]="'common.selectDateRange' | t" [readonlyInput]="true" [showButtonBar]="true"
+                [maxDate]="today" appendTo="body" (onSelect)="onDateRangeChange()"
+                (onClear)="onDateRangeChange()"></p-datepicker>
+        </div>
+        <div class="ex-field">
+            <label>{{ 'expense.category' | t }}</label>
+            <ng-select [(ngModel)]="categoryFilter" [items]="categories()" [placeholder]="'expense.allCategories' | t"
+                (change)="onFilterChange()"></ng-select>
+        </div>
+        <div class="ex-field">
+            <label>{{ 'common.payment' | t }}</label>
+            <ng-select [(ngModel)]="methodFilter" [items]="methodList()" bindLabel="label" bindValue="value"
+                [placeholder]="'sales.allPayments' | t" (change)="onFilterChange()"></ng-select>
+        </div>
+        <button type="button" class="_outline-btn ex-reset" (click)="reset()">{{ 'common.reset' | t }}</button>
+    </div>
+
+    <!-- what it adds up to -->
+    <div class="stat-grid">
+        @for (s of stats(); track s.label) {
+        <div class="stat-card">
+            <div class="stat-icon" [ngClass]="s.tone"><i [class]="s.icon"></i></div>
+            <div class="stat-body">
+                <p class="stat-label">{{ s.label }}</p>
+                <h3 class="stat-value num">{{ s.value }}</h3>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="ex-row">
+        <!-- the ledger -->
+        <div class="body-details ex-panel">
+            @if (!hasOffice()) {
+            <p class="ex-empty">{{ 'common.pickOfficeFirst' | t }}</p>
+            } @else if (loading() && !rows().length) {
+            <p class="ex-empty">{{ 'common.loading' | t }}</p>
+            } @else if (!rows().length) {
+            <p class="ex-empty">{{ 'expense.none' | t }}</p>
+            } @else {
+            <div class="table-responsive">
+                <table class="ex-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ 'common.date' | t }}</th>
+                            <th scope="col">{{ 'expense.category' | t }}</th>
+                            <th scope="col">{{ 'expense.paidTo' | t }}</th>
+                            <th scope="col">{{ 'common.payment' | t }}</th>
+                            <th scope="col" class="num">{{ 'expense.amount' | t }}</th>
+                            <th scope="col">{{ 'common.action' | t }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of rows(); track row.id) {
+                        <tr>
+                            <td>{{ row.spent_at | date: 'dd MMM yyyy' }}</td>
+                            <td>
+                                <span class="ex-cat">{{ row.category }}</span>
+                                @if (row.note) { <small class="ex-note" [title]="row.note">{{ row.note }}</small> }
+                            </td>
+                            <td>{{ row.paid_to || '—' }}</td>
+                            <td>
+                                <span class="ex-method" [ngClass]="row.payment_method">
+                                    {{ (row.payment_method === 'cash' ? 'common.cash' : 'common.online') | t }}
+                                </span>
+                            </td>
+                            <td class="num ex-amount">
+                                {{ money(row.amount) }}
+                                @if (row.receipt) {
+                                <i class="pi pi-paperclip ex-clip" [title]="'expense.viewReceipt' | t"
+                                    (click)="openReceipt(row.receipt)"></i>
+                                }
+                            </td>
+                            <td>
+                                <div class="ex-actions">
+                                    @if (perm.can(module, 'edit')) {
+                                    <i class="pi pi-pencil" [title]="'common.edit' | t" (click)="openDialog(row)"></i>
+                                    }
+                                    @if (perm.can(module, 'delete')) {
+                                    <i class="pi pi-trash danger" [title]="'common.delete' | t" (click)="remove(row)"></i>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mt-3">
+                <span class="f-14">{{ 'common.total' | t }}: <span class="num">{{ total() }}</span></span>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="_outline-btn" [disabled]="page() <= 1" (click)="goToPage(page() - 1)">
+                        {{ 'common.prev' | t }}
+                    </button>
+                    <span class="f-14">{{ 'common.page' | t }} <span class="num">{{ page() }} / {{ totalPages() }}</span></span>
+                    <button class="_outline-btn" [disabled]="page() >= totalPages()" (click)="goToPage(page() + 1)">
+                        {{ 'common.next' | t }}
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+
+        <!-- where the money went -->
+        <div class="body-details ex-side">
+            <h4>{{ 'expense.whereItWent' | t }}</h4>
+            @if (!topCategories().length) {
+            <p class="ex-empty-sm">{{ 'expense.none' | t }}</p>
+            } @else {
+            <ul class="ex-cats">
+                @for (c of topCategories(); track c.category) {
+                <li>
+                    <div class="ex-cat-line">
+                        <span class="ex-cat-name" [title]="c.category">{{ c.category }}</span>
+                        <span class="ex-cat-amount num">{{ money(c.amount) }}</span>
+                    </div>
+                    <div class="ex-cat-track">
+                        <div class="ex-cat-fill" [style.width.%]="share(c.amount)"></div>
+                    </div>
+                    <span class="ex-cat-meta num">{{ share(c.amount) }}%</span>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- add / edit -->
+@if (dialogOpen()) {
+<div class="ex-backdrop" (click)="closeDialog()"></div>
+<div class="ex-dialog" role="dialog" [attr.aria-label]="'expense.add' | t">
+    <div class="ex-dialog-head">
+        <div>
+            <h3>{{ (editingId() ? 'expense.edit' : 'expense.add') | t }}</h3>
+            <p>{{ 'expense.dialogHint' | t }}</p>
+        </div>
+        <button class="ex-close" (click)="closeDialog()" [title]="'common.close' | t">
+            <i class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <div class="ex-dialog-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'expense.category' | t }} <span class="text-danger">*</span></label>
+                    <!-- the list is a suggestion: a shop may type its own wording -->
+                    <ng-select [(ngModel)]="form.category" [items]="categories()" [addTag]="addCategory"
+                        [placeholder]="'expense.categoryPlaceholder' | t" [addTagText]="'expense.useThis' | t">
+                    </ng-select>
+                    @if (fieldError('category')) { <small class="text-danger">{{ fieldError('category') }}</small> }
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'expense.amount' | t }} <span class="text-danger">*</span></label>
+                    <input type="number" min="0" step="0.01" [(ngModel)]="form.amount" name="ex-amount"
+                        placeholder="0.00" />
+                    @if (fieldError('amount')) { <small class="text-danger">{{ fieldError('amount') }}</small> }
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'common.payment' | t }}</label>
+                    <ng-select [(ngModel)]="form.payment_method" [items]="methodList()" bindLabel="label"
+                        bindValue="value" [clearable]="false"></ng-select>
+                    <small class="ex-hint">{{ 'expense.cashHint' | t }}</small>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'expense.spentOn' | t }}</label>
+                    <p-datepicker [(ngModel)]="form.spent_at" name="ex-date" dateFormat="dd-mm-yy"
+                        [maxDate]="today" appendTo="body" [showButtonBar]="true"></p-datepicker>
+                    <small class="ex-hint">{{ 'expense.dateHint' | t }}</small>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'expense.paidTo' | t }}</label>
+                    <input type="text" [(ngModel)]="form.paid_to" name="ex-paid-to"
+                        [placeholder]="'common.optional' | t" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label>{{ 'common.note' | t }}</label>
+                    <input type="text" [(ngModel)]="form.note" name="ex-note" [placeholder]="'common.optional' | t" />
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label>{{ 'expense.receipt' | t }}</label>
+                    <div class="ex-receipt">
+                        @if (receipt()) {
+                        <img [src]="receiptSrc(receipt())" alt="" (click)="openReceipt(receipt())" />
+                        <button type="button" class="link muted" (click)="clearReceipt()">
+                            {{ 'office.remove' | t }}
+                        </button>
+                        } @else {
+                        <label class="ex-receipt-pick">
+                            <input type="file" accept="image/*" class="d-none" (change)="onPickReceipt($event)" />
+                            <i class="pi pi-camera"></i> {{ 'expense.attachReceipt' | t }}
+                        </label>
+                        <small class="ex-hint">{{ 'expense.receiptHint' | t }}</small>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ex-dialog-foot">
+        <button type="button" class="_cancel-btn" (click)="closeDialog()">{{ 'common.cancel' | t }}</button>
+        <button type="button" class="_primary-btn" [disabled]="saving()" (click)="submit()">
+            {{ (saving() ? 'common.saving' : 'common.save') | t }}
+        </button>
+    </div>
+</div>
+}
+
+<!-- Bills that come round again -->
+@if (recurringOpen()) {
+<div class="ex-backdrop" (click)="closeRecurring()"></div>
+<div class="ex-dialog ex-dialog-wide" role="dialog" [attr.aria-label]="'expense.recurring' | t">
+    <div class="ex-dialog-head">
+        <div>
+            <h3>{{ 'expense.recurring' | t }}</h3>
+            <p>{{ 'expense.recurringHint' | t }}</p>
+        </div>
+        <button class="ex-close" (click)="closeRecurring()" [title]="'common.close' | t">
+            <i class="pi pi-times"></i>
+        </button>
+    </div>
+
+    <div class="ex-dialog-body">
+        <!-- the instruction being written -->
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label>{{ 'expense.category' | t }} <span class="text-danger">*</span></label>
+                    <ng-select [(ngModel)]="recurringForm.category" [items]="categories()" [addTag]="addCategory"
+                        [placeholder]="'expense.categoryPlaceholder' | t" [addTagText]="'expense.useThis' | t">
+                    </ng-select>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>{{ 'expense.amount' | t }} <span class="text-danger">*</span></label>
+                    <input type="number" min="0" step="0.01" [(ngModel)]="recurringForm.amount" name="rec-amount"
+                        placeholder="0.00" />
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>{{ 'expense.howOften' | t }}</label>
+                    <ng-select [(ngModel)]="recurringForm.frequency" [items]="frequencyList()" bindLabel="label"
+                        bindValue="value" [clearable]="false"></ng-select>
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>{{ 'expense.onDay' | t }}</label>
+                    @if (recurringForm.frequency === 'weekly') {
+                    <ng-select [(ngModel)]="recurringForm.day" [items]="[0,1,2,3,4,5,6]" [clearable]="false">
+                        <ng-template ng-label-tmp let-item="item">{{ weekdays[item] | t }}</ng-template>
+                        <ng-template ng-option-tmp let-item="item">{{ weekdays[item] | t }}</ng-template>
+                    </ng-select>
+                    } @else {
+                    <ng-select [(ngModel)]="recurringForm.day" [items]="monthDays" [clearable]="false"></ng-select>
+                    }
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>{{ 'common.payment' | t }}</label>
+                    <ng-select [(ngModel)]="recurringForm.payment_method" [items]="methodList()" bindLabel="label"
+                        bindValue="value" [clearable]="false"></ng-select>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div class="form-group">
+                    <label>{{ 'expense.paidTo' | t }}</label>
+                    <input type="text" [(ngModel)]="recurringForm.paid_to" name="rec-paid-to"
+                        [placeholder]="'common.optional' | t" />
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div class="form-group">
+                    <label>{{ 'common.note' | t }}</label>
+                    <input type="text" [(ngModel)]="recurringForm.note" name="rec-note"
+                        [placeholder]="'common.optional' | t" />
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button type="button" class="_primary-btn w-100" [disabled]="recurringSaving()"
+                        (click)="saveRecurring()">
+                        {{ (recurringEditingId() ? 'common.save' : 'common.add') | t }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- what is already standing -->
+        <div class="ex-rules">
+            @for (rule of recurring(); track rule.id) {
+            <div class="ex-rule" [class.paused]="!rule.active">
+                <div class="ex-rule-main">
+                    <p class="ex-rule-name">
+                        {{ rule.category }}
+                        @if (!rule.active) { <span class="ex-paused">{{ 'expense.paused' | t }}</span> }
+                    </p>
+                    <span class="ex-rule-meta">
+                        {{ scheduleLabel(rule) }}
+                        @if (rule.paid_to) { · {{ rule.paid_to }} }
+                        @if (rule.next_run) {
+                        · {{ 'expense.nextOn' | t }} {{ rule.next_run | date: 'dd MMM yyyy' }}
+                        }
+                    </span>
+                </div>
+                <span class="ex-rule-amount num">{{ money(rule.amount) }}</span>
+                <div class="ex-rule-actions">
+                    <i class="pi pi-pencil" [title]="'common.edit' | t" (click)="editRecurring(rule)"></i>
+                    <i class="pi" [ngClass]="rule.active ? 'pi-pause' : 'pi-play'"
+                        [title]="(rule.active ? 'expense.pause' : 'expense.resume') | t"
+                        (click)="toggleRecurring(rule)"></i>
+                    <i class="pi pi-trash danger" [title]="'expense.ruleStop' | t" (click)="removeRecurring(rule)"></i>
+                </div>
+            </div>
+            } @empty {
+            <p class="ex-draft-empty">{{ 'expense.noRules' | t }}</p>
+            }
+        </div>
+    </div>
+
+    <div class="ex-dialog-foot">
+        <button type="button" class="_cancel-btn" (click)="closeRecurring()">{{ 'common.close' | t }}</button>
+    </div>
+</div>
+}

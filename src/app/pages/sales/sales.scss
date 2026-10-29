@@ -322,16 +322,6 @@
     color: var(--info);
 }
 
-/* the range picker renders its own input — match the other filter controls */
-:host ::ng-deep .filter-field p-datepicker .p-datepicker-input {
-    border: 1px solid var(--borderColor);
-    border-radius: var(--r-sm);
-    padding: 7px 10px;
-    font-size: 13px;
-    outline: none;
-    width: 100%;
-}
-
 /* search sits with the other filters; reset closes the row on the right */
 .filter-field .position-relative input {
     width: 100%;

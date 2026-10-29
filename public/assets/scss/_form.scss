@@ -58,6 +58,21 @@ input {
   padding: 0 12px;
 }
 
+/* ---- The datepicker's own field ----
+   PrimeNG renders its own input and dresses it itself: 16px text in a box
+   sized to its content, so a date sat beside a plain field looked a size
+   bigger and stopped short of the column's edge. It is a field like any
+   other — give it the same metrics once, here, for every screen. */
+p-datepicker {
+  display: block;
+  width: 100%;
+
+  .p-datepicker-input {
+    @include input;
+    padding: 0 12px;
+  }
+}
+
 textarea {
   @include input;
   height: auto;

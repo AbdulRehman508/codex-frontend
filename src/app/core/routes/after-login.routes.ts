@@ -78,6 +78,14 @@ export const afterLoginRoutes: Routes = [
           import('../../pages/report/report').then((c) => c.Report),
       },
       {
+        // money out that is not stock: rent, wages, the chai
+        path: 'expense',
+        canActivate: [accessGuard],
+        data: { module: 'expenses' },
+        loadComponent: () =>
+          import('../../pages/expense/expense').then((c) => c.ExpenseList),
+      },
+      {
         // what the shop earned, not what it took: its own page
         path: 'report/profit',
         canActivate: [accessGuard],

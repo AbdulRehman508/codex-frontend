@@ -15,6 +15,10 @@ export interface DashboardOverview {
     refunds: Compared;
     /** revenue less the cost of what was sold, over the same period */
     profit: Compared;
+    /** rent, wages and the rest, over the same period */
+    expenses: Compared;
+    /** profit less those expenses: what the owner keeps */
+    net_profit: Compared;
     /** what customers owe right now — a balance, not a period figure */
     outstanding_borrow: number;
     /** value of the stock bought in from suppliers during the period */

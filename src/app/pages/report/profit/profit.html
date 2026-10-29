@@ -33,19 +33,24 @@
         <!-- the headline: what was earned, and how that compares -->
         <div class="pf-hero">
             <div class="pf-hero-main">
-                <p class="pf-hero-label">{{ 'profit.earned' | t }} · {{ periodLabel() | t }}</p>
-                <h3 class="pf-hero-value num" [class.loss]="d.totals.profit < 0">
-                    {{ money(d.totals.profit) }}
+                <p class="pf-hero-label">{{ 'profit.kept' | t }} · {{ periodLabel() | t }}</p>
+                <h3 class="pf-hero-value num" [class.loss]="d.totals.net_profit < 0">
+                    {{ money(d.totals.net_profit) }}
                 </h3>
-                @if (d.change.profit === null) {
+                @if (d.change.net_profit === null) {
                 <span class="pf-change flat">{{ 'dashboard.noCompare' | t }}</span>
                 } @else {
-                <span class="pf-change" [ngClass]="changeTone(d.change.profit)">
-                    <i class="pi" [ngClass]="d.change.profit > 0 ? 'pi-arrow-up-right' : 'pi-arrow-down-right'"></i>
-                    <span class="num">{{ d.change.profit > 0 ? '+' : '' }}{{ d.change.profit }}%</span>
+                <span class="pf-change" [ngClass]="changeTone(d.change.net_profit)">
+                    <i class="pi" [ngClass]="d.change.net_profit > 0 ? 'pi-arrow-up-right' : 'pi-arrow-down-right'"></i>
+                    <span class="num">{{ d.change.net_profit > 0 ? '+' : '' }}{{ d.change.net_profit }}%</span>
                     <span class="pf-vs">{{ comparisonKey() | t }}</span>
                 </span>
                 }
+                <!-- the sum, spelled out, so the headline is never a mystery -->
+                <p class="pf-maths">
+                    <span class="num">{{ money(d.totals.profit) }}</span> {{ 'profit.grossShort' | t }}
+                    − <span class="num">{{ money(d.totals.expenses) }}</span> {{ 'profit.expensesShort' | t }}
+                </p>
             </div>
 
             <div class="pf-hero-split">
@@ -56,6 +61,14 @@
                 <div>
                     <p>{{ 'report.costOfGoods' | t }}</p>
                     <strong class="num">{{ money(d.totals.cost) }}</strong>
+                </div>
+                <div>
+                    <p>{{ 'profit.grossProfit' | t }}</p>
+                    <strong class="num">{{ money(d.totals.profit) }}</strong>
+                </div>
+                <div>
+                    <p>{{ 'expense.title' | t }}</p>
+                    <strong class="num pf-spend">{{ money(d.totals.expenses) }}</strong>
                 </div>
                 <div>
                     <p>{{ 'report.margin' | t }}</p>
@@ -159,6 +172,19 @@
                 }
 
                 <!-- sold at or below cost: worth knowing about -->
+                <!-- where the money went, so a thin month has an explanation -->
+                @if (d.expense_breakdown.length) {
+                <div class="pf-spend-list">
+                    <p class="pf-spend-head">{{ 'profit.whereSpent' | t }}</p>
+                    @for (item of d.expense_breakdown.slice(0, 5); track item.category) {
+                    <div class="pf-spend-row">
+                        <span [title]="item.category">{{ item.category }}</span>
+                        <span class="num">{{ money(item.amount) }}</span>
+                    </div>
+                    }
+                </div>
+                }
+
                 @if (d.losing.length) {
                 <div class="pf-losing">
                     <p class="pf-losing-head">
